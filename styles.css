@@ -1,0 +1,400 @@
+/* Custom CSS for EliteFit Landing Page */
+
+/* Variables */
+:root {
+    --primary-color: #2c3640;
+    --secondary-color: #eeeeeb;
+    --white-color: #fffffc;
+    --accent-color: #0d6efd;
+    --accent-hover: #0b5ed7;
+}
+
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    background-color: var(--white-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--primary-color);
+}
+
+.section-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.sharp {
+    border-radius: 0 !important;
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--primary-color);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 500;
+    transition: color 0.3s;
+    padding: 0.5rem 1rem !important;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #0d6efd !important;
+}
+
+/* Buttons */
+.btn {
+    font-weight: 500;
+    padding: 0.625rem 1.5rem;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.btn-outline-primary {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+/* Hero Section */
+.hero {
+    background-color: var(--secondary-color);
+    padding: 5rem 0;
+}
+
+/* Features Section */
+.features {
+    background-color: var(--white-color);
+}
+
+.feature-card {
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+    width: 70px;
+    height: 70px;
+    background-color: rgba(13, 110, 253, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    color: var(--accent-color);
+}
+
+/* About Section */
+.about {
+    background-color: var(--secondary-color);
+}
+
+/* Services Section */
+.services {
+    background-color: var(--white-color);
+}
+
+.service-card {
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.service-link {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.service-link:hover {
+    color: var(--accent-hover);
+}
+
+/* Membership Section */
+.membership {
+    background-color: var(--secondary-color);
+}
+
+.pricing-card {
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.pricing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.pricing-card.featured {
+    border: 2px solid var(--accent-color);
+    position: relative;
+    transform: scale(1.05);
+    z-index: 1;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.pricing-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.25rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.price {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+}
+
+.currency {
+    font-size: 1.25rem;
+    color: #6c757d;
+    margin-right: 0.25rem;
+}
+
+.amount {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.period {
+    font-size: 1rem;
+    color: #6c757d;
+    margin-left: 0.25rem;
+}
+
+/* Trainers Section */
+.trainers {
+    background-color: var(--white-color);
+}
+
+.trainer-card {
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.trainer-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.trainer-img {
+    overflow: hidden;
+}
+
+.trainer-social {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 0.75rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.trainer-card:hover .trainer-social {
+    opacity: 1;
+}
+
+.trainer-social a {
+    color: white;
+    transition: color 0.3s;
+}
+
+.trainer-social a:hover {
+    color: var(--accent-color);
+}
+
+/* Testimonials Section */
+.testimonials {
+    background-color: var(--secondary-color);
+}
+
+.testimonial-card {
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.carousel-control-prev, .carousel-control-next {
+    width: 40px;
+    height: 40px;
+    background-color: white;
+    border-radius: 50%;
+    color: var(--primary-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.carousel-control-prev:hover, .carousel-control-next:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+/* Call to Action */
+.cta {
+    background-color: var(--primary-color);
+}
+
+/* Contact Section */
+.contact {
+    background-color: var(--white-color);
+}
+
+.contact-card {
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.contact-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.contact-form-card {
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Footer */
+.footer {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.footer-links li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-links a:hover {
+    color: var(--accent-color);
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 50%;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.social-link:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.footer-bottom-links {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1.5rem;
+}
+
+.footer-bottom-links a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.3s;
+}
+
+.footer-bottom-links a:hover {
+    color: var(--accent-color);
+}
+
+/* Back to Top Button */
+.back-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background-color: var(--accent-color);
+    color: white;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, background-color 0.3s;
+    z-index: 1000;
+}
+
+.back-to-top.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.back-to-top:hover {
+    background-color: var(--accent-hover);
+}
+
+/* Media Queries */
+@media (max-width: 991.98px) {
+    .pricing-card.featured {
+        transform: scale(1);
+    }
+}

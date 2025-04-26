@@ -127,7 +127,7 @@ Session Handling: PHP Sessions
 4. **Run the Project**
    - Place the project folder inside `htdocs/` (if using XAMPP).
    - Start Apache and MySQL services.
-   - Access via `http://localhost/gym-management-system/`.
+   - Access via `http://localhost/potato.git/`.
 
 ---
 

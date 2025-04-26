@@ -107,7 +107,7 @@ Session Handling: PHP Sessions
 1. **Clone or Download the Repository**
 
    ```bash
-   git clone https://github.com/your-username/gym-management-system.git
+   git clone https://github.com/leslie-23/potato.git
    ```
 
 2. **Set Up Database**
@@ -184,7 +184,6 @@ This project is available under the **MIT License** – you are free to modify, 
 
 ## 🙏 Credits
 
-- Project Source and Initial Design: [CodeAstro.com](https://codeastro.com)
 - UI Framework: [Bootstrap](https://getbootstrap.com/)
 - Chart Visualizations: Chart.js (if integrated)
 

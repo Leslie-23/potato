@@ -74,7 +74,7 @@ include('dbcon.php'); ?>
             </div>
 
             <div class="pull-right">
-            <a href="../customer"><h6>Customer Login</h6></a>
+            <a href="../customer/login.php"><h6>Customer Login</h6></a>
             </div>
             
         </div>

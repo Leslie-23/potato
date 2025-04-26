@@ -34,7 +34,7 @@ header('location:../index.php');
 <?php include '../includes/topheader.php'?>
 <!--close-top-Header-menu-->
 <!--sidebar-menu-->
-<?php $page="todo"; include '../includes/sidebar.php'?>
+<?php $page="todo"; $userid="user_id"; include '../includes/sidebar.php'?>
 
 <!--sidebar-menu-->
 
@@ -101,7 +101,7 @@ header('location:../index.php');
 <!--Footer-part-->
 
 <div class="row-fluid">
-  <div id="footer" class="span12"> <?php echo date("Y");?> &copy; Developed By Naseeb Bajracharya</a> </div>
+  <div id="footer" class="span12"> <?php echo date("Y");?> &copy; Developed By Leslie Paul Ajayi</a> </div>
 </div>
 
 <style>

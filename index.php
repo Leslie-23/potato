@@ -2,7 +2,7 @@
  include('dbcon.php'); ?>
 <!DOCTYPE html>
 <html lang="en">
-     
+    <!-- Visit codeastro.com for more projects -->
 <head>
         <title>Gym System Admin</title><meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -71,7 +71,7 @@
                     }
             ?>
             <div class="pull-left">
-            <a href="customer/index.php"><h6>Customer Login</h6></a>
+            <a href="customer/login.php"><h6>Customer Login</h6></a>
             </div>
 
             <div class="pull-right">
@@ -85,5 +85,5 @@
         <script src="js/bootstrap.min.js"></script> 
 <script src="js/matrix.js"></script>
     </body>
- 
+<!-- Visit codeastro.com for more projects -->
 </html>

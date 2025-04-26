@@ -1,5 +1,4 @@
-**Log on to codeastro.com for more projects!***
-
+  
 **Database Name: gymnsb**
 
 **Developed by Naseeb Bajracharya**
@@ -10,5 +9,4 @@
 **Admin Login Details**
 
 Username: admin
-Password: codeastro.com
-
+Password: 12345678

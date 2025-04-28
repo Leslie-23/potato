@@ -5,7 +5,7 @@ include('dbcon.php');
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Gym System Admin - Login</title>
+    <title>Gym System - Customer Login</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="../css/bootstrap.min.css" />
@@ -44,7 +44,7 @@ include('dbcon.php');
         <div class="form-actions">
             <span class="pull-left"><a href="../index.php" class="btn btn-info">&laquo; Go Home</a></span>
             
-            <span class="pull-left" style="margin-left: 2px"><a href="../index.php" class="btn btn-info">Join Now</a></span>
+            <span class="pull-left" style="margin-left: 2px"><a href="./index.php" class="btn btn-info">Join Now</a></span>
             <span class="pull-right"><button type="submit" name="login" class="btn btn-success">Login</button></span>
         </div>
 

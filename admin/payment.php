@@ -67,14 +67,14 @@ header('location:../index.php');
           
           <div class='widget-content nopadding'>
 
+<a href="./payment-processing.php" class="text-warning">Process members payments here... &raquo; </a>
 
-
-           <!-- <form action="search-result.php" role="search" method="POST">
+           <form action="search-result.php" role="search" method="POST">
             <div id="search">
             <input type="text" placeholder="Search Here.." name="search"/>
             <button type="submit" class="tip-bottom" title="Search"><i class="fas fa-search fa-white"></i></button>
           </div>
-          </form> -->
+          </form>
 
 	  
 	  <?php
@@ -82,7 +82,7 @@ header('location:../index.php');
       include "dbcon.php";
       $qry="SELECT * FROM members";
       $cnt = 1;
-        $result=mysqli_query($conn,$qry);
+        $result=mysqli_query($con,$qry);
 
         
           echo"<table class='table table-bordered data-table table-hover'>

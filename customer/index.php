@@ -47,6 +47,12 @@ if ($plan_result) {
                     <form action="" method="POST" class="form-horizontal" id="registration-form">
                         
                         <div class="control-group">
+                            <label class="control-label">Email :</label>
+                            <div class="controls">
+                                <input type="email" class="span11" name="email" placeholder="email" required />
+                            </div>
+                        </div>
+                        <div class="control-group">
                             <label class="control-label">Full Name :</label>
                             <div class="controls">
                                 <input type="text" class="span11" name="fullname" placeholder="Full Name" required />
@@ -71,9 +77,9 @@ if ($plan_result) {
                             <label class="control-label">Gender :</label>
                             <div class="controls">
                                 <select name="gender" required>
-                                    <option value="Male" selected>Male</option>
+                                <option value="" disabled><strong>Choose Gender</strong></option>
+                                <option value="Male" selected>Male</option>
                                     <option value="Female">Female</option>
-                                    <option value="Other">Other</option>
                                 </select>
                             </div>
                         </div>
@@ -248,9 +254,6 @@ if ($plan_result) {
         </div>
     </div>
 
-    <div class="form-actions">
-        <button type="submit" name="register" class="btn btn-success btn-block">Complete Registration</button>
-    </div>
 </div>
 
                             <div class="form-actions">
@@ -262,6 +265,7 @@ if ($plan_result) {
                     <?php
                     if (isset($_POST['register'])) {
                         // Process basic registration info with proper null checks
+                        $email = isset($_POST['email']) ? mysqli_real_escape_string($con, $_POST['email']) : '';
                         $fullname = isset($_POST['fullname']) ? mysqli_real_escape_string($con, $_POST['fullname']) : '';
                         $username = isset($_POST['username']) ? mysqli_real_escape_string($con, $_POST['username']) : '';
                         $password = isset($_POST['password']) ? mysqli_real_escape_string($con, $_POST['password']) : '';
@@ -271,7 +275,30 @@ if ($plan_result) {
                         $services = isset($_POST['services']) ? mysqli_real_escape_string($con, $_POST['services']) : '';
                         $plan = isset($_POST['plan']) ? mysqli_real_escape_string($con, $_POST['plan']) : '';
                         
+                        // Check if username already exists
+                        $check_qry = "SELECT * FROM members WHERE username = '$username'";
+                        $check_result = mysqli_query($con, $check_qry);
+                        if (mysqli_num_rows($check_result) > 0) {
+                            echo "<div class='alert alert-danger'>Username already exists.</div>";
+                            exit;
+                        }
+                        // Check if email already exists
+                        $check_qry = "SELECT * FROM members WHERE email = '$email'";
+                        $check_result = mysqli_query($con, $check_qry);
+                        if (mysqli_num_rows($check_result) > 0) {
+                            echo "<div class='alert alert-danger'>Email already exists.</div>";
+                            exit;
+                        }
+
+
+
+                        // store email in session
+                        $_SESSION['email'] = $email;
+
+                        
                       
+
+
 
                         // Default amount based on plan
                         $amount = 0;
@@ -285,8 +312,8 @@ if ($plan_result) {
                         $password = md5($password);
 
                         // Insert basic member info with service, plan, and amount
-                        $qry = "INSERT INTO members(fullname, username, password, dor, gender, services, plan, amount, address, contact, status) 
-                                VALUES ('$fullname', '$username', '$password', CURRENT_TIMESTAMP, '$gender', '$services', '$plan', '$amount', '$address', '$contact', 'Pending')";
+                        $qry = "INSERT INTO members(email,fullname, username, password, dor, gender, services, plan, amount, address, contact, status) 
+                                VALUES ('$email','$fullname', '$username', '$password', CURRENT_TIMESTAMP, '$gender', '$services', '$plan', '$amount', '$address', '$contact', 'Pending')";
                         $result = mysqli_query($con, $qry);
 
                         if ($result) {
@@ -319,6 +346,10 @@ if (isset($_POST['register'])) {
     $services = isset($_POST['services']) ? mysqli_real_escape_string($con, $_POST['services']) : '';
     $plan = isset($_POST['plan']) ? mysqli_real_escape_string($con, $_POST['plan']) : '';
 
+    // validation on the preferred_workout_plan. the 1,2 and 3must be different
+
+
+
     // Insert into members_fitness table
     $fitness_qry = "INSERT INTO members_fitness (
         user_weight, user_height, user_bodytype, 
@@ -336,7 +367,7 @@ if (isset($_POST['register'])) {
     
     if ($fitness_result) {
         echo"<div class='alert alert-success'>
-        Fitness details saved successfully!<br/>
+        User Personal and Fitness details saved successfully!<br/>
         <p>Click here to activate your account and login: 
             <a href='validate.php' class='btn btn-primary'>Validate Account</a>
         </p>

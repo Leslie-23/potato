@@ -4,8 +4,31 @@ session_start();
 if(!isset($_SESSION['user_id'])){
 header('location:../index.php');	
 }
+
+
+
 ?>
- 
+ <?php
+include "dbcon.php";
+
+// Initialize search variable
+$search = '';
+$where = '';
+
+// Check if search parameter exists
+if(isset($_GET['search']) && !empty($_GET['search'])) {
+    $search = mysqli_real_escape_string($con, $_GET['search']);
+    $where = " WHERE fullname LIKE '%$search%' 
+               OR username LIKE '%$search%' 
+               OR contact LIKE '%$search%' 
+               OR address LIKE '%$search%' 
+               OR services LIKE '%$search%'";
+}
+
+$qry = "SELECT * FROM members $where ORDER BY dor DESC";
+$cnt = 1;
+$result = mysqli_query($con, $qry);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -56,60 +79,78 @@ header('location:../index.php');
       <div class="span12">
 
       <div class='widget-box'>
-          <div class='widget-title'> <span class='icon'> <i class='fas fa-th'></i> </span>
-            <h5>Member table</h5>
-          </div>
-          <div class='widget-content nopadding'>
-	  
-	  <?php
-
-      include "dbcon.php";
-      $qry="select * from members";
-      $cnt = 1;
-        $result=mysqli_query($conn,$qry);
-
-        
-          echo"<table class='table table-bordered table-hover'>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Fullname</th>
-                  <th>Username</th>
-                  <th>Gender</th>
-                  <th>Contact Number</th>
-                  <th>D.O.R</th>
-                  <th>Address</th>
-                  <th>Amount</th>
-                  <th>Choosen Service</th>
-                  <th>Plan</th>
-                </tr>
-              </thead>";
-              
-            while($row=mysqli_fetch_array($result)){
-            
-            echo"<tbody> 
-               
-                <td><div class='text-center'>".$cnt."</div></td>
-                <td><div class='text-center'>".$row['fullname']."</div></td>
-                <td><div class='text-center'>@".$row['username']."</div></td>
-                <td><div class='text-center'>".$row['gender']."</div></td>
-                <td><div class='text-center'>".$row['contact']."</div></td>
-                <td><div class='text-center'>".$row['dor']."</div></td>
-                <td><div class='text-center'>".$row['address']."</div></td>
-                <td><div class='text-center'>$".$row['amount']."</div></td>
-                <td><div class='text-center'>".$row['services']."</div></td>
-                <td><div class='text-center'>".$row['plan']." Month/s</div></td>
-             
-                
-              </tbody>";
-          $cnt++;  }
-            ?>
-
-            </table>
-          </div>
+    <div class='widget-title'> <span class='icon'> <i class='fas fa-th'></i> </span>
+        <h5>Member table</h5>
+    </div>
+    <div class='widget-content nopadding'>
+        <!-- Search Form -->
+        <div class="controls" style="padding: 10px;">
+            <form method="GET" action="" class="form-inline">
+                <div class="input-append">
+                    <input type="text" name="search" class="span11" placeholder="Search members..." 
+                           value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                    <?php if(isset($_GET['search'])): ?>
+                        <a href="members.php" class="btn btn-danger"><i class="fas fa-times"></i> Clear</a>
+                    <?php endif; ?>
+                </div>
+            </form>
         </div>
-   
-		
+        
+        <!-- Search Results Count -->
+        <div class="alert alert-info" style="margin: 10px;">
+            <?php 
+            $total_members = mysqli_num_rows($result);
+            if(isset($_GET['search']) && !empty($_GET['search'])) {
+                echo "Showing $total_members members matching '".htmlspecialchars($_GET['search'])."'";
+            } else {
+                echo "Showing all $total_members members";
+            }
+            ?>
+        </div>
+        
+        <!-- Members Table -->
+        <table class='table table-bordered table-hover'>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Fullname</th>
+                    <th>Username</th>
+                    <th>Gender</th>
+                    <th>Contact Number</th>
+                    <th>D.O.R</th>
+                    <th>Address</th>
+                    <th>Amount</th>
+                    <th>Choosen Service</th>
+                    <th>Plan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php 
+                if(mysqli_num_rows($result) > 0) {
+                    while($row = mysqli_fetch_array($result)) {
+                        echo "<tr>
+                            <td><div class='text-center'>".$cnt."</div></td>
+                            <td><div class='text-center'>".htmlspecialchars($row['fullname'])."</div></td>
+                            <td><div class='text-center'>@".htmlspecialchars($row['username'])."</div></td>
+                            <td><div class='text-center'>".htmlspecialchars($row['gender'])."</div></td>
+                            <td><div class='text-center'>".htmlspecialchars($row['contact'])."</div></td>
+                            <td><div class='text-center'>".htmlspecialchars($row['dor'])."</div></td>
+                            <td><div class='text-center'>".htmlspecialchars($row['address'])."</div></td>
+                            <td><div class='text-center'>$".htmlspecialchars($row['amount'])."</div></td>
+                            <td><div class='text-center'>".htmlspecialchars($row['services'])."</div></td>
+                            <td><div class='text-center'>".htmlspecialchars($row['plan'])." Month/s</div></td>
+                        </tr>";
+                        $cnt++;
+                    }
+                } else {
+                    echo "<tr><td colspan='10' class='text-center'>No members found</td></tr>";
+                }
+                ?>
+            </tbody>
+        </table>
+    </div>
+</div>
 	
       </div>
     </div>

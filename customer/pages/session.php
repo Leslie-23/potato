@@ -1,6 +1,14 @@
 <?php
 //Start session
-session_start();
+
+// this might need to be ativated, currently out pof function due to a session start duplication  
+
+
+// session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 //Check whether the session variable SESS_MEMBER_ID is present or not
 if (!isset($_SESSION['user_id']) || (trim($_SESSION['user_id']) == '')) {
     header("location: index.php");

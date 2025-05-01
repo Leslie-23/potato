@@ -1,3 +1,20 @@
+
+<?php
+include('dbcon.php');
+
+
+// Fetch workout plans from database
+$workout_plans = [];
+$plan_query = "SELECT * FROM workout_plan";
+$plan_result = mysqli_query($con, $plan_query);
+if ($plan_result) {
+    while ($row = mysqli_fetch_assoc($plan_result)) {
+        $workout_plans[$row['table_id']] = $row['workout_name'];
+    }
+}
+?>
+
+
 <?php
 session_start();
 //the isset function to check username is already loged in and stored on the session
@@ -51,157 +68,309 @@ header('location:../index.php');
 </div>
 <div class="container-fluid">
   <hr>
-  <div class="row-fluid">
-    <div class="span6">
-      <div class="widget-box">
-        <div class="widget-title"> <span class="icon"> <i class="fas fa-align-justify"></i> </span>
-          <h5>Personal-info</h5>
-        </div>
-        <div class="widget-content nopadding">
-          <form action="add-member-req.php" method="POST" class="form-horizontal">
-            <div class="control-group">
-              <label class="control-label">Full Name :</label>
-              <div class="controls">
-                <input type="text" class="span11" name="fullname" placeholder="Fullname" />
-              </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">Username :</label>
-              <div class="controls">
-                <input type="text" class="span11" name="username" placeholder="Username" />
-              </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">Password :</label>
-              <div class="controls">
-                <input type="password"  class="span11" name="password" placeholder="**********"  />
-                <span class="help-block">Note: The given information will create an account for this particular member</span>
-              </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">Gender :</label>
-              <div class="controls">
-              <select name="gender" required="required" id="select">
-                  <option value="Male" selected="selected">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">D.O.R :</label>
-              <div class="controls">
-                <input type="date" name="dor" class="span11" />
-                <span class="help-block">Date of registration</span> </div>
-            </div>
-            
-          
-        </div>
-     
-        
-        <div class="widget-content nopadding">
-          <div class="form-horizontal">
-          
-        </div>
-        <div class="widget-content nopadding">
-          <div class="form-horizontal">
-            <div class="control-group">
-              <label for="normal" class="control-label">Plans: </label>
-              <div class="controls">
-                <select name="plan" required="required" id="select">
-                  <option value="1" selected="selected">One Month</option>
-                  <option value="3">Three Month</option>
-                  <option value="6">Six Month</option>
-                  <option value="12">One Year</option>
+  
+  <div class="widget-content nopadding">
+                    <form action="" method="POST" class="form-horizontal" id="registration-form">
+                    <div class="widget-title"> 
+        <span class="icon"> <i class="icon-heart"></i> </span>
+        <h5>Personal Details Form</h5>
+    </div>
+                        <div class="control-group">
+                            <label class="control-label">Full Name :</label>
+                            <div class="controls">
+                                <input type="text" class="span11" name="fullname" placeholder="Full Name" required />
+                            </div>
+                        </div>
 
-                </select>
-              </div>
+                        <div class="control-group">
+                            <label class="control-label">Username :</label>
+                            <div class="controls">
+                                <input type="text" class="span11" name="username" placeholder="@username" required />
+                            </div>
+                        </div>
 
-            </div>
-            <div class="control-group">
-              
-              
-            </div>
-          </div>
+                        <div class="control-group">
+                            <label class="control-label">Password :</label>
+                            <div class="controls">
+                                <input type="password" class="span11" name="password" placeholder="Password" required />
+                            </div>
+                        </div>
 
-          </div>
+                        <div class="control-group">
+                            <label class="control-label">Gender :</label>
+                            <div class="controls">
+                                <select name="gender" required>
+                                  <option value="" disabled><strong>Choose Gender</strong></option>
+                                    <option value="Male" selected>Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                        </div>
 
+                        <div class="control-group">
+                            <label class="control-label">Address :</label>
+                            <div class="controls">
+                                <input type="text" class="span11" name="address" placeholder="Address" required />
+                            </div>
+                        </div>
 
+                        <div class="control-group">
+                            <label class="control-label">Contact :</label>
+                            <div class="controls">
+                                <input type="text" class="span11" name="contact" placeholder="+233 00 000 0000" required />
+                            </div>
+                        </div>
 
-        </div>
-      </div>
-	  
-	
+                        <!-- <div class="text-center">
+                            <a href="./login.php">Already have an account? Login</a>
+                        </div>
+                        <div class="text-center">
+                            <button type="button" id="show-fitness-btn" class="btn btn-info">Continue to Fitness Details</button>
+                        </div> -->
+
+                        <!-- Fitness Details Section -->
+                       <!-- Fitness Details Section -->
+<div id="fitness-details-section">
+    <hr>
+    <div class="widget-title"> 
+        <span class="icon"> <i class="icon-heart"></i> </span>
+        <h5>Fitness Details Form</h5>
     </div>
 
+    <div class="control-group">
+        <label class="control-label">Weight (kg):</label>
+        <div class="controls">
+            <input type="number" step="0.1" class="span11" name="user_weight" placeholder="e.g., 70.5" required />
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">Height (cm):</label>
+        <div class="controls">
+            <input type="number" step="0.1" class="span11" name="user_height" placeholder="e.g., 175.5" required />
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">Body Type:</label>
+        <div class="controls">
+            <select name="user_bodytype" required>
+                <option value="Ectomorph">Ectomorph (Lean)</option>
+                <option value="Mesomorph">Mesomorph (Athletic)</option>
+                <option value="Endomorph">Endomorph (Round)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">Primary Fitness Goal:</label>
+        <div class="controls">
+            <input type="text" class="span11" name="fitness_goal_1" placeholder="e.g., Weight Loss" required />
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">Secondary Fitness Goal:</label>
+        <div class="controls">
+            <input type="text" class="span11" name="fitness_goal_2" placeholder="Optional" />
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">Tertiary Fitness Goal:</label>
+        <div class="controls">
+            <input type="text" class="span11" name="fitness_goal_3" placeholder="Optional" />
+        </div>
+    </div>
+
+    <div class="control-group">
+    <label class="control-label">Primary Preferred Workout Plan:</label>
+    <div class="controls">
+        <select name="preferred_workout_plan_1" class="workout-plan-select" required>
+            <option value="" disabled selected>Select Primary Plan</option>
+            <?php foreach ($workout_plans as $id => $name): ?>
+                <option value="<?php echo $id; ?>"><?php echo htmlspecialchars($name); ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+</div>
+
+<div class="control-group">
+    <label class="control-label">Secondary Preferred Workout Plan:</label>
+    <div class="controls">
+        <select name="preferred_workout_plan_2" class="workout-plan-select">
+            <option value="">None</option>
+            <?php foreach ($workout_plans as $id => $name): ?>
+                <option value="<?php echo $id; ?>"><?php echo htmlspecialchars($name); ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+</div>
+
+<div class="control-group">
+    <label class="control-label">Tertiary Preferred Workout Plan:</label>
+    <div class="controls">
+        <select name="preferred_workout_plan_3" class="workout-plan-select">
+            <option value="">None</option>
+            <?php foreach ($workout_plans as $id => $name): ?>
+                <option value="<?php echo $id; ?>"><?php echo htmlspecialchars($name); ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+</div>
+
+    <div class="control-group">
+        <label class="control-label">Experience Level:</label>
+        <div class="controls">
+            <select name="experience_level" required>
+                <option value="1">Beginner</option>
+                <option value="5">Intermediate</option>
+                <option value="9">Advanced</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">Health Conditions:</label>
+        <div class="controls">
+            <select name="health_condition" required>
+                <option value="None">None</option>
+                <option value="Asthma">Asthma</option>
+                <option value="Diabetes">Diabetes</option>
+                <option value="Hypertension">Hypertension</option>
+                <option value="Joint Problems">Joint Problems</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">Health Condition Description:</label>
+        <div class="controls">
+            <textarea class="span11" name="health_condition_desc" placeholder="Please describe any health conditions in detail"></textarea>
+        </div>
+    </div>
+
+    <!-- Maintained Services and Plan fields -->
+    <div class="control-group">
+        <label class="control-label">Service :</label>
+        <div class="controls">
+            <select name="services" required>
+                <option value="" disabled selected>Select Service</option>
+                <option value="Fitness">Fitness</option>
+                <option value="Sauna">Sauna</option>
+                <option value="Cardio">Cardio</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">Plan :</label>
+        <div class="controls">
+            <select name="plan" required>
+                <option value="" disabled selected>Select Plan</option>
+                <option value="1">One Month</option>
+                <option value="3">Three Months</option>
+                <option value="6">Six Months</option>
+                <option value="12">One Year</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" name="register" class="btn btn-success btn-block">Complete Registration for User</button>
+    </div>
+
+
+    <?php
+                    if (isset($_POST['register'])) {
+                        // Process basic registration info with proper null checks
+                        $fullname = isset($_POST['fullname']) ? mysqli_real_escape_string($con, $_POST['fullname']) : '';
+                        $username = isset($_POST['username']) ? mysqli_real_escape_string($con, $_POST['username']) : '';
+                        $password = isset($_POST['password']) ? mysqli_real_escape_string($con, $_POST['password']) : '';
+                        $gender = isset($_POST['gender']) ? mysqli_real_escape_string($con, $_POST['gender']) : '';
+                        $address = isset($_POST['address']) ? mysqli_real_escape_string($con, $_POST['address']) : '';
+                        $contact = isset($_POST['contact']) ? mysqli_real_escape_string($con, $_POST['contact']) : '';
+                        $services = isset($_POST['services']) ? mysqli_real_escape_string($con, $_POST['services']) : '';
+                        $plan = isset($_POST['plan']) ? mysqli_real_escape_string($con, $_POST['plan']) : '';
+                        
+                      
+
+                        // Default amount based on plan
+                        $amount = 0;
+                        switch($plan) {
+                            case '1': $amount = 100; break; // Example amount for 1 month
+                            case '3': $amount = 250; break; // Example amount for 3 months
+                            case '6': $amount = 450; break; // Example amount for 6 months
+                            case '12': $amount = 800; break; // Example amount for 1 year
+                        }
+
+                        $password = md5($password);
+
+                        // Insert basic member info with service, plan, and amount
+                        $qry = "INSERT INTO members(fullname, username, password, dor, gender, services, plan, amount, address, contact, status) 
+                                VALUES ('$fullname', '$username', '$password', CURRENT_TIMESTAMP, '$gender', '$services', '$plan', '$amount', '$address', '$contact', 'Pending')";
+                        $result = mysqli_query($con, $qry);
+
+                        if ($result) {
+                            $member_id = mysqli_insert_id($con);
+                            
+                           
+                        } else {
+                            echo "<div class='alert alert-danger'>Registration failed. Please try again. Error: " . mysqli_error($con) . "</div>";
+                        }
+                    }
+                    ?>
+                    <?php
+
+
+
+if (isset($_POST['register'])) {
+    // Process fitness details
+    $user_weight = isset($_POST['user_weight']) ? mysqli_real_escape_string($con, $_POST['user_weight']) : 0;
+    $user_height = isset($_POST['user_height']) ? mysqli_real_escape_string($con, $_POST['user_height']) : 0;
+    $user_bodytype = isset($_POST['user_bodytype']) ? mysqli_real_escape_string($con, $_POST['user_bodytype']) : '';
+    $fitness_goal_1 = isset($_POST['fitness_goal_1']) ? mysqli_real_escape_string($con, $_POST['fitness_goal_1']) : '';
+    $fitness_goal_2 = isset($_POST['fitness_goal_2']) ? mysqli_real_escape_string($con, $_POST['fitness_goal_2']) : '';
+    $fitness_goal_3 = isset($_POST['fitness_goal_3']) ? mysqli_real_escape_string($con, $_POST['fitness_goal_3']) : '';
+    $preferred_workout_plan_1 = isset($_POST['preferred_workout_plan_1']) ? mysqli_real_escape_string($con, $_POST['preferred_workout_plan_1']) : '';
+    $preferred_workout_plan_2 = isset($_POST['preferred_workout_plan_2']) ? mysqli_real_escape_string($con, $_POST['preferred_workout_plan_2']) : '';
+    $preferred_workout_plan_3 = isset($_POST['preferred_workout_plan_3']) ? mysqli_real_escape_string($con, $_POST['preferred_workout_plan_3']) : '';
+    $experience_level = isset($_POST['experience_level']) ? mysqli_real_escape_string($con, $_POST['experience_level']) : '';
+    $health_condition = isset($_POST['health_condition']) ? mysqli_real_escape_string($con, $_POST['health_condition']) : '';
+    $health_condition_desc = isset($_POST['health_condition_desc']) ? mysqli_real_escape_string($con, $_POST['health_condition_desc']) : '';
+    $services = isset($_POST['services']) ? mysqli_real_escape_string($con, $_POST['services']) : '';
+    $plan = isset($_POST['plan']) ? mysqli_real_escape_string($con, $_POST['plan']) : '';
+
+    // Insert into members_fitness table
+    $fitness_qry = "INSERT INTO members_fitness (
+        user_weight, user_height, user_bodytype, 
+        fitness_goal_1, fitness_goal_2, fitness_goal_3,
+        preferred_workout_plan_1, preferred_workout_plan_2, preferred_workout_plan_3,
+        experience_level, health_condition, health_condition_desc
+    ) VALUES (
+        '$user_weight', '$user_height', '$user_bodytype',
+        '$fitness_goal_1', '$fitness_goal_2', '$fitness_goal_3',
+        '$preferred_workout_plan_1', '$preferred_workout_plan_2', '$preferred_workout_plan_3',
+        '$experience_level', '$health_condition', '$health_condition_desc'
+    )";
     
+    $fitness_result = mysqli_query($con, $fitness_qry);
     
-    <div class="span6">
-      <div class="widget-box">
-        <div class="widget-title"> <span class="icon"> <i class="fas fa-align-justify"></i> </span>
-          <h5>Contact Details</h5>
-        </div>
-        <div class="widget-content nopadding">
-          <div class="form-horizontal">
-            <div class="control-group">
-              <label for="normal" class="control-label">Contact Number</label>
-              <div class="controls">
-                <input type="number" id="mask-phone" name="contact" placeholder="9876543210" class="span8 mask text">
-                <span class="help-block blue span8">(999) 999-9999</span> 
-                </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">Address :</label>
-              <div class="controls">
-                <input type="text" class="span11" name="address" placeholder="Address" />
-              </div>
-            </div>
-          </div>
-
-              <div class="widget-title"> <span class="icon"> <i class="fas fa-align-justify"></i> </span>
-          <h5>Service Details</h5>
-        </div>
-        <div class="widget-content nopadding">
-          <div class="form-horizontal">
-            
-            
-            <div class="control-group">
-              <label class="control-label">Services</label>
-              <div class="controls">
-                <label>
-                  <input type="radio" value="Fitness" name="services" />
-                  Fitness <small>- $55 per month</small></label>
-                <label>
-                  <input type="radio" value="Sauna" name="services" />
-                  Sauna <small>- $35 per month</small></label>
-                <label>
-                  <input type="radio" value="Cardio" name="services" />
-                  Cardio <small>- $40 per month</small></label>
-              </div>
-            </div>
-
-            <div class="control-group">
-              <label class="control-label">Total Amount</label>
-              <div class="controls">
-                <div class="input-append">
-                  <span class="add-on">$</span> 
-                  <input type="number" placeholder="50" name="amount" class="span11">
-                  </div>
-              </div>
-            </div>
-            
-          
-            
-            <div class="form-actions text-center">
-              <button type="submit" class="btn btn-success">Submit Member Details</button>
-            </div>
-            </form>
-
-          </div>
+    if ($fitness_result) {
+        echo"<div class='alert alert-success'>
+        User details saved successfully!<br/>
+        <p>Click here to send $fullname an activation link : 
+            <a href='validate.php' class='btn btn-primary'>Send</a>
+        </p>
+      </div>";
+    } else {
+        echo "<div class='alert alert-danger'>Error saving fitness details: " . mysqli_error($con) . "</div>";
+    }
+}
+?>
 
 
-
-        </div>
 
         </div>
       </div>
@@ -250,6 +419,7 @@ header('location:../index.php');
 <script src="../js/matrix.popover.js"></script> 
 <script src="../js/jquery.dataTables.min.js"></script> 
 <script src="../js/matrix.tables.js"></script> 
+
 
 <script type="text/javascript">
   // This function is called from the pop-up menus to transfer to

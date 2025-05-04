@@ -6,6 +6,7 @@
     </li>
 
     <li class="<?php if($page=='reminder'){ echo 'active'; }?>"><a href="customer-reminder.php"><i class="icon icon-time"></i> <span>Reminders</span></a></li>
+    <li class="<?php if($page=='session'){ echo 'active'; }?>"><a href="trainer-sessions.php"><i class="icon icon-time"></i> <span>Sessions & Schedules</span></a></li>
 
     <li class="<?php if($page=='announcement'){ echo 'active'; }?>"><a href="announcement.php"><i class="icon icon-bullhorn"></i> <span>Announcement</span></a></li>
 

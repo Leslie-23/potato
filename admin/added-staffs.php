@@ -54,12 +54,13 @@ header('location:../index.php');
             $gender = $_POST["gender"];
             $contact = $_POST["contact"];
 
-            $password = md5($password);
+            // $password = md5($password);
+            $hashedPassword = password_hash($_POST['password'], PASSWORD_BCRYPT);
 
                     include 'dbcon.php';
                     //code after connection is successfull
-                    $qry = "insert into staffs(fullname,username,password,email,address,designation,gender,contact) values ('$fullname','$username','$password','$email','$address','$designation','$gender','$contact')";
-                    $result = mysqli_query($conn,$qry); //query executes
+                    $qry = "insert into staffs(fullname,username,password,email,address,designation,gender,contact) values ('$fullname','$username','$hashedPassword','$email','$address','$designation','$gender','$contact')";
+                    $result = mysqli_query($con,$qry); //query executes
 
                     if(!$result){
                     echo"<div class='container-fluid'>";

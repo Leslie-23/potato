@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_otp'])) {
             };
             
             // Send email using your service ID and template ID
-            emailjs.send('service_pvbodq9', 'template_7he6yyj', templateParams) // REPLACE WITH YOUR SERVICE AND TEMPLATE IDs
+            emailjs.send('service_x3zoj59', 'template_7he6yyj', templateParams) // REPLACE WITH YOUR SERVICE AND TEMPLATE IDs
                 .then(function(response) {
                     console.log('OTP sent successfully', response);
                 }, function(error) {
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_otp'])) {
         
         $_SESSION['verified'] = true;
         unset($_SESSION['otp']); // Clear OTP from session
-        header("Location: dashboard.php");
+        header("Location: ./login.php");
         exit();
     } else {
         $_SESSION['error'] = "Invalid or expired OTP. Please try again.";

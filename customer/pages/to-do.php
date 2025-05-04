@@ -87,6 +87,65 @@ header('location:../index.php');
               <div id="submitted"></div>
             </form>
           </div><!--end of widget-content -->
+          <!-- Upcoming Sessions -->
+          <h4>Your Upcoming Sessions</h4>
+                    <?php
+                    include('dbcon.php');
+                    $sessionsQuery = mysqli_query($con, "SELECT ts.*, s.fullname as trainer_name, wp.workout_name 
+                                                         FROM training_sessions ts
+                                                         JOIN staffs s ON ts.trainer_id = s.user_id
+                                                         JOIN workout_plan wp ON ts.table_id = wp.table_id
+                                                         WHERE ts.user_id = '".$_SESSION['user_id']."' 
+                                                         AND ts.session_date >= NOW()
+                                                         ORDER BY ts.session_date ASC");
+                    if(mysqli_num_rows($sessionsQuery) > 0): ?>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Trainer</th>
+                                    <th>Workout Plan</th>
+                                    <th>Date/Time</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php while($session = mysqli_fetch_assoc($sessionsQuery)): ?>
+                                <tr>
+                                    <td><?php echo $session['trainer_name']; ?></td>
+                                    <td><?php echo $session['workout_name']; ?></td>
+                                    <td><?php echo date('M j, Y g:i A', strtotime($session['session_date'])); ?></td>
+                                    <td><?php echo ucfirst($session['status']); ?></td>
+                                    <td>
+                                        <?php if($session['status'] == 'scheduled'): ?>
+                                            <button type="button" class="btn btn-danger btn-mini" name="cancel_session" data-toggle="modal" data-target="#cancelModal" data-id="<?php echo $session['session_id']; ?>">Cancel 
+                                                <?php
+                                                // code to cancel the status by setting it to cancelled.
+                                                if(isset($_POST['cancel_session']) && $_POST['session_id'] == $session['session_id']) {
+                                                    $cancelQuery = "UPDATE training_sessions SET status = 'cancelled' WHERE session_id = '".$_POST['session_id']."'";
+                                                    if(mysqli_query($con, $cancelQuery)) {
+                                                        $success = "Session cancelled successfully.";
+                                                    } else {
+                                                        $error = "Error cancelling session: " . mysqli_error($con);
+                                                    }
+                                                }
+                                                ?>
+                                            </button>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    <?php else: ?>
+                        <p>No upcoming sessions scheduled.</p>
+                    <?php endif; ?>
+                    <div class="form-actions">
+  <a href="trainer-sessions.php" class="btn btn-primary" style="text-decoration: none; color: white;">
+    Sessions & Schedules
+  </a>
+</div>
+
         </div><!--end of widget box-->
       </div><!--end of span 12 -->
 	  

@@ -59,6 +59,7 @@ if(!$announcement_result) die("Announcement query failed: " . mysqli_error($con)
     <link rel="stylesheet" href="../css/jquery.gritter.css" />
     <link rel="stylesheet" href="../font-awesome/css/all.min.css" />
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     
     <!-- Chart Scripts -->

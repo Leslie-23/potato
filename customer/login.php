@@ -49,33 +49,51 @@ include('dbcon.php');
         </div>
 
         <?php
-        if (isset($_POST['login'])) {
-            $username = mysqli_real_escape_string($con, $_POST['username']);
-            $password = mysqli_real_escape_string($con, $_POST['password']);
-            
-            $encrypted_password = md5($password);
-            
-            $query = mysqli_query($con, "SELECT * FROM members WHERE username='$username' AND password='$encrypted_password' AND status='Active'") or die(mysqli_error($con));
-            $row = mysqli_fetch_array($query);
-            $num_row = mysqli_num_rows($query);
+if (isset($_POST['login'])) {
+    $username = mysqli_real_escape_string($con, $_POST['username']);
+    $password = $_POST['password']; // Don't escape the password - it will be hashed
+    
+    // First find the user by username only
+    $query = mysqli_query($con, "SELECT * FROM members WHERE username='$username' AND status='Active'") 
+        or die(mysqli_error($con));
+    $row = mysqli_fetch_array($query);
+    $num_row = mysqli_num_rows($query);
 
-            if ($num_row > 0) {
-                $_SESSION['user_id'] = $row['user_id'];
-                $_SESSION['username'] = $row['username'];
-                
-                header('location:pages/index.php'); // Redirect to dashboard
-            } else {
-                echo "
-                <div class='alert alert-danger alert-dismissible' role='alert'>
-                    Invalid Username/Password or Account not Active!
-                    <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
-                        <span aria-hidden='true'>&times;</span>
-                    </button>
-                </div>
-                ";
-            }
+    if ($num_row > 0) {
+        $storedHash = $row['password'];
+        $validPassword = false;
+        
+        // Check if password matches bcrypt hash
+        if (password_verify($password, $storedHash)) {
+            $validPassword = true;
+        } 
+        // If not, check if it matches MD5 hash
+        elseif (md5($password) === $storedHash) {
+            $validPassword = true;
+            
+            // Upgrade MD5 password to bcrypt
+            $newHash = password_hash($password, PASSWORD_BCRYPT);
+            mysqli_query($con, "UPDATE members SET password='$newHash' WHERE user_id='".$row['user_id']."'");
         }
-        ?>
+
+        if ($validPassword) {
+            $_SESSION['user_id'] = $row['user_id'];
+            $_SESSION['username'] = $row['username'];
+            header('location:pages/index.php');
+            exit();
+        }
+    }
+    
+    // If we get here, login failed
+    echo '
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        Invalid Username/Password or Account not Active!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>';
+}
+?>
 
     </form>    
     <div class="pull-left">

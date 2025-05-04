@@ -49,13 +49,13 @@ if ($plan_result) {
                         <div class="control-group">
                             <label class="control-label">Email :</label>
                             <div class="controls">
-                                <input type="email" class="span11" name="email" placeholder="email" required />
+                                <input type="email" class="span11" name="email" placeholder="e.g user@gmail.com" required />
                             </div>
                         </div>
                         <div class="control-group">
                             <label class="control-label">Full Name :</label>
                             <div class="controls">
-                                <input type="text" class="span11" name="fullname" placeholder="Full Name" required />
+                                <input type="text" class="span11" name="fullname" placeholder="e.g Marquee Sanders" required />
                             </div>
                         </div>
 
@@ -72,7 +72,20 @@ if ($plan_result) {
                                 <input type="password" class="span11" name="password" placeholder="Password" required />
                             </div>
                         </div>
+                        <div class="control-group">
+    <label class="control-label">Date of Birth</label>
+    <div class="controls">
+        <input type="date" name="date_of_birth" class="span6" required 
+               max="<?php echo date('Y-m-d', strtotime('-18 years')); ?>">
+    </div>
+</div>
 
+<div class="control-group">
+    <label class="control-label">Profile Picture</label>
+    <div class="controls">
+        <input type="file" name="profile_pic" class="span6" accept="image/*">
+    </div>
+</div>
                         <div class="control-group">
                             <label class="control-label">Gender :</label>
                             <div class="controls">
@@ -99,10 +112,10 @@ if ($plan_result) {
                         </div>
 
                         <div class="text-center">
-                            <a href="./login.php">Already have an account? Login</a>
+                            <button type="button" id="show-fitness-btn" class="btn btn-info">Continue to Fitness Details</button>
                         </div>
                         <div class="text-center">
-                            <button type="button" id="show-fitness-btn" class="btn btn-info">Continue to Fitness Details</button>
+                            <a href="./login.php">Already have an account? Login</a>
                         </div>
 
                         <!-- Fitness Details Section -->
@@ -117,14 +130,14 @@ if ($plan_result) {
     <div class="control-group">
         <label class="control-label">Weight (kg):</label>
         <div class="controls">
-            <input type="number" step="0.1" class="span11" name="user_weight" placeholder="e.g., 70.5" required />
+            <input type="number" step="0.1" class="span11" name="user_weight" placeholder="e.g., 70.5" min="0" required />
         </div>
     </div>
 
     <div class="control-group">
         <label class="control-label">Height (cm):</label>
         <div class="controls">
-            <input type="number" step="0.1" class="span11" name="user_height" placeholder="e.g., 175.5" required />
+            <input type="number" step="0.1" class="span11" name="user_height" placeholder="e.g., 175.5" min="0" required />
         </div>
     </div>
 
@@ -254,11 +267,11 @@ if ($plan_result) {
         </div>
     </div>
 
+    <div class="form-actions">
+        <button type="submit" name="register" class="btn btn-success btn-block">Complete Registration</button>
+    </div>
 </div>
 
-                            <div class="form-actions">
-                                <button type="submit" name="register" class="btn btn-success btn-block">Complete Registration</button>
-                            </div>
                         </div>
                     </form>
 
@@ -268,6 +281,8 @@ if ($plan_result) {
                         $email = isset($_POST['email']) ? mysqli_real_escape_string($con, $_POST['email']) : '';
                         $fullname = isset($_POST['fullname']) ? mysqli_real_escape_string($con, $_POST['fullname']) : '';
                         $username = isset($_POST['username']) ? mysqli_real_escape_string($con, $_POST['username']) : '';
+                        $date_of_birth = isset($_POST['date_of_birth']) ? mysqli_real_escape_string($con, $_POST['date_of_birth']) : '';
+                        $profile_pic = isset($_POST['profile_pic']) ? mysqli_real_escape_string($con, $_POST['profile_pic']) : '';
                         $password = isset($_POST['password']) ? mysqli_real_escape_string($con, $_POST['password']) : '';
                         $gender = isset($_POST['gender']) ? mysqli_real_escape_string($con, $_POST['gender']) : '';
                         $address = isset($_POST['address']) ? mysqli_real_escape_string($con, $_POST['address']) : '';
@@ -294,10 +309,46 @@ if ($plan_result) {
 
                         // store email in session
                         $_SESSION['email'] = $email;
+                      
 
                         
                       
-
+                        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+                            // Validate date of birth (must be 18+)
+                            $dob = $_POST['date_of_birth'];
+                            $today = new DateTime();
+                            $birthdate = new DateTime($dob);
+                            $age = $today->diff($birthdate)->y;
+                            
+                            if ($age < 18) {
+                                die("You must be at least 18 years old to register.");
+                            }
+                        }
+                        // Handle profile picture upload
+    $profilePic = null;
+    if (!empty($_FILES['profile_pic']['name'])) {
+        $uploadDir = '../uploads/profile_pics/';
+        $fileName = uniqid() . '_' . basename($_FILES['profile_pic']['name']);
+        $targetPath = $uploadDir . $fileName;
+        
+        // Check if image file is actual image
+        $check = getimagesize($_FILES['profile_pic']['tmp_name']);
+        if ($check !== false) {
+            if (move_uploaded_file($_FILES['profile_pic']['tmp_name'], $targetPath)) {
+                $profilePic = $fileName;
+            }
+        }
+    }
+    
+    // If no picture uploaded, use default based on gender
+    if (empty($profilePic)) {
+        function getDefaultAvatar($gender) {
+    $gender = strtolower($gender);
+    return ($gender == 'female') ? '../img/default-female-avatar.png' : '../img/default-male-avatar.png';
+}
+        $gender = $_POST['gender']; // Assuming you have a gender field
+        $profilePic = getDefaultAvatar($gender);
+    }
 
 
                         // Default amount based on plan
@@ -309,15 +360,23 @@ if ($plan_result) {
                             case '12': $amount = 800; break; // Example amount for 1 year
                         }
 
-                        $password = md5($password);
+                        // $password = md5($password);
+                        function hashPassword($password) {
+                            // Use cost parameter of 12 (good balance between security and performance)
+                            $options = ['cost' => 12];
+                            return password_hash($password, PASSWORD_BCRYPT, $options);
+                        }
+                        $hashedPassword = hashPassword($_POST['password']);
 
                         // Insert basic member info with service, plan, and amount
-                        $qry = "INSERT INTO members(email,fullname, username, password, dor, gender, services, plan, amount, address, contact, status) 
-                                VALUES ('$email','$fullname', '$username', '$password', CURRENT_TIMESTAMP, '$gender', '$services', '$plan', '$amount', '$address', '$contact', 'Pending')";
+                        $qry = "INSERT INTO members(email,fullname, username, password, dor, gender, services, plan, amount, address, contact, status,date_of_birth,profile_pic) 
+                                VALUES ('$email','$fullname', '$username', '$hashedPassword', CURRENT_TIMESTAMP, '$gender', '$services', '$plan', '$amount', '$address', '$contact', 'Pending','$date_of_birth','$profile_pic')";
                         $result = mysqli_query($con, $qry);
 
                         if ($result) {
                             $member_id = mysqli_insert_id($con);
+                              //store user_id in session
+                        $_SESSION['user_id'] = $member_id;
                             
                            
                         } else {
@@ -331,6 +390,12 @@ if ($plan_result) {
 
 if (isset($_POST['register'])) {
     // Process fitness details
+    $user_id = isset($_SESSION['user_id']) ? mysqli_real_escape_string($con, $_SESSION['user_id']) : null;
+
+if (!$user_id) {
+    die("Error: User not authenticated or user ID not set.");
+}
+
     $user_weight = isset($_POST['user_weight']) ? mysqli_real_escape_string($con, $_POST['user_weight']) : 0;
     $user_height = isset($_POST['user_height']) ? mysqli_real_escape_string($con, $_POST['user_height']) : 0;
     $user_bodytype = isset($_POST['user_bodytype']) ? mysqli_real_escape_string($con, $_POST['user_bodytype']) : '';
@@ -348,15 +413,18 @@ if (isset($_POST['register'])) {
 
     // validation on the preferred_workout_plan. the 1,2 and 3must be different
 
-
+    if ($preferred_workout_plan_1 == $preferred_workout_plan_2 || $preferred_workout_plan_1 == $preferred_workout_plan_3 || $preferred_workout_plan_2 == $preferred_workout_plan_3) {
+        echo "<script>alert('You cannot select the same workout routine more than once!'); history.back(); </script>";
+        exit();
+    }
 
     // Insert into members_fitness table
-    $fitness_qry = "INSERT INTO members_fitness (
+    $fitness_qry = "INSERT INTO members_fitness (  user_id,
         user_weight, user_height, user_bodytype, 
         fitness_goal_1, fitness_goal_2, fitness_goal_3,
         preferred_workout_plan_1, preferred_workout_plan_2, preferred_workout_plan_3,
         experience_level, health_condition, health_condition_desc
-    ) VALUES (
+    ) VALUES (    '$user_id',
         '$user_weight', '$user_height', '$user_bodytype',
         '$fitness_goal_1', '$fitness_goal_2', '$fitness_goal_3',
         '$preferred_workout_plan_1', '$preferred_workout_plan_2', '$preferred_workout_plan_3',
@@ -374,6 +442,10 @@ if (isset($_POST['register'])) {
       </div>";
     } else {
         echo "<div class='alert alert-danger'>Error saving fitness details: " . mysqli_error($con) . "</div>";
+    }
+
+    if ($user_weight <= 0 || $user_height <= 0) {
+        die("Error: Weight and height must be positive values");
     }
 }
 ?>
@@ -395,6 +467,34 @@ $(document).ready(function(){
             scrollTop: $('#fitness-details-section').offset().top
         }, 600);
     });
+});
+</script>
+<script>
+// Additional validation before form submission
+document.querySelector('form').addEventListener('submit', function(e) {
+    const weight = parseFloat(document.querySelector('[name="weight"]').value);
+    const height = parseFloat(document.querySelector('[name="height"]').value);
+    
+    if (weight <= 0 || height <= 0) {
+        e.preventDefault();
+        alert('Weight and height must be positive values. Cannot be less than 0');
+    }
+});
+
+
+function validatePassword(password) {
+    // At least 8 characters, 1 uppercase, 1 lowercase, 1 number
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    return regex.test(password);
+}
+
+// Usage in form submission
+document.querySelector('form').addEventListener('submit', function(e) {
+    const password = document.querySelector('[name="password"]').value;
+    if (!validatePassword(password)) {
+        e.preventDefault();
+        alert('Password must contain at least 8 characters, including uppercase, lowercase letters and numbers');
+    }
 });
 </script>
 

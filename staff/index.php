@@ -41,34 +41,47 @@ include('dbcon.php'); ?>
                 </div>
             </form>
             <?php
-                if (isset($_POST['login']))
-                    {
-                        $username = mysqli_real_escape_string($con, $_POST['user']);
-                        $password = mysqli_real_escape_string($con, $_POST['pass']);
-
-                        $password = md5($password);
-                        
-                        $query 		= mysqli_query($con, "SELECT * FROM staffs WHERE password='$password' and username='$username'");
-                        $row		= mysqli_fetch_array($query);
-                        $num_row 	= mysqli_num_rows($query);
-                        
-                        if ($num_row > 0) 
-                            {			
-                                $_SESSION['user_id']=$row['user_id'];
-                                header('location:staff-pages/index.php');
-                                
-                            }
-                        else
-                            {
-                                echo "<div class='alert alert-danger alert-dismissible' role='alert'>
-                                Invalid Username and Password
-                                <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
-                                    <span aria-hidden='true'>&times;</span>
-                                </button>
-                                </div>";
-                            }
-                    }
-            ?>
+if (isset($_POST['login'])) {
+    $username = mysqli_real_escape_string($con, $_POST['user']);
+    $password = $_POST['pass']; // Don't escape password - we'll hash it
+    
+    // First try to find the user by username only
+    $query = mysqli_query($con, "SELECT * FROM staffs WHERE username='$username'");
+    $row = mysqli_fetch_array($query);
+    $num_row = mysqli_num_rows($query);
+    
+    if ($num_row > 0) {
+        $storedHash = $row['password'];
+        $validPassword = false;
+        
+        // First try bcrypt verification
+        if (password_verify($password, $storedHash)) {
+            $validPassword = true;
+        } 
+        // If bcrypt fails, try MD5
+        elseif (md5($password) === $storedHash) {
+            $validPassword = true;
+            // Upgrade MD5 to bcrypt
+            $newHash = password_hash($password, PASSWORD_BCRYPT);
+            mysqli_query($con, "UPDATE staffs SET password='$newHash' WHERE user_id='".$row['user_id']."'");
+        }
+        
+        if ($validPassword) {
+            $_SESSION['user_id'] = $row['user_id'];
+            header('location:staff-pages/index.php');
+            exit();
+        }
+    }
+    
+    // If we get here, login failed
+    echo "<div class='alert alert-danger alert-dismissible' role='alert'>
+            Invalid Username and Password
+            <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
+                <span aria-hidden='true'>&times;</span>
+            </button>
+          </div>";
+}
+?>
             <div class="pull-left"> 
             <a href="../index.php"><h6>Admin Login</h6></a>
             </div>

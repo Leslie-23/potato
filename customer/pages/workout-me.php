@@ -114,6 +114,53 @@ $fitness_result = mysqli_query($con, $fitness_query);
 $fitness_plan = mysqli_num_rows($fitness_result) > 0 ? mysqli_fetch_assoc($fitness_result) : null;
 ?>
 
+<?php
+include "dbcon.php";
+include "session.php";
+
+// Get member data including date of birth
+$sql = "SELECT date_of_birth FROM members WHERE user_id = ?";
+$stmt = $con->prepare($sql);
+$stmt->bind_param("i", $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+$member = $result->fetch_assoc();
+
+// Calculate age from date of birth
+if (!empty($member['date_of_birth'])) {
+    $dob = new DateTime($member['date_of_birth']);
+    $today = new DateTime();
+    $age = $today->diff($dob)->y;
+} else {
+    $age = "Not specified";
+}
+?>
+
+                                 
+<?php
+include('dbcon.php');
+// Get member data including new fields
+$sql = "SELECT username, fullname, email, address, gender, contact, profile_pic, date_of_birth 
+        FROM members WHERE user_id = ?";
+$stmt = $con->prepare($sql);
+$stmt->bind_param("i", $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+$member = $result->fetch_assoc();
+function getDefaultAvatar($gender) {
+    $gender = strtolower($gender);
+    return ($gender == 'female') ? '../img/default-female-avatar.png' : '../img/default-male-avatar.png';
+}
+// Set default avatar if no profile picture
+if (empty($member['profile_pic'])) {
+    $member['profile_pic'] = getDefaultAvatar($member['gender']);
+}
+
+// Calculate age from date of birth
+$dob = new DateTime($member['date_of_birth']);
+$today = new DateTime();
+$age = $today->diff($dob)->y;
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -158,6 +205,44 @@ $fitness_plan = mysqli_num_rows($fitness_result) > 0 ? mysqli_fetch_assoc($fitne
             background-color: #fff3cd;
         }
     </style>
+    <style>
+    .user-thumb img {
+    width: 240px;
+    height:120px;
+    /* border-radius: 0%; */
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    padding-bottom: 5px;
+}
+
+.user-thumb img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.user-info {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f8f8f8;
+    border-radius: 4px;
+}
+
+.user-info p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+/* .age-display {
+    font-size: 16px;
+    margin-bottom: 15px;
+    padding: 8px 12px;
+    background: #f0f8ff;
+    border-left: 4px solid #3498db;
+    border-radius: 3px;
+} */
+</style>
+
 </head>
 <body>
 
@@ -219,7 +304,7 @@ $fitness_plan = mysqli_num_rows($fitness_result) > 0 ? mysqli_fetch_assoc($fitne
                                         <label class="control-label">Current Weight (kg)</label>
                                         <div class="controls">
                                             <input type="number" step="0.1" class="span12" name="user_weight" 
-                                                   value="<?php echo $fitness_plan ? htmlspecialchars($fitness_plan['user_weight']) : htmlspecialchars($member['curr_weight']); ?>" required>
+                                                   value="<?php echo $fitness_plan ? htmlspecialchars($fitness_plan['user_weight']) : "" ?>" required>
                                         </div>
                                     </div>
                                     
@@ -398,10 +483,16 @@ $fitness_plan = mysqli_num_rows($fitness_result) > 0 ? mysqli_fetch_assoc($fitne
                                 echo $fitness_level; 
                                 ?>
                                 </p>
+                                <div class="age-display">
+    <strong>Age:</strong> <?php echo htmlspecialchars($age); ?>
+</div>
                             </div>
                             
+                           
                             <div class="span6">
                                 <h4>Fitness Goals</h4>
+                               
+                                
                                 <ul class="goal-list">
                                     <?php if (!empty($fitness_plan['fitness_goal_1'])): ?>
                                     <li><?php echo htmlspecialchars($fitness_plan['fitness_goal_1']); ?></li>
@@ -413,7 +504,13 @@ $fitness_plan = mysqli_num_rows($fitness_result) > 0 ? mysqli_fetch_assoc($fitne
                                     <li><?php echo htmlspecialchars($fitness_plan['fitness_goal_3']); ?></li>
                                     <?php endif; ?>
                                 </ul>
+                                
                             </div>
+                            <div class="user-thumb">
+                                    <img src="<?php echo htmlspecialchars($member['profile_pic']); ?>" 
+                                    width="240" height="120" 
+                                    alt="Profile Picture" 
+                                    >
                         </div>
                         
                         <div class="row-fluid">
@@ -451,12 +548,15 @@ $fitness_plan = mysqli_num_rows($fitness_result) > 0 ? mysqli_fetch_assoc($fitne
                         </div>
                         <?php endif; ?>
                     </div>
+                    
                 </div>
                 <?php endif; ?>
             </div>
+            
         </div>
     </div>
 </div>
+
 
 <!-- Footer Section -->
 <div class="row-fluid">

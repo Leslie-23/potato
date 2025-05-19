@@ -71,7 +71,7 @@ header('location:../index.php');
 include "dbcon.php";
 $qry="SELECT * FROM members";
 $cnt = 1;
-  $result=mysqli_query($conn,$qry);
+  $result=mysqli_query($con,$qry);
 
   
     echo"<table class='table table-bordered data-table table-hover'>

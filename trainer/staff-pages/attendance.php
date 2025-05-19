@@ -20,6 +20,9 @@ header('location:../index.php');
 <link rel="stylesheet" href="../css/matrix-media.css" />
 <link href="../font-awesome/css/font-awesome.css" rel="stylesheet" />
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-IQsoLXlDZ+0rT6Azc+PstzlJ7Uq/NzvIuChnD9+jZWcyldj/4VSS9avFba2aYV0M" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoDnUH/s0O9QjxkHgvrnKf2Z5W4wPcA4wCk5tczlF8NnKj+" crossorigin="anonymous"></script>
+
 </head>
 <body>
 
@@ -76,13 +79,13 @@ header('location:../index.php');
                 </tr>
               </thead>";
 
-              date_default_timezone_set('Asia/Kathmandu');
+              date_default_timezone_set('Africa/Accra');
               //$current_date = date('Y-m-d h:i:s');
                  $current_date = date('Y-m-d h:i A');
                 $exp_date_time = explode(' ', $current_date);
                  $todays_date =  $exp_date_time['0'];
                      $qry="SELECT * FROM members WHERE status = 'Active'";
-                    $result=mysqli_query($conn,$qry);
+                    $result=mysqli_query($con,$qry);
                    $i=1;
                    $cnt = 1;
               
@@ -100,7 +103,7 @@ header('location:../index.php');
 
             <?php
                 $qry = "select * from attendance where curr_date = '$todays_date' AND user_id = '".$row['user_id']."'";
-                $res = $conn->query($qry);
+                $res = $con->query($qry);
                 $num_count  = mysqli_num_rows($res);
                 $row_exist = mysqli_fetch_array($res);
                 $curr_date = $row_exist['curr_date'] ?? "";

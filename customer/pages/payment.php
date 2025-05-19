@@ -59,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['make_payment'])) {
 <link href="../font-awesome/css/all.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="../css/jquery.gritter.css" />
 <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet'>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
@@ -173,6 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['make_payment'])) {
                 </thead>
                 <tbody>
                     <?php
+                    include('dbcon.php');
                     $history_query = "SELECT * FROM transactions 
                                      WHERE user_id = '$user_id' 
                                      ORDER BY payment_date DESC";

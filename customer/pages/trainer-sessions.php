@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 if(!isset($_SESSION['user_id'])){
@@ -51,7 +50,6 @@ if(!isset($_SESSION['user_id'])){
 include 'dbcon.php';
 
 // Get user's preferred workout plans
-// Get user's preferred workout plans
 $userPlans = [];
 $planQuery = mysqli_query($con, "SELECT preferred_workout_plan_1, preferred_workout_plan_2, preferred_workout_plan_3 
                                 FROM members_fitness 
@@ -65,12 +63,11 @@ if(mysqli_num_rows($planQuery) > 0) {
     ], function($value) { return !empty($value); });
 }
 
-// Get available trainers - modified to get ALL trainers if none assigned to plans
+// Get available trainers
 $trainers = [];
 if(!empty($userPlans)) {
     $planList = "'" . implode("','", $userPlans) . "'";
     
-    // First try to get trainers specialized in user's preferred plans
     $trainerQuery = mysqli_query($con, "SELECT DISTINCT s.user_id, s.fullname, t.specialization
                                        FROM staffs s
                                        JOIN trainers t ON s.user_id = t.trainer_id
@@ -79,7 +76,6 @@ if(!empty($userPlans)) {
     
     $trainers = mysqli_fetch_all($trainerQuery, MYSQLI_ASSOC);
     
-    // If no trainers found for specific plans, get ALL active trainers
     if(empty($trainers)) {
         $allTrainersQuery = mysqli_query($con, "SELECT s.user_id, s.fullname, t.specialization
                                               FROM staffs s
@@ -89,29 +85,81 @@ if(!empty($userPlans)) {
     }
 }
 
+// Handle session cancellation
+if(isset($_POST['cancel_session'])) {
+    $sessionId = mysqli_real_escape_string($con, $_POST['session_id']);
+    $userId = $_SESSION['user_id'];
+    
+    // Verify the session belongs to the user before cancelling
+    $verifyQuery = mysqli_query($con, "SELECT * FROM training_sessions WHERE session_id = '$sessionId' AND user_id = '$userId'");
+    
+    if(mysqli_num_rows($verifyQuery) > 0) {
+        $cancelQuery = "UPDATE training_sessions SET status = 'cancelled' WHERE session_id = '$sessionId'";
+        if(mysqli_query($con, $cancelQuery)) {
+            $success = "Session cancelled successfully!";
+            // Refresh the page to show updated status
+            header("Refresh:0");
+        } else {
+            $error = "Error cancelling session: " . mysqli_error($con);
+        }
+    } else {
+        $error = "You can only cancel your own sessions.";
+    }
+}
 
 // Handle session booking
 if(isset($_POST['book_session'])) {
     $trainerId = mysqli_real_escape_string($con, $_POST['trainer_id']);
     $planId = mysqli_real_escape_string($con, $_POST['plan_id']);
     $sessionDate = mysqli_real_escape_string($con, $_POST['session_date']);
+    $userId = $_SESSION['user_id'];
     
-    // Check if the trainer is available at the selected time
-    $checkAvailability = mysqli_query($con, "SELECT * FROM training_sessions 
-                                           WHERE trainer_id = '$trainerId' 
-                                           AND session_date = '$sessionDate'");
+    // Get workout duration in weeks
+    $durationQuery = mysqli_query($con, "SELECT duration_weeks FROM workout_plan WHERE table_id = '$planId'");
+    $durationData = mysqli_fetch_assoc($durationQuery);
+    $durationWeeks = $durationData['duration_weeks'] ?? 1; // Default to 1 week if not set
     
-    if(mysqli_num_rows($checkAvailability) > 0) {
-        $error = "The selected trainer is not available at that time. Please choose another time.";
-    } else {
-        $insertQuery = "INSERT INTO training_sessions (user_id, trainer_id, table_id, session_date, status) 
-                       VALUES ('".$_SESSION['user_id']."', '$trainerId', '$planId', '$sessionDate', 'scheduled')";
-        if(mysqli_query($con, $insertQuery)) {
-            $success = "Session booked successfully!";
-            // Refresh the page to show the new booking
-            header("Refresh:0");
+    // Calculate end date (session date + duration in weeks)
+    $endDate = date('Y-m-d H:i:s', strtotime($sessionDate . " + $durationWeeks weeks"));
+    
+    // Check for overlapping sessions for the user
+    $userOverlapCheck = mysqli_query($con, "SELECT * FROM training_sessions 
+                                          WHERE user_id = '$userId'
+                                          AND status != 'cancelled'
+                                          AND (
+                                              (session_date <= '$sessionDate' AND end_date >= '$sessionDate')
+                                              OR (session_date <= '$endDate' AND end_date >= '$endDate')
+                                              OR (session_date >= '$sessionDate' AND end_date <= '$endDate')
+                                          )");
+    
+    if(mysqli_num_rows($userOverlapCheck) > 0) {
+        $error = "You already have a session scheduled during this time period. Please choose another time.";
+    }
+    // Check for overlapping sessions for the trainer
+    else {
+        $trainerOverlapCheck = mysqli_query($con, "SELECT * FROM training_sessions 
+                                                 WHERE trainer_id = '$trainerId'
+                                                 AND status != 'cancelled'
+                                                 AND (
+                                                     (session_date <= '$sessionDate' AND end_date >= '$sessionDate')
+                                                     OR (session_date <= '$endDate' AND end_date >= '$endDate')
+                                                     OR (session_date >= '$sessionDate' AND end_date <= '$endDate')
+                                                 )");
+        
+        if(mysqli_num_rows($trainerOverlapCheck) > 0) {
+            $error = "The selected trainer is not available during this time. Please choose another time or trainer.";
         } else {
-            $error = "Error booking session: " . mysqli_error($con);
+            // Insert the new session with calculated end date
+            $insertQuery = "INSERT INTO training_sessions 
+                           (user_id, trainer_id, table_id, session_date, end_date, status) 
+                           VALUES ('$userId', '$trainerId', '$planId', '$sessionDate', '$endDate', 'scheduled')";
+            
+            if(mysqli_query($con, $insertQuery)) {
+                $success = "Session booked successfully! This is a $durationWeeks-week program ending on " . date('M j, Y', strtotime($endDate)) . ".";
+                header("Refresh:0");
+            } else {
+                $error = "Error booking session: " . mysqli_error($con);
+            }
         }
     }
 }
@@ -138,10 +186,13 @@ if(isset($_POST['book_session'])) {
                             <div class="controls">
                                 <select name="plan_id" required>
                                     <?php foreach($userPlans as $planId): 
-                                        $planInfo = mysqli_fetch_assoc(mysqli_query($con, "SELECT workout_name FROM workout_plan WHERE table_id = '$planId'"));
+                                        $planInfo = mysqli_fetch_assoc(mysqli_query($con, "SELECT workout_name, duration_weeks FROM workout_plan WHERE table_id = '$planId'"));
                                         if($planInfo) {
                                     ?>
-                                        <option value="<?php echo $planId; ?>"><?php echo $planInfo['workout_name']; ?></option>
+                                        <option value="<?php echo $planId; ?>">
+                                            <?php echo $planInfo['workout_name']; ?>
+                                            (<?php echo $planInfo['duration_weeks'] ?? 'N/A'; ?> weeks)
+                                        </option>
                                     <?php } endforeach; ?>
                                 </select>
                             </div>
@@ -168,6 +219,7 @@ if(isset($_POST['book_session'])) {
                             <label class="control-label">Session Date/Time:</label>
                             <div class="controls">
                                 <input type="datetime-local" name="session_date" min="<?php echo date('Y-m-d\TH:i'); ?>" required>
+                                <span class="help-block">Select the start date/time for your session</span>
                             </div>
                         </div>
                         
@@ -179,46 +231,48 @@ if(isset($_POST['book_session'])) {
                     <!-- Upcoming Sessions -->
                     <h4>Your Upcoming Sessions</h4>
                     <?php
-                    $sessionsQuery = mysqli_query($con, "SELECT ts.*, s.fullname as trainer_name, wp.workout_name 
+                    $sessionsQuery = mysqli_query($con, "SELECT ts.*, s.fullname as trainer_name, wp.workout_name, wp.duration_weeks
                                                          FROM training_sessions ts
                                                          JOIN staffs s ON ts.trainer_id = s.user_id
                                                          JOIN workout_plan wp ON ts.table_id = wp.table_id
                                                          WHERE ts.user_id = '".$_SESSION['user_id']."' 
                                                          AND ts.session_date >= NOW()
+                                                         AND ts.status != 'cancelled'
                                                          ORDER BY ts.session_date ASC");
                     if(mysqli_num_rows($sessionsQuery) > 0): ?>
-                        <table class="table table-bordered">
+                        <table class="table table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <th>Trainer</th>
                                     <th>Workout Plan</th>
-                                    <th>Date/Time</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Duration</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php while($session = mysqli_fetch_assoc($sessionsQuery)): ?>
+                                <?php while($session = mysqli_fetch_assoc($sessionsQuery)): 
+                                    $endDate = !empty($session['end_date']) ? $session['end_date'] : 
+                                        date('Y-m-d H:i:s', strtotime($session['session_date'] . " + " . ($session['duration_weeks'] ?? 1) . " weeks"));
+                                ?>
                                 <tr>
                                     <td><?php echo $session['trainer_name']; ?></td>
                                     <td><?php echo $session['workout_name']; ?></td>
                                     <td><?php echo date('M j, Y g:i A', strtotime($session['session_date'])); ?></td>
+                                    <td><?php echo date('M j, Y', strtotime($endDate)); ?></td>
+                                    <td><?php echo $session['duration_weeks'] ?? 'N/A'; ?> weeks</td>
                                     <td><?php echo ucfirst($session['status']); ?></td>
                                     <td>
                                         <?php if($session['status'] == 'scheduled'): ?>
-                                            <button type="button" class="btn btn-danger btn-mini" name="cancel_session" data-toggle="modal" data-target="#cancelModal" data-id="<?php echo $session['session_id']; ?>">Cancel 
-                                                <?php
-                                                // code to cancel the status by setting it to cancelled.
-                                                if(isset($_POST['cancel_session']) && $_POST['session_id'] == $session['session_id']) {
-                                                    $cancelQuery = "UPDATE training_sessions SET status = 'cancelled' WHERE session_id = '".$_POST['session_id']."'";
-                                                    if(mysqli_query($con, $cancelQuery)) {
-                                                        $success = "Session cancelled successfully.";
-                                                    } else {
-                                                        $error = "Error cancelling session: " . mysqli_error($con);
-                                                    }
-                                                }
-                                                ?>
-                                            </button>
+                                            <form method="post" style="margin:0;">
+                                                <input type="hidden" name="session_id" value="<?php echo $session['session_id']; ?>">
+                                                <button type="submit" name="cancel_session" class="btn btn-danger btn-mini" 
+                                                        onclick="return confirm('Are you sure you want to cancel this session?')">
+                                                    Cancel
+                                                </button>
+                                            </form>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -226,7 +280,42 @@ if(isset($_POST['book_session'])) {
                             </tbody>
                         </table>
                     <?php else: ?>
-                        <p>No upcoming sessions scheduled.</p>
+                        <div class="alert alert-info">No upcoming sessions scheduled.</div>
+                    <?php endif; ?>
+                    
+                    <!-- Cancelled Sessions -->
+                    <h4>Your Cancelled Sessions</h4>
+                    <?php
+                    $cancelledQuery = mysqli_query($con, "SELECT ts.*, s.fullname as trainer_name, wp.workout_name
+                                                         FROM training_sessions ts
+                                                         JOIN staffs s ON ts.trainer_id = s.user_id
+                                                         JOIN workout_plan wp ON ts.table_id = wp.table_id
+                                                         WHERE ts.user_id = '".$_SESSION['user_id']."' 
+                                                         AND ts.status = 'cancelled'
+                                                         ORDER BY ts.session_date DESC");
+                    if(mysqli_num_rows($cancelledQuery) > 0): ?>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Trainer</th>
+                                    <th>Workout Plan</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php while($cancelled = mysqli_fetch_assoc($cancelledQuery)): ?>
+                                <tr>
+                                    <td><?php echo $cancelled['trainer_name']; ?></td>
+                                    <td><?php echo $cancelled['workout_name']; ?></td>
+                                    <td><?php echo date('M j, Y g:i A', strtotime($cancelled['session_date'])); ?></td>
+                                    <td><?php echo ucfirst($cancelled['status']); ?></td>
+                                </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    <?php else: ?>
+                        <p>No cancelled sessions.</p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -269,7 +358,19 @@ if(isset($_POST['book_session'])) {
 <script src="../js/jquery.dataTables.min.js"></script> 
 <script src="../js/matrix.tables.js"></script> 
 
+<script>
+// Add confirmation for session cancellation
+$(document).ready(function() {
+    $('[name="cancel_session"]').click(function() {
+        return confirm('Are you sure you want to cancel this session?');
+    });
+    
+    // Set minimum datetime for session booking (current time)
+    var now = new Date();
+    var minDate = now.toISOString().slice(0,16);
+    $('[name="session_date"]').attr('min', minDate);
+});
+</script>
+
 </body>
 </html>
-
-

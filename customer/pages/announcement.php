@@ -20,6 +20,9 @@ header('location:../index.php');
 <link href="../font-awesome/css/font-awesome.css" rel="stylesheet" />
 <link rel="stylesheet" href="../css/jquery.gritter.css" />
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
+<link href="../font-awesome/css/font-awesome.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
 </head>
 <body>
 
@@ -55,33 +58,141 @@ header('location:../index.php');
     <div class="span12">
     <div class="widget-box">
           <div class="widget-title bg_ly" data-toggle="collapse" href="#collapseG2"><span class="icon"><i class="icon-chevron-down"></i></span>
-            <h5>Gym Announcement</h5>
-          </div>
-          <div class="widget-content nopadding collapse in" id="collapseG2">
-            <ul class="recent-posts">
-              <li>
-
-              <?php
-
-                include "dbcon.php";
-                $qry="select * from announcements";
-                  $result=mysqli_query($con,$qry);
-                  
-                while($row=mysqli_fetch_array($result)){
-                  echo"<div class='user-thumb'> <img width='50' height='50' alt='User' src='../img/demo/av2.jpg'> </div>";
-                  echo"<div class='article-post'>"; 
-                  echo"<span class='user-info'> By: System Administrator / Date: ".$row['date']." </span>";
-                  echo"<p><a href='#'>".$row['message']."</a> </p>";
-                 
+          <h5>Gym Announcements</h5>
+                    </div>
+                    <div class="widget-content nopadding collapse in" id="collapseAnnouncements">
+                        <ul class="recent-posts">
+                            <li>
+                            <?php
+              include "dbcon.php";
+              // Query to get announcements with sender information
+              $qry = "SELECT a.*, 
+                             COALESCE(s.designation, ad.role) AS sender_role,
+                             COALESCE(s.fullname, ad.name) AS sender_name
+                      FROM announcements a
+                      LEFT JOIN staffs s ON a.user_id = s.user_id
+                      LEFT JOIN admin ad ON a.user_id = ad.user_id
+                      ORDER BY a.date "; // Show only 5 latest announcements
+              
+              $result = mysqli_query($con, $qry);
+              
+              if (!$result) {
+                  die("Database query failed: " . mysqli_error($con));
+              }
+              
+              if (mysqli_num_rows($result) > 0) {
+                  while($row = mysqli_fetch_assoc($result)) {
+                      echo "<div class='article-post'>"; 
+                      
+                      // Get sender info safely
+                      $senderName = htmlspecialchars($row['sender_name'] ?? 'System Administrator', ENT_QUOTES, 'UTF-8');
+                      $senderRole = htmlspecialchars($row['sender_role'] ?? 'Administrator', ENT_QUOTES, 'UTF-8');
+                      $date = htmlspecialchars($row['date'], ENT_QUOTES, 'UTF-8');
+                      $message = htmlspecialchars($row['message'], ENT_QUOTES, 'UTF-8');
+                      
+                      // Determine icon based on role
+                      $icon = 'icon-user'; // default icon
+                      switch(strtolower($senderRole)) {
+                          case 'admin':
+                              $icon = 'icon-star';
+                              break;
+                          case 'trainer':
+                              $icon = 'icon-trophy';
+                              break;
+                          case 'cashier':
+                              $icon = 'icon-shopping-cart';
+                              break;
+                          case 'gym assistant':
+                              $icon = 'icon-heart';
+                              break;
+                          case 'manager':
+                              $icon = 'icon-briefcase';
+                              break;
+                      }
+                      
+                      // Display announcement with role-specific icon
+                      echo "<div class='user-info'>";
+                      echo "<i class='$icon'></i> "; // Role icon
+                      echo "By: $senderName ($senderRole) / Date: $date";
+                      echo "</div>";
+                      echo "<p>$message</p>";
+                      echo "</div>";
+                  }
+              } else {
+                  echo "<p>No announcements found.</p>";
+              }
+              
+              mysqli_close($con);
+            ?>       <?php
+            include "dbcon.php";
+            // Query to get announcements with sender information
+            $qry = "SELECT a.*, 
+                           COALESCE(s.designation, ad.role) AS sender_role,
+                           COALESCE(s.fullname, ad.name) AS sender_name
+                    FROM announcements a
+                    LEFT JOIN staffs s ON a.user_id = s.user_id
+                    LEFT JOIN admin ad ON a.user_id = ad.user_id
+                    ORDER BY a.date 
+                    "; // Show only 5 latest announcements
+            
+            $result = mysqli_query($con, $qry);
+            
+            if (!$result) {
+                die("Database query failed: " . mysqli_error($con));
+            }
+            
+            if (mysqli_num_rows($result) > 0) {
+                while($row = mysqli_fetch_assoc($result)) {
+                    echo "<div class='article-post'>"; 
+                    
+                    // Get sender info safely
+                    $senderName = htmlspecialchars($row['sender_name'] ?? 'System Administrator', ENT_QUOTES, 'UTF-8');
+                    $senderRole = htmlspecialchars($row['sender_role'] ?? 'Administrator', ENT_QUOTES, 'UTF-8');
+                    $date = htmlspecialchars($row['date'], ENT_QUOTES, 'UTF-8');
+                    $message = htmlspecialchars($row['message'], ENT_QUOTES, 'UTF-8');
+                    
+                    // Determine icon based on role
+                    $icon = 'icon-user'; // default icon
+                    switch(strtolower($senderRole)) {
+                        case 'admin':
+                            $icon = 'icon-star';
+                            break;
+                        case 'trainer':
+                            $icon = 'icon-trophy';
+                            break;
+                        case 'cashier':
+                            $icon = 'icon-shopping-cart';
+                            break;
+                        case 'gym assistant':
+                            $icon = 'icon-heart';
+                            break;
+                        case 'manager':
+                            $icon = 'icon-briefcase';
+                            break;
+                    }
+                    
+                    // Display announcement with role-specific icon
+                    // echo "<div class='user-info'>";
+                    // echo "<i class='$icon'></i> "; // Role icon
+                    // echo "By: $senderName ($senderRole) / Date: $date";
+                    // echo "</div>";
+                    // echo "<p>$message</p>";
+                    // echo "</div>";
                 }
-
-                echo"</div>";
-                echo"</li>";
-              ?>
-    
-              </li>
-            </ul>
-          </div>
+            } else {
+                echo "<p>No announcements found.</p>";
+            }
+            
+            mysqli_close($con);
+          ?>                                 
+                                <a href="index.php">
+                                    <button class="btn btn-success btn-mini">Back to Dashboard</button>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div> 
         </div>
       </div><!--end of span 12 -->
 	  

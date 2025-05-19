@@ -47,7 +47,7 @@ header('location:../index.php');
         include 'dbcon.php';
         $id=$_GET['id'];
         $qry= "select * from equipment where id='$id'";
-        $result=mysqli_query($conn,$qry);
+        $result=mysqli_query($con,$qry);
         while($row=mysqli_fetch_array($result)){
     ?> 
 

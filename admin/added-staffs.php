@@ -1,8 +1,7 @@
 <?php
 session_start();
-//the isset function to check username is already loged in and stored on the session
 if(!isset($_SESSION['user_id'])){
-header('location:../index.php');	
+    header('location:../index.php');    
 }
 ?>
  
@@ -19,6 +18,13 @@ header('location:../index.php');
 <link href="../font-awesome/css/fontawesome.css" rel="stylesheet" />
 <link href="../font-awesome/css/all.css" rel="stylesheet" />
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
+<!-- Add EmailJS SDK -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script type="text/javascript">
+    (function() {
+        emailjs.init("6W98kc4gPVLdCp2RV"); // Replace with your EmailJS user ID
+    })();
+</script>
 </head>
 <body>
 
@@ -31,9 +37,8 @@ header('location:../index.php');
 <!--top-Header-menu-->
 <?php include 'includes/topheader.php'?>
 
- 
 <!--sidebar-menu-->
-  <?php $page='staff-management'; include 'includes/sidebar.php'?>
+<?php $page='staff-management'; include 'includes/sidebar.php'?>
 <!--sidebar-menu-->
 <div id="content">
   <div id="content-header">
@@ -41,78 +46,85 @@ header('location:../index.php');
     <h1 class="text-center">GYM's Staff <i class="fas fa-users"></i></h1>
   </div>
   
-  <form role="form" action="index.php" method="POST">
-            <?php 
+  <form role="form" action="index.php" method="POST" id="staffForm">
+    <?php 
+    if(isset($_POST['fullname'])){
+        $fullname = $_POST["fullname"];    
+        $username = $_POST["username"];
+        $password = $_POST["password"];
+        $email = $_POST["email"];
+        $address = $_POST["address"];
+        $designation = $_POST["designation"];
+        $gender = $_POST["gender"];
+        $contact = $_POST["contact"];
 
-            if(isset($_POST['fullname'])){
-            $fullname = $_POST["fullname"];    
-            $username = $_POST["username"];
-            $password = $_POST["password"];
-            $email = $_POST["email"];
-            $address = $_POST["address"];
-            $designation = $_POST["designation"];
-            $gender = $_POST["gender"];
-            $contact = $_POST["contact"];
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-            // $password = md5($password);
-            $hashedPassword = password_hash($_POST['password'], PASSWORD_BCRYPT);
+        include 'dbcon.php';
+        $qry = "INSERT INTO staffs(fullname,username,password,email,address,designation,gender,contact) VALUES ('$fullname','$username','$hashedPassword','$email','$address','$designation','$gender','$contact')";
+        $result = mysqli_query($con,$qry);
 
-                    include 'dbcon.php';
-                    //code after connection is successfull
-                    $qry = "insert into staffs(fullname,username,password,email,address,designation,gender,contact) values ('$fullname','$username','$hashedPassword','$email','$address','$designation','$gender','$contact')";
-                    $result = mysqli_query($con,$qry); //query executes
-
-                    if(!$result){
-                    echo"<div class='container-fluid'>";
-                        echo"<div class='row-fluid'>";
-                        echo"<div class='span12'>";
-                        echo"<div class='widget-box'>";
-                        echo"<div class='widget-title'> <span class='icon'> <i class='fas fa-info'></i> </span>";
-                            echo"<h5>Error Message</h5>";
-                            echo"</div>";
-                            echo"<div class='widget-content'>";
-                                echo"<div class='error_ex'>";
-                                echo"<h1 style='color:maroon;'>Error 404</h1>";
-                                echo"<h3>Error occured while submitting your details</h3>";
-                                echo"<p>Please Try Again</p>";
-                                echo"<a class='btn btn-warning btn-big'  href='edit-member.php'>Go Back</a> </div>";
-                            echo"</div>";
-                            echo"</div>";
-                        echo"</div>";
-                        echo"</div>";
+        if(!$result){
+            echo"<div class='container-fluid'>";
+                echo"<div class='row-fluid'>";
+                echo"<div class='span12'>";
+                echo"<div class='widget-box'>";
+                echo"<div class='widget-title'> <span class='icon'> <i class='fas fa-info'></i> </span>";
+                    echo"<h5>Error Message</h5>";
                     echo"</div>";
-                    }else {
-
-                    echo"<div class='container-fluid'>";
-                        echo"<div class='row-fluid'>";
-                        echo"<div class='span12'>";
-                        echo"<div class='widget-box'>";
-                        echo"<div class='widget-title'> <span class='icon'> <i class='fas fa-info'></i> </span>";
-                            echo"<h5>Message</h5>";
-                            echo"</div>";
-                            echo"<div class='widget-content'>";
-                                echo"<div class='error_ex'>";
-                                echo"<h1>Success</h1>";
-                                echo"<h3>Staff details has been added!</h3>";
-                                echo"<p>The requested staff details are added to database. Please click the button to go back.</p>";
-                                echo"<a class='btn btn-inverse btn-big'  href='staffs.php'>Go Back</a> </div>";
-                            echo"</div>";
-                            echo"</div>";
-                        echo"</div>";
-                        echo"</div>";
+                    echo"<div class='widget-content'>";
+                        echo"<div class='error_ex'>";
+                        echo"<h1 style='color:maroon;'>Error 404</h1>";
+                        echo"<h3>Error occurred while submitting your details</h3>";
+                        echo"<p>Please Try Again</p>";
+                        echo"<a class='btn btn-warning btn-big'  href='edit-member.php'>Go Back</a> </div>";
                     echo"</div>";
+                    echo"</div>";
+                echo"</div>";
+                echo"</div>";
+            echo"</div>";
+        } else {
+            // Send email with credentials
+            echo "<script>
+                emailjs.send('service_csp86fr', 'template_3s06bzm', {
+                    to_email: '$email',
+                    fullname: '$fullname',
+                    username: '$username',
+                    password: '$password',
+                    designation: '$designation'
+                }).then(function(response) {
+                    console.log('Email sent successfully', response);
+                }, function(error) {
+                    console.log('Failed to send email', error);
+                });
+            </script>";
 
-                    }
-                    //  
-                    }else{
-                        echo"<h3>YOU ARE NOT AUTHORIZED TO REDIRECT THIS PAGE. GO BACK to <a href='index.php'> DASHBOARD </a></h3>";
-                    }
-?>                                    
-                                    </form>
-                                </div>
-</div></div>
-
+            echo"<div class='container-fluid'>";
+                echo"<div class='row-fluid'>";
+                echo"<div class='span12'>";
+                echo"<div class='widget-box'>";
+                echo"<div class='widget-title'> <span class='icon'> <i class='fas fa-info'></i> </span>";
+                    echo"<h5>Message</h5>";
+                    echo"</div>";
+                    echo"<div class='widget-content'>";
+                        echo"<div class='error_ex'>";
+                        echo"<h1>Success</h1>";
+                        echo"<h3>Staff details has been added!</h3>";
+                        echo"<p>The requested staff details are added to database. Login credentials have been sent to $email.</p>";
+                        echo"<a class='btn btn-inverse btn-big'  href='staffs.php'>Go Back</a> </div>";
+                    echo"</div>";
+                    echo"</div>";
+                echo"</div>";
+                echo"</div>";
+            echo"</div>";
+        }
+    } else {
+        echo"<h3>YOU ARE NOT AUTHORIZED TO REDIRECT THIS PAGE. GO BACK to <a href='index.php'> DASHBOARD </a></h3>";
+    }
+    ?>                                    
+  </form>
 </div>
+
 <!--Footer-part-->
 <div class="row-fluid">
   <div id="footer" class="span12"> <?php echo date("Y");?> &copy; Developed By Leslie Paul Ajayi</a> </div>

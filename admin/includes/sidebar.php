@@ -36,6 +36,7 @@
         <li class="<?php if($page=='chart'){ echo 'active'; }?>"><a href="reports.php"><i class="fas fa-arrow-right"></i> Chart Representation </a></li>
         <li class="<?php if($page=='member-repo'){ echo 'active'; }?>"><a href="members-report.php"><i class="fas fa-arrow-right"></i> Members Report</a></li>
         <li class="<?php if($page=='c-p-r'){ echo 'active'; }?>"><a href="progress-report.php"><i class="fas fa-arrow-right"></i> Customer Progress Report</a></li>
+        <li class="<?php if($page=='financials'){ echo 'active'; }?>"><a href="financial-report.php"><i class="fas fa-arrow-right"></i> Financial Report</a></li>
       </ul>
     </li>
 

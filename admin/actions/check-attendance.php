@@ -1,13 +1,12 @@
 <?php
-
 session_start();
-//the isset function to check username is already loged in and stored on the session
+
 if(!isset($_SESSION['user_id'])){
-header('location:../index.php');	
+  header('location:../index.php');	
 }
 
-include('../dbcon.php');
- date_default_timezone_set('Asia/Kathmandu');
+include('dbcon.php');
+ date_default_timezone_set('Africa/Accra');
  //$current_date = date('Y-m-d h:i:s');
     $current_date = date('Y-m-d h:i A');
    $exp_date_time = explode(' ', $current_date);
@@ -30,11 +29,11 @@ window.location="../attendance.php";
 </script>
 <?php
 }*/
- //else { 
+ //else {
 
 
-   $sql = "INSERT INTO attendance (user_id, curr_date,curr_time,present)
-   VALUES ('$user_id','$curr_date','$curr_time',1)";
+   $sql = "INSERT INTO attendance (user_id, curr_date,curr_time)
+   VALUES ('$user_id','$curr_date','$curr_time')";
 
 
  if ($con->query($sql) === TRUE) {
@@ -43,8 +42,8 @@ window.location="../attendance.php";
   $result_attend = $con->query($attend);
   $row_attend = mysqli_fetch_array($result_attend);
    $cnt = $row_attend['attendance_count'];
-    $attend_count = $attend_count + 1;
-     $sql1 = "UPDATE members SET attendance_count = attendance_count + '$attend_count' where user_id='$user_id'";
+$attend_count = $attend_count + 1;
+     $sql1 = "update members set attendance_count ='$attend_count' where user_id='$user_id'";
      $con->query($sql1) ;
 
    

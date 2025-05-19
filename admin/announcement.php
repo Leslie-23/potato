@@ -1,11 +1,12 @@
 <?php
 session_start();
-//the isset function to check username is already loged in and stored on the session
+// Check if the user is logged in
 if(!isset($_SESSION['user_id'])){
-header('location:../index.php');	
+    header('location:../index.php');	
+    exit(); // Make sure to exit after the redirect
 }
 ?>
- 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,79 +22,71 @@ header('location:../index.php');
 <link href="../font-awesome/css/all.css" rel="stylesheet" />
 <link rel="stylesheet" href="../css/jquery.gritter.css" />
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
+
 </head>
 <body>
 
-<!--Header-part-->
+<!-- Header-part -->
 <div id="header">
-  <h1><a href="dashboard.html">Perfect Gym Admin</a></h1>
+    <h1><a href="dashboard.html">Perfect Gym Admin</a></h1>
 </div>
-<!--close-Header-part--> 
+<!-- close-Header-part --> 
 
- 
-<!--top-Header-menu-->
-<?php include 'includes/topheader.php'?>
-<!--close-top-Header-menu-->
-<!--start-top-serch-->
-<!-- <div id="search">
-  <input type="hidden" placeholder="Search here..."/>
-  <button type="submit" class="tip-bottom" title="Search"><i class="icon-search icon-white"></i></button>
-</div> -->
-<!--close-top-serch-->
+<!-- top-Header-menu -->
+<?php include 'includes/topheader.php' ?>
+<!-- close-top-Header-menu -->
 
-<!--sidebar-menu-->
-  <?php $page='announcement'; include 'includes/sidebar.php'?>
-<!--sidebar-menu-->
+<!-- sidebar-menu -->
+<?php $page='announcement'; include 'includes/sidebar.php' ?>
+<!-- sidebar-menu -->
+
 <div id="content">
-<div id="content-header">
-  <div id="breadcrumb"> <a href="index.php" title="Go to Home" class="tip-bottom"><i class="fas fa-home"></i> Home</a><a href="announcement.php" class="current">Announcements</a> </div>
-  <h1>Announcement</h1>
-</div>
-<div class="container-fluid">
-  <hr>
-  <a href="manage-announcement.php"><button class="btn btn-danger" type="button">Manage Your Announcements</button></a>
-  <div class="row-fluid">
-    <div class="widget-box">
-      <div class="widget-title"> <span class="icon"> <i class="fas fa-align-justify"></i> </span>
-        <h5>Make Announcements</h5>
-      </div>
-      <div class="widget-content">
-        <div class="control-group">
-          <form action="post-announcement.php" method="POST">
-            <div class="controls">
-              <textarea class="span12" name="message" rows="6" placeholder="Enter text ..."></textarea>
-            </div>
-            <div class="controls">
-                <h5><label for="Announce Date">Applied Date: 
-              <input type="date" name="date"></h5> </label>
-            </div>
-            <div class="text-center">
-            <button type="submit" class="btn btn-info btn-large">Publish Now</button>
-            </div>
-          </form>
-        </div>
-      </div>
+    <div id="content-header">
+        <div id="breadcrumb"> <a href="index.php" title="Go to Home" class="tip-bottom"><i class="fas fa-home"></i> Home</a><a href="announcement.php" class="current">Announcements</a> </div>
+        <h1>Announcement</h1>
     </div>
-  </div>
+    <div class="container-fluid">
+        <hr>
+        <a href="manage-announcement.php"><button class="btn btn-danger" type="button">Manage Your Announcements</button></a>
+        <div class="row-fluid">
+            <div class="widget-box">
+                <div class="widget-title"> <span class="icon"> <i class="fas fa-align-justify"></i> </span>
+                    <h5>Make Announcements</h5>
+                </div>
+                <div class="widget-content">
+                    <div class="control-group">
+                        <form action="post-announcement.php" method="POST">
+                            <div class="controls">
+                                <textarea class="span12" name="message" rows="6" placeholder="Enter text ..."></textarea>
+                            </div>
+                            <div class="controls">
+                                <h5><label for="Announce Date">Applied Date: 
+                                <input type="date" name="date" id="announcementDate" min required></h5></label>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-info btn-large">Publish Now</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- end-main-container-part -->
 
-</div></div>
-
-
-<!--end-main-container-part-->
-
-<!--Footer-part-->
-
+<!-- Footer-part -->
 <div class="row-fluid">
-  <div id="footer" class="span12"> <?php echo date("Y");?> &copy; Developed By Leslie Paul Ajayi</a> </div>
+    <div id="footer" class="span12"><?php echo date("Y"); ?> &copy; Developed By Leslie Paul Ajayi</div>
 </div>
 
 <style>
 #footer {
-  color: white;
+    color: white;
 }
 </style>
-<!--end-Footer-part-->
+<!-- end-Footer-part -->
 
 <script src="../js/excanvas.min.js"></script> 
 <script src="../js/jquery.min.js"></script> 
@@ -116,31 +109,50 @@ header('location:../index.php');
 <script src="../js/bootstrap-wysihtml5.js"></script>
 
 <script type="text/javascript">
-  // This function is called from the pop-up menus to transfer to
-  // a different page. Ignore if the value returned is a null string:
-  function goPage (newURL) {
+    // This function is called from the pop-up menus to transfer to
+    // a different page. Ignore if the value returned is a null string:
+    function goPage(newURL) {
+        // if url is empty, skip the menu dividers and reset the menu selection to default
+        if (newURL != "") {
+            // if url is "-", it is this page -- reset the menu:
+            if (newURL == "-") {
+                resetMenu();            
+            } 
+            // else, send page to designated URL            
+            else {  
+                document.location.href = newURL;
+            }
+        }
+    }
 
-      // if url is empty, skip the menu dividers and reset the menu selection to default
-      if (newURL != "") {
-      
-          // if url is "-", it is this page -- reset the menu:
-          if (newURL == "-" ) {
-              resetMenu();            
-          } 
-          // else, send page to designated URL            
-          else {  
-            document.location.href = newURL;
-          }
-      }
-  }
-
-// resets the menu selection upon entry to this page:
-function resetMenu() {
-   document.gomenu.selector.selectedIndex = 2;
-}
+    // resets the menu selection upon entry to this page:
+    function resetMenu() {
+        document.gomenu.selector.selectedIndex = 2;
+    }
 </script>
+
 <script>
-	$('.textarea_editor').wysihtml5();
+    document.addEventListener('DOMContentLoaded', function() {
+        const announcementForm = document.querySelector('form[action="post-announcement.php"]');
+        const dateInput = document.querySelector('input[name="date"]');
+
+        // Set today's date for validation
+        const today = new Date();
+        const formattedToday = today.toISOString().split('T')[0]; // format to YYYY-MM-DD
+        dateInput.setAttribute('min', formattedToday); // Set the minimum date
+
+        announcementForm.addEventListener('submit', function(e) {
+            const selectedDate = new Date(dateInput.value);
+            today.setHours(0, 0, 0, 0); // Reset time part for accurate comparison
+            
+            if (selectedDate < today) {
+                e.preventDefault();
+                alert('Error: Announcement date cannot be in the past. Please select today or a future date.');
+                dateInput.focus();
+            }
+        });
+    });
 </script>
+
 </body>
 </html>

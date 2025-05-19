@@ -18,12 +18,17 @@ header('location:../index.php');
 <link rel="stylesheet" href="../css/select2.css" />
 <link rel="stylesheet" href="../css/matrix-style.css" />
 <link rel="stylesheet" href="../css/matrix-media.css" />
-<link href="../font-awesome/css/fontawesome.css" rel="stylesheet" />
-<link href="../font-awesome/css/all.css" rel="stylesheet" />
+<link rel="stylesheet" href="../css/font-awesome.css" rel="stylesheet"/>
+<link href="../font-awesome/css/font-awesome.css" rel="stylesheet" />
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
+<!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-IQsoLXlDZ+0rT6Azc+PstzlJ7Uq/NzvIuChnD9+jZWcyldj/4VSS9avFba2aYV0M" crossorigin="anonymous"> -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoDnUH/s0O9QjxkHgvrnKf2Z5W4wPcA4wCk5tczlF8NnKj+" crossorigin="anonymous"></script>
+<!-- Font Awesome Free (version 6) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
 </head>
 <body>
- 
+
 <!--Header-part-->
 <div id="header">
   <h1><a href="dashboard.html">Perfect Gym Admin</a></h1>
@@ -32,7 +37,8 @@ header('location:../index.php');
 
 
 <!--top-Header-menu-->
-<?php include 'includes/topheader.php'?>
+<?php include './includes/topheader.php'?>
+
 <!--close-top-Header-menu-->
 <!--start-top-serch-->
 <!-- <div id="search">
@@ -40,28 +46,32 @@ header('location:../index.php');
   <button type="submit" class="tip-bottom" title="Search"><i class="icon-search icon-white"></i></button>
 </div> -->
 <!--close-top-serch-->
- 
 <!--sidebar-menu-->
-<?php $page="attendance"; include 'includes/sidebar.php'?>
+<?php $page="attendance"; include './includes/sidebar.php'?>
 <!--sidebar-menu-->
 
 <div id="content">
   <div id="content-header">
-    <div id="breadcrumb"> <a href="index.php" title="Go to Home" class="tip-bottom"><i class="fas fa-home"></i> Home</a> <a href="attendance.php" class="current">Manage Attendance</a> </div>
-    <h1 class="text-center">Attendance List <i class="fas fa-calendar"></i></h1>
+    <div id="breadcrumb"> <a href="index.php" title="Go to Home" class="tip-bottom"><i class="icon-home"></i> Home</a> <a href="attendance.php" class="current">Manage Attendance</a> </div>
+    <h1 class="text-center">Attendance List <i class="icon icon-calendar"></i></h1>
   </div>
   <div class="container-fluid">
     <div class="row-fluid">
       <div class="span12">
 
       <div class='widget-box'>
-          <div class='widget-title'> <span class='icon'> <i class='fas fa-th'></i> </span>
+          <div class='widget-title'> <span class='icon'> <i class='icon-th'></i> </span>
             <h5>Attendance Table</h5>
           </div>
-          <div class='widget-content nopadding'> 
+          <div class='widget-content nopadding'>
+	  
+	  <?php
+
+      include "dbcon.php";
+     
 
         
-          <table class='table table-bordered table-hover'>
+          echo"<table class='table table-bordered'>
               <thead>
                 <tr>
                   <th>#</th>
@@ -70,18 +80,18 @@ header('location:../index.php');
                   <th>Choosen Service</th>
                   <th>Action</th>
                 </tr>
-              </thead>
+              </thead>";
 
-             <?php include "dbcon.php";
-              date_default_timezone_set('Asia/Kathmandu');
+              date_default_timezone_set('Africa/Accra');
               //$current_date = date('Y-m-d h:i:s');
                  $current_date = date('Y-m-d h:i A');
                 $exp_date_time = explode(' ', $current_date);
                  $todays_date =  $exp_date_time['0'];
                      $qry="SELECT * FROM members WHERE status = 'Active'";
-                    $result=mysqli_query($conn,$qry);
+                    $result=mysqli_query($con,$qry);
                    $i=1;
-              $cnt = 1;
+                   $cnt = 1;
+              
             while($row=mysqli_fetch_array($result)){ ?>
             
            <tbody> 
@@ -92,40 +102,40 @@ header('location:../index.php');
                 <td><div class='text-center'><?php echo $row['services']; ?></div></td>
 
                 <!-- <span>count</span><br>CHECK IN</td> -->
-                <input type="hidden" name="user_id" value="<?php echo $row['id'];?>">
+                <input type="hidden" name="user_id" value="<?php echo $row['user_id'];?>">
 
             <?php
-                $qry = "SELECT * FROM attendance WHERE curr_date = '$todays_date' AND user_id = '".$row['user_id']."'";
-                $res = $conn->query($qry);
+                $qry = "select * from attendance where curr_date = '$todays_date' AND user_id = '".$row['user_id']."'";
+                $res = $con->query($qry);
                 $num_count  = mysqli_num_rows($res);
                 $row_exist = mysqli_fetch_array($res);
-                $curr_date = $row_exist['curr_date'];
+                $curr_date = $row_exist['curr_date'] ?? "";
                 if($curr_date == $todays_date){
   
-              ?>
-                <td>
-                <div class='text-center'><span class="label label-inverse"><?php echo $row_exist['curr_date'];?>  <?php echo $row_exist['curr_time'];?></span></div>
-                <div class='text-center'><a href='actions/delete-attendance.php?id=<?php echo $row['user_id'];?>'><button class='btn btn-danger'>Check Out <i class='fas fa-clock'></i></button> </a></div>
+    ?>
+                <td><div class='text-center'><span class="label label-inverse"><?php echo $row_exist['curr_date'];?>  <?php echo $row_exist['curr_time'];?></span></div>
+                <div class='text-center'><a href='actions/delete-attendance.php?id=<?php echo $row['user_id'];?>'><button class='btn btn-danger'>Check Out <i class='icon icon-time'></i></button> </a></div>
                 </td>
 
-            <?php } else {
-                
-                ?>
+              <?php } else {
+                  
+                  ?>
 
-                <td><div class='text-center'><a href='actions/check-attendance.php?id=<?php echo $row['user_id'];?>'><button class='btn btn-info'>Check In <i class='fas fa-map-marker-alt'></i></button> </a></div></td>
+                <td><div class='text-center'><a href='actions/check-attendance.php?id=<?php echo $row['user_id'];?>'><button class='btn btn-info'>Check In <i class='icon icon-map-marker'></i></button> </a></div></td>
              
-                <?php }
-              ?>      
+                <?php $cnt++; }
+
+              ?>
+
               </tbody>
-           <?php $cnt++; } ?>
+
+           <?php } ?>
            
 
             </table>
           </div>
         </div>
-   
-		
-	
+
       </div>
     </div>
   </div>

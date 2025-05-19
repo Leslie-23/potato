@@ -15,6 +15,7 @@ include('dbcon.php');
     <link rel="stylesheet" href="../css/matrix-media.css" />
     <link href="../font-awesome/css/font-awesome.css" rel="stylesheet" />
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
@@ -26,7 +27,7 @@ include('dbcon.php');
         <div class="control-group">
             <div class="controls">
                 <div class="main_input_box">
-                    <span class="add-on bg_lg"><i class="icon-user"> </i></span>
+                    <span class="add-on bg_lg"><i class="fas fa-user"> </i></span>
                     <input type="text" name="username" placeholder="Username" required/>
                 </div>
             </div>
@@ -35,7 +36,7 @@ include('dbcon.php');
         <div class="control-group">
             <div class="controls">
                 <div class="main_input_box">
-                    <span class="add-on bg_ly"><i class="icon-lock"></i></span>
+                    <span class="add-on bg_ly"><i class="fas fa-lock"></i></span>
                     <input type="password" name="password" placeholder="Password" required/>
                 </div>
             </div>

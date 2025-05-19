@@ -37,7 +37,7 @@ include('dbcon.php'); ?>
                 <div class="form-actions center">
                     <!-- <span class="pull-right"><a type="submit" href="index.html" class="btn btn-success" /> Login</a></span> -->
                     <!-- <input type="submit" class="button" title="Log In" name="login" value="Admin Login"></input> -->
-                    <button type="submit" class="btn btn-block btn-large btn-warning" title="Log In" name="login" value="Admin Login">Staff Login</button>
+                    <button type="submit" class="btn btn-block btn-large btn-warning" title="Log In" name="login" value="Admin Login">Trainer Login</button>
                 </div>
             </form>
             <?php

@@ -1,5 +1,5 @@
 <?php
-$conn = mysqli_connect("localhost","new_user","new_password","elitefit-23");
+$con = mysqli_connect("localhost","new_user","new_password","elitefit-23");
 
 // Check connection
 if (mysqli_connect_errno())

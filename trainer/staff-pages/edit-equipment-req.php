@@ -69,7 +69,7 @@ header('location:../index.php');
             //code after connection is successfull
             //update query
             $qry = "update equipment set name='$name', amount='$amount',vendor='$vendor', description='$description', address='$address', address='$address', contact='$contact', date='$date', quantity='$quantity' where id='$id'";
-            $result = mysqli_query($conn,$qry); //query executes
+            $result = mysqli_query($con,$qry); //query executes
 
             if(!$result){
                 echo"<div class='container-fluid'>";

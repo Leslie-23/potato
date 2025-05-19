@@ -68,7 +68,7 @@ header('location:../index.php');
             $amountpayable = $amount * $plan;
             
             include 'dbcon.php';
-            date_default_timezone_set('Asia/Kathmandu');
+            date_default_timezone_set('Africa/Accra');
             //$current_date = date('Y-m-d h:i:s');
                 $current_date = date('Y-m-d h:i A');
                 $exp_date_time = explode(' ', $current_date);

@@ -56,7 +56,7 @@ header('location:../index.php');
     <div class="span12">
         <div class="widget-box">
           <div class="widget-title"> <span class="icon"> <i class="icon-pencil"></i> </span>
-            <h5>To-Do Lists</h5>
+            <h5>My Personal To-Do Lists</h5>
           </div>
           <div class="widget-content nopadding">
             <form id="form-wizard" class="form-horizontal" action="add-to-do.php" method="POST">

@@ -67,21 +67,31 @@
     <div class="container-fluid">
         <div class="quick-actions_homepage">
             <ul class="quick-actions">
-                <li class="bg_ls span"> 
+                <li class="bg_ls span2"> 
                     <a href="workout-me.php" style="font-size: 16px;"> 
-                        <i class="fas fa-dumbbell"></i> Workouts 
+                        <i class="fas fa-dumbbell"></i> <br/>Workouts 
                     </a> 
                 </li>
                 <li class="bg_lg span2"> 
                     <a href="payment.php" style="font-size: 16px;"> 
-                        <i class="fas fa-dollar-sign"></i> Payments 
+                        <i class="fas fa-dollar-sign"></i> <br/> Payments 
                     </a> 
                 </li>
-                <li class="bg_lb span2"> 
+                <li class="bg_ls span2"> 
                     <a href="announcement.php" style="font-size: 16px;"> 
-                        <i class="fas fa-bullhorn"></i> Announcements 
+                        <i class="fas fa-bullhorn"></i> <br/>Announcements 
                     </a> 
                 </li>
+                <li class="bg_lg span2"> 
+                    <a href="my-report.php" style="font-size: 16px;"> 
+                        <i class="fas fa-file"></i> <br/>Reports 
+                    </a> 
+                </li>
+                <!-- <li class="bg_lb span2"> 
+                    <a href="my-report.php" style="font-size: 16px;"> 
+                        <i class="fas fa-file"></i> Reports 
+                    </a> 
+                </li> -->
             </ul>
         </div>
     <!-- End Quick Action Boxes -->    
@@ -133,9 +143,13 @@
                             }
                         ?>
                         </table>
+                        
                     </div>
-                </div>
-            </div> 
+              
+            </div>
+            
+        </div>
+                            
             <!-- End To-Do List Section -->
             
             <!-- Workout and Fitness Stats Section -->
@@ -222,7 +236,7 @@ $age = $today->diff($dob)->y;
                                 <div class="article-post">
                                     <h4>Your Fitness Summary</h4>
                                     <div class="progress progress-striped active" style="display: none"; id="loadingProgress">
-                                        <div class="bar" style="width: 80%;" ></div>
+                                        <div class="bar" style="width: 80%; height: 20%;" ></div>
                                     </div>
                                     <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -241,6 +255,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             width += 10;
             barInner.style.width = width + '%';
+            barInner.style.height = '20%';
         }
     }, 300); // Adjust speed as needed
     
@@ -311,7 +326,84 @@ document.addEventListener('DOMContentLoaded', function() {
             </div> 
             <!-- End Workout and Fitness Stats Section -->
         </div>
-        
+        <!-- Upcoming Sessions Section -->
+<div class="span12 m0">
+    <div class="widget-box m0">
+        <div class="widget-title bg_ly" data-toggle="collapse" href="#collapseSessions">
+            <span class="icon"><i class="fas fa-chevron-down"></i></span>
+            <h5>Your Upcoming Sessions</h5>
+        </div>
+        <div class="widget-content nopadding collapse in" id="collapseSessions">
+            <?php
+                $sessionsQuery = mysqli_query($con, "SELECT ts.*, s.fullname as trainer_name, wp.workout_name, wp.duration_weeks
+                                                    FROM training_sessions ts
+                                                    JOIN staffs s ON ts.trainer_id = s.user_id
+                                                    JOIN workout_plan wp ON ts.table_id = wp.table_id
+                                                    WHERE ts.user_id = '".$_SESSION['user_id']."' 
+                                                    AND ts.session_date >= NOW()
+                                                    AND ts.status != 'cancelled'
+                                                    ORDER BY ts.session_date ASC");
+                
+                if(mysqli_num_rows($sessionsQuery) > 0): 
+            ?>
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr class="success">
+                            <th>#</th>
+                            <th>Trainer</th>
+                            <th>Workout Plan</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        $counter = 1;
+                        while($session = mysqli_fetch_assoc($sessionsQuery)): 
+                            $endDate = !empty($session['end_date']) ? $session['end_date'] : 
+                                date('Y-m-d H:i:s', strtotime($session['session_date'] . " + " . ($session['duration_weeks'] ?? 1) . " weeks"));
+                        ?>
+                        <tr>
+                            <td><?php echo $counter++; ?></td>
+                            <td><?php echo $session['trainer_name']; ?></td>
+                            <td><?php echo $session['workout_name']; ?></td>
+                            <td><?php echo date('M j, Y g:i A', strtotime($session['session_date'])); ?></td>
+                            <td><?php echo date('M j, Y', strtotime($endDate)); ?></td>
+                            <td><?php echo $session['duration_weeks'] ?? 'N/A'; ?> weeks</td>
+                            <td>
+                                <span class="badge badge-<?php 
+                                    echo ($session['status'] == 'scheduled') ? 'success' : 
+                                         (($session['status'] == 'completed') ? 'primary' : 'warning'); 
+                                ?>">
+                                    <?php echo ucfirst($session['status']); ?>
+                                </span>
+                            </td>
+                        </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+                <div class="widget-footer">
+                    <a href="trainer-sessions.php" class="btn btn-success btn-small">
+                        <i class="fas fa-calendar-alt"></i> View All Sessions
+                    </a>
+                    <a href="trainer-sessions.php" class="btn btn-info btn-small">
+                        <i class="fas fa-plus"></i> Book New Session
+                    </a>
+                </div>
+            <?php else: ?>
+                <div class="alert alert-info" style="margin: 10px;">
+                    <i class="fas fa-info-circle"></i> No upcoming sessions scheduled.
+                    <a href="book-session.php" class="btn btn-small btn-primary" style="margin-left: 10px;">
+                        <i class="fas fa-plus"></i> Book a Session
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+<!-- End Upcoming Sessions Section -->
         <!-- Announcements Section -->
         <div class="row-fluid">
             <div class="span12">
@@ -323,45 +415,130 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="widget-content nopadding collapse in" id="collapseAnnouncements">
                         <ul class="recent-posts">
                             <li>
-                                <?php
-                                    include "dbcon.php";
-                                    // Query to get announcements with sender information
-                                    $qry = "SELECT a.*, 
-                                                   COALESCE(s.designation, ad.role) AS sender_role,
-                                                   COALESCE(s.fullname, ad.name) AS sender_name
-                                            FROM announcements a
-                                            LEFT JOIN staffs s ON a.id = s.user_id
-                                            LEFT JOIN admin ad ON a.id = ad.user_id
-                                            ORDER BY a.date DESC
-                                            LIMIT 5"; // Show only 5 latest announcements
-                                    
-                                    $result = mysqli_query($con, $qry);
-                                    
-                                    if (!$result) {
-                                        die("Database query failed: " . mysqli_error($con));
-                                    }
-                                    
-                                    if (mysqli_num_rows($result) > 0) {
-                                        while($row = mysqli_fetch_assoc($result)) {
-                                            
-                                            echo "<div class='article-post'>"; 
-                                            
-                                            // Display sender information safely
-                                            $senderName = htmlspecialchars($row['sender_name'] ?? 'System Administrator', ENT_QUOTES, 'UTF-8');
-                                            $senderRole = htmlspecialchars($row['sender_role'] ?? 'Administrator', ENT_QUOTES, 'UTF-8');
-                                            $date = htmlspecialchars($row['date'], ENT_QUOTES, 'UTF-8');
-                                            $message = htmlspecialchars($row['message'], ENT_QUOTES, 'UTF-8');
-                                            
-                                            echo "<span class='user-info'> By: $senderName ($senderRole) / Date: $date </span>";
-                                            echo "<p><a href='#'>$message</a></p>";
-                                            echo "</div>";
-                                        }
-                                    } else {
-                                        echo "<p>No announcements found.</p>";
-                                    }
-                                    
-                                    mysqli_close($con);
-                                ?>                               
+                            <?php
+              include "dbcon.php";
+              // Query to get announcements with sender information
+              $qry = "SELECT a.*, 
+                             COALESCE(s.designation, ad.role) AS sender_role,
+                             COALESCE(s.fullname, ad.name) AS sender_name
+                      FROM announcements a
+                      LEFT JOIN staffs s ON a.user_id = s.user_id
+                      LEFT JOIN admin ad ON a.user_id = ad.user_id
+                      ORDER BY a.date 
+                      DESC LIMIT 5"; // Show only 5 latest announcements
+              
+              $result = mysqli_query($con, $qry);
+              
+              if (!$result) {
+                  die("Database query failed: " . mysqli_error($con));
+              }
+              
+              if (mysqli_num_rows($result) > 0) {
+                  while($row = mysqli_fetch_assoc($result)) {
+                      echo "<div class='article-post'>"; 
+                      
+                      // Get sender info safely
+                      $senderName = htmlspecialchars($row['sender_name'] ?? 'System Administrator', ENT_QUOTES, 'UTF-8');
+                      $senderRole = htmlspecialchars($row['sender_role'] ?? 'Administrator', ENT_QUOTES, 'UTF-8');
+                      $date = htmlspecialchars($row['date'], ENT_QUOTES, 'UTF-8');
+                      $message = htmlspecialchars($row['message'], ENT_QUOTES, 'UTF-8');
+                      
+                      // Determine icon based on role
+                      $icon = 'icon-user'; // default icon
+                      switch(strtolower($senderRole)) {
+                          case 'admin':
+                              $icon = 'fas fa-star';
+                              break;
+                          case 'trainer':
+                              $icon = 'fas fa-trophy';
+                              break;
+                          case 'cashier':
+                              $icon = 'fas fa-shopping-cart';
+                              break;
+                          case 'gym assistant':
+                              $icon = 'fas fa-heart';
+                              break;
+                          case 'manager':
+                              $icon = 'fas fa-briefcase';
+                              break;
+                      }
+                      
+                      // Display announcement with role-specific icon
+                      echo "<div class='user-info'>";
+                      echo "<i class='$icon'></i> "; // Role icon
+                      echo "By: $senderName ($senderRole) / Date: $date";
+                      echo "</div>";
+                      echo "<p>$message</p>";
+                      echo "</div>";
+                  }
+              } else {
+                  echo "<p>No announcements found.</p>";
+              }
+              
+              mysqli_close($con);
+            ?>       <?php
+            include "dbcon.php";
+            // Query to get announcements with sender information
+            $qry = "SELECT a.*, 
+                           COALESCE(s.designation, ad.role) AS sender_role,
+                           COALESCE(s.fullname, ad.name) AS sender_name
+                    FROM announcements a
+                    LEFT JOIN staffs s ON a.user_id = s.user_id
+                    LEFT JOIN admin ad ON a.user_id = ad.user_id
+                    ORDER BY a.date 
+                    DESC LIMIT 5
+                    "; // Show only 5 latest announcements
+            
+            $result = mysqli_query($con, $qry);
+            
+            if (!$result) {
+                die("Database query failed: " . mysqli_error($con));
+            }
+            
+            if (mysqli_num_rows($result) > 0) {
+                while($row = mysqli_fetch_assoc($result)) {
+                    echo "<div class='article-post'>"; 
+                    
+                    // Get sender info safely
+                    $senderName = htmlspecialchars($row['sender_name'] ?? 'System Administrator', ENT_QUOTES, 'UTF-8');
+                    $senderRole = htmlspecialchars($row['sender_role'] ?? 'Administrator', ENT_QUOTES, 'UTF-8');
+                    $date = htmlspecialchars($row['date'], ENT_QUOTES, 'UTF-8');
+                    $message = htmlspecialchars($row['message'], ENT_QUOTES, 'UTF-8');
+                    
+                    // Determine icon based on role
+                    $icon = 'icon-user'; // default icon
+                    switch(strtolower($senderRole)) {
+                        case 'admin':
+                            $icon = 'fas fa-star';
+                            break;
+                        case 'trainer':
+                            $icon = 'fas fa-trophy';
+                            break;
+                        case 'cashier':
+                            $icon = 'fas fa-shopping-cart';
+                            break;
+                        case 'gym assistant':
+                            $icon = 'fas fa-heart';
+                            break;
+                        case 'manager':
+                            $icon = 'fas fa-briefcase';
+                            break;
+                    }
+                    
+                    // Display announcement with role-specific icon
+                    // echo "<div class='user-info'>";
+                    // echo "<i class='$icon'></i> "; // Role icon
+                    // echo "By: $senderName ($senderRole) / Date: $date";
+                    // echo "</div>";
+                    // echo "<p>$message</p>";
+                    // echo "</div>";
+                }
+            } else {
+                echo "<p>No announcements found.</p>";
+            }
+            
+            mysqli_close($con);
+          ?>                                   
                                 <a href="announcement.php">
                                     <button class="btn btn-warning btn-mini">View All Announcements</button>
                                 </a>

@@ -1,8 +1,22 @@
 <?php
+include 'dbcon.php';
 session_start();
 //the isset function to check username is already loged in and stored on the session
 if(!isset($_SESSION['user_id'])){
 header('location:../index.php');	
+}
+
+include 'dbcon.php'; // Make sure this includes your database connection
+
+$trainer_id = $_SESSION['user_id'];
+$qry = "SELECT id, name, status, description, vendor 
+        FROM equipment 
+        WHERE trainer_id = '$trainer_id'";
+$result = mysqli_query($con, $qry);
+
+// Check if query was successful
+if(!$result) {
+    die("Database query failed: " . mysqli_error($con));
 }
 ?>
 
@@ -72,8 +86,9 @@ header('location:../index.php');
     <div class="widget-box widget-plain">
       <div class="center">
         <ul class="stat-boxes2">
-          <li>
-            <div class="left peity_bar_neutral"><span><span style="display: none;">2,4,9,7,12,10,12</span>
+          <!-- <li>
+            <div class="left peity_bar_neutral"><span>
+              <span style="display: none;">2,4,20,7,12,10,12</span>
               <canvas width="60" height="24"></canvas>
               </span>+10%</div>
             <div class="right"> <strong><?php include 'dashboard-usercount.php' ?></strong> Registered </div>
@@ -83,11 +98,11 @@ header('location:../index.php');
               <canvas width="60" height="24"></canvas>
               </span>17.8%</div>
             <div class="right"> <strong>$<?php include 'income-count.php' ?></strong> Total Earnings </div>
-          </li>
+          </li> -->
           <li>
-            <div class="left peity_bar_bad"><span><span style="display: none;">3,5,6,16,8,10,6</span>
+            <div class="left peity_bar_bad"><span><span style="display: none;">2,4,6,8,10,12</span>
               <canvas width="60" height="24"></canvas>
-              </span>-40%</div>
+              </span>+40%</div>
             <div class="right"> <strong><?php include 'actions/count-trainers.php' ?></strong> Active Trainers</div>
           </li>
           <li>
@@ -104,7 +119,134 @@ header('location:../index.php');
       </div>
     </div>
     </div><!-- End of row-fluid -->
+
+  <?php
+// session_start();
+
+// Assuming you have determined the trainer ID from the session
+$trainer_id = $_SESSION['user_id']; // Replace with the actual trainer ID
+
+// Database connection
+include "dbcon.php";
+
+// Handle form submission to update session status
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_status'])) {
+    $session_id = $_POST['session_id']; // Get the session ID
+    $new_status = $_POST['status']; // Get the selected status
+    
+    // SQL query to update the session status
+    $updateQuery = "UPDATE training_sessions SET status = '$new_status' WHERE user_id = '$session_id' AND trainer_id = '$trainer_id'";
+    mysqli_query($con, $updateQuery);
+}
+
+// SQL query to fetch trainees
+$qry = "SELECT m.user_id, m.fullname, m.username, m.status, 
+               ts.session_id, ts.session_date, ts.status AS session_status, 
+               ts.notes
+        FROM members m
+        JOIN training_sessions ts ON m.user_id = ts.user_id
+        WHERE ts.trainer_id = '$trainer_id'";
+        
+$result = mysqli_query($con, $qry);
+
+// Display results
+if (mysqli_num_rows($result) > 0) {
+    echo "<table class='table table-bordered'>";
+    echo "<thead><tr><th>User ID</th><th>Full Name</th><th>Username</th><th>Status</th><th>Session Date</th><th>Session Status</th><th>Notes</th><th>Action</th></tr></thead><tbody>";
+    
+    while ($row = mysqli_fetch_assoc($result)) {
+        echo "<tr>
+                <td>" . $row['user_id'] . "</td>
+                <td>" . $row['fullname'] . "</td>
+                <td>" . $row['username'] . "</td>
+                <td>" . $row['status'] . "</td>
+                <td>" . $row['session_date'] . "</td>
+                <td>" . $row['session_status'] . "</td>
+                <td>" . $row['notes'] . "</td>
+                <td>
+                    <form method='POST' action=''>
+                        <input type='hidden' name='session_id' value='" . $row['user_id'] . "'>
+                        <select name='status' required>
+                            <option value=''>Select Status</option>
+                            <option value='Completed'>Completed</option>
+                            <option value='Missed'>Missed</option>
+                            <option value='Cancelled'>Cancelled</option>
+                        </select>
+                        <button type='submit' name='update_status' class='btn btn-primary'>Update</button>
+                    </form>
+                </td>
+              </tr>";
+    }
+    echo "</tbody></table>";
+} else {
+    echo "No trainees found.";
+}
+
+// Close connection
+mysqli_close($con);
+?>
 	
+<div class="widget-box">
+    <div class="widget-title">
+        <span class="icon"><i class="icon-cogs"></i></span>
+        <h5>Equipment Status</h5>
+    </div>
+    <div class="widget-content">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Equipment ID</th>
+                    <th>Equipment Name</th>
+                    <th>Description</th>
+                    <th>Vendor/Brand</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php 
+                if(mysqli_num_rows($result) > 0) {
+                    while($row = mysqli_fetch_assoc($result)) { 
+                        // Sanitize output
+                        $id = htmlspecialchars($row['id']);
+                        $name = htmlspecialchars($row['name']);
+                        $description = htmlspecialchars($row['description']);
+                        $vendor = htmlspecialchars($row['vendor']);
+                        $status = htmlspecialchars($row['status']);
+                        
+                        // Determine badge class based on status
+                        $badge_class = 'badge-danger'; // default
+                        if($status == 'good') {
+                            $badge_class = 'badge-success';
+                        } elseif($status == 'out_of_order') {
+                            $badge_class = 'badge-warning';
+                        } elseif($status == 'maintenance') {
+                            $badge_class = 'badge-info';
+                        }
+                        ?>
+                        <tr>
+                            <td><?php echo $id; ?></td>
+                            <td><?php echo $name; ?></td>
+                            <td><?php echo $description; ?></td>
+                            <td><?php echo $vendor; ?></td>
+                            <td>
+                                <span class="badge <?php echo $badge_class; ?>">
+                                    <?php echo ucwords(str_replace('_', ' ', $status)); ?>
+                                </span>
+                            </td>
+                        </tr>
+                    <?php 
+                    }
+                } else { ?>
+                    <tr>
+                        <td colspan="5" class="text-center">No equipment assigned to you</td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- </div> -->
 <!--End-Chart-box--> 
     <hr/>
     <div class="row-fluid">
@@ -121,7 +263,7 @@ header('location:../index.php');
 
                 include "dbcon.php";
                 $qry="select * from announcements";
-                  $result=mysqli_query($conn,$qry);
+                  $result=mysqli_query($con,$qry);
                   
                 while($row=mysqli_fetch_array($result)){
                   echo"<div class='user-thumb'> <img width='70' height='40' alt='User' src='../img/demo/av1.jpg'> </div>";
@@ -156,7 +298,7 @@ header('location:../index.php');
 
                 include "dbcon.php";
                 $qry="SELECT * FROM todo";
-                $result=mysqli_query($conn,$qry);
+                $result=mysqli_query($con,$qry);
 
                 while($row=mysqli_fetch_array($result)){ ?>
 

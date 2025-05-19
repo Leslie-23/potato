@@ -12,6 +12,20 @@ $user_id = $_GET['id'];
 
 
 $sql = "DELETE FROM attendance WHERE user_id='".$_GET["id"]."'";
+// $sql = "UPDATE attendance 
+//         SET status = 'absent', 
+//             check_in = NULL,
+//             check_out = NULL,
+//             duration = NULL
+//         WHERE user_id = '$user_id' 
+//         AND curr_date = CURDATE()
+//         AND status = 'present'";
+
+if($con->query($sql)) {
+    $_SESSION['message'] = "Attendance status updated to absent";
+} else {
+    $_SESSION['error'] = "Error updating attendance: " . $con->error;
+}
 $res = $con->query($sql) ;
 
 

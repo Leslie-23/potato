@@ -12,7 +12,7 @@ include 'dbcon.php';
 
 
 $qry="UPDATE members SET reminder = '1' where user_id=$id";
-$result=mysqli_query($conn,$qry);
+$result=mysqli_query($con,$qry);
 
 if($result){
     echo '<script>alert("Notification sent to selected customer!")</script>';

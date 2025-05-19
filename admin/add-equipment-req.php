@@ -68,7 +68,7 @@ $totalamount = $amount * $quantity;
 include 'dbcon.php';
 //code after connection is successfull
 $qry = "insert into equipment(name,description,amount,vendor,address,contact,date,quantity) values ('$name','$description','$totalamount','$vendor','$address','$contact','$date','$quantity')";
-$result = mysqli_query($conn,$qry); //query executes
+$result = mysqli_query($con,$qry); //query executes
 
 if(!$result){
   echo"<div class='container-fluid'>";

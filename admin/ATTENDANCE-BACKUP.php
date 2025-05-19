@@ -77,13 +77,13 @@ header('location:../index.php');
                 </tr>
               </thead>";
 
-              date_default_timezone_set('Asia/Kathmandu');
+              date_default_timezone_set('Africa/Accra');
               //$current_date = date('Y-m-d h:i:s');
                  $current_date = date('Y-m-d h:i A');
                 $exp_date_time = explode(' ', $current_date);
                  $todays_date =  $exp_date_time['0'];
                      $qry="select * from members";
-                    $result=mysqli_query($conn,$qry);
+                    $result=mysqli_query($con,$qry);
                    $i=1;
               $cnt = 1;
             while($row=mysqli_fetch_array($result)){ ?>
@@ -96,11 +96,11 @@ header('location:../index.php');
                 <td><div class='text-center'><?php echo $row['services']; ?></div></td>
 
                 <!-- <span>count</span><br>CHECK IN</td> -->
-                <input type="hidden" name="user_id" value="<?php echo $row['id'];?>">
+                <input type="hidden" name="user_id" value="<?php echo $row['user_id'];?>">
 
             <?php
                 $qry = "SELECT * FROM attendance WHERE curr_date = '$todays_date' AND user_id = '".$row['user_id']."'";
-                $res = $conn->query($qry);
+                $res = $con->query($qry);
                 $num_count  = mysqli_num_rows($res);
                 $row_exist = mysqli_fetch_array($res);
                 $curr_date = $row_exist['curr_date'];

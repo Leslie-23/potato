@@ -21,5 +21,8 @@
     <li class="<?php if($page=='report'){ echo 'active'; }?>">
       <a href="my-report.php"><i class="fas fa-file-alt"></i> <span>Reports</span></a>
     </li>
+    <li class="<?php if($page=='profile'){ echo 'active'; }?>">
+      <a href="profile.php"><i class="fas fa-user"></i> <span>Profile</span></a>
+    </li>
   </ul>
 </div>

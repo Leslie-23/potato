@@ -22,7 +22,7 @@ include('dbcon.php');
 
 <div id="loginbox">            
     <form id="loginform" class="form-vertical" method="POST" action="">
-        <div class="control-group normal_text"> <h3>Customer Login</h3></div>
+        <div class="control-group normal_text"> <h3><img src="img/icontest3.png" alt="Logo" /></h3><h3>Customer Login</h3></div>
         
         <div class="control-group">
             <div class="controls">

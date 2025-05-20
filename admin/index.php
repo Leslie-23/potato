@@ -195,14 +195,14 @@ if(!$announcement_result) die("Announcement query failed: " . mysqli_error($con)
     <div class="container-fluid">
         <div class="quick-actions_homepage">
             <ul class="quick-actions">
-                <li class="bg_ls span"> 
+                <li class="bg_ls span " style="background-color: #22b86c"> 
                     <a href="index.php" style="font-size: 16px;">
                         <i class="fas fa-user-check"></i> 
                         <span class="label label-important"><?php include 'actions/dashboard-activecount.php'?></span> 
                         Active Members 
                     </a> 
                 </li>
-                <li class="bg_lo span3"> 
+                <li class="bg_lo span3" style="background-color: #10aaf8"> 
                     <a href="members.php" style="font-size: 16px;"> 
                         <i class="fas fa-users"></i>
                         <span class="label label-important"><?php include 'dashboard-usercount.php'?></span> 
@@ -239,12 +239,14 @@ if(!$announcement_result) die("Announcement query failed: " . mysqli_error($con)
                         </div>
                         <div class="span4">
                             <ul class="site-stats">
-                                <li class="bg_lh"><i class="fas fa-users"></i> <strong><?php include 'dashboard-usercount.php';?></strong> <small>Total Members</small></li>
+                                <li class="bg_lg"><i class="fas fa-users"></i> <strong><?php include 'dashboard-usercount.php';?></strong> <small>Total Members</small></li>
                                 <li class="bg_lg"><i class="fas fa-user-clock"></i> <strong><?php include 'actions/dashboard-staff-count.php';?></strong> <small>Staff Users</small></li>
                                 <li class="bg_ls"><i class="fas fa-dumbbell"></i> <strong><?php include 'actions/count-equipments.php';?></strong> <small>Available Equipments</small></li>
                                 <li class="bg_ly"><i class="fas fa-file-invoice-dollar"></i> <strong>$<?php include 'actions/total-exp.php';?></strong> <small>Total Expenses</small></li>
                                 <li class="bg_lr"><i class="fas fa-user-ninja"></i> <strong><?php include 'actions/count-trainers.php';?></strong> <small>Active Gym Trainers</small></li>
                                 <li class="bg_lb"><i class="fas fa-calendar-check"></i> <strong><?php include 'actions/count-attendance.php';?></strong> <small>Present Members</small></li>
+                                <li class="bg_lb"><i class="fas fa-hand"></i> <strong><?php include 'actions/count-pending.php';?></strong> <small>pending Members</small></li>
+                                <li class="bg_lh"><i class="fas fa-cancel"></i> <strong><?php include 'actions/count-expired.php';?></strong> <small>Expired Members</small></li>
                             </ul>
                         </div>
                     </div>
@@ -327,35 +329,120 @@ if(!$announcement_result) die("Announcement query failed: " . mysqli_error($con)
                 </div>
             </div>
 
-            <div class="span6">
-                <div class="widget-box">
-                    <div class="widget-title">
-                        <span class="icon"><i class="fas fa-tasks"></i></span>
-                        <h5>Customer's To-Do Lists</h5>
-                    </div>
-                    <div class="widget-content">
-                        <div class="todo">
-                            <ul>
-                                <?php while($row = mysqli_fetch_assoc($todo_result)): ?>
-                                <li class="clearfix">
-                                    <div class="txt">
-                                        <?= htmlspecialchars($row['task_desc']) ?>
-                                        <small>(<?= htmlspecialchars($row['fullname']) ?>)</small>
-                                        <?php if ($row['task_status'] == "Pending"): ?>
-                                            <span class="by label label-info">Pending</span>
-                                        <?php else: ?>
-                                            <span class="by label label-success">In Progress</span>
-                                        <?php endif; ?>
-                                    </div>
-                                </li>
-                                <?php endwhile; ?>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+           <div class="span6">
+  <div class="widget-box">
+    <div class="widget-title"> <span class="icon"><i class="icon-bar-chart"></i></span>
+      <h5>Member Progress Report</h5>
     </div>
+    <div class="widget-content">
+      <div class="report-stats">
+        <?php
+        include "dbcon.php";
+        
+        // Member progress statistics
+        $progressQuery = "SELECT 
+                          COUNT(*) as total_members,
+                          SUM(CASE WHEN ini_weight IS NOT NULL AND curr_weight IS NOT NULL THEN 1 ELSE 0 END) as tracking_progress,
+                          AVG(curr_weight - ini_weight) as avg_weight_change,
+                          COUNT(DISTINCT user_id) as active_members
+                        FROM members
+                        WHERE status = 'Active'";
+        $progressResult = mysqli_query($con, $progressQuery);
+        $progressData = mysqli_fetch_assoc($progressResult);
+        
+        // Session statistics
+        $sessionQuery = "SELECT 
+                          COUNT(*) as total_sessions,
+                          SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_sessions,
+                          SUM(CASE WHEN status = 'missed' THEN 1 ELSE 0 END) as missed_sessions,
+                          AVG(TIMESTAMPDIFF(MINUTE, session_date, end_date)) as avg_session_duration
+                        FROM training_sessions";
+        $sessionResult = mysqli_query($con, $sessionQuery);
+        $sessionData = mysqli_fetch_assoc($sessionResult);
+        ?>
+        
+        <div class="stat-row">
+          <h4>Member Statistics</h4>
+          <div class="stat-item">
+            <span class="stat-label">Total Active Members:</span>
+            <span class="stat-value"><?php echo $progressData['active_members']; ?></span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Tracking Progress:</span>
+            <span class="stat-value"><?php echo $progressData['tracking_progress']; ?></span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Avg Weight Change (kg):</span>
+            <span class="stat-value"><?php echo number_format($progressData['avg_weight_change'], 2); ?></span>
+          </div>
+        </div>
+        
+        <div class="stat-row">
+          <h4>Training Session Statistics</h4>
+          <div class="stat-item">
+            <span class="stat-label">Total Sessions:</span>
+            <span class="stat-value"><?php echo $sessionData['total_sessions']; ?></span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Completed:</span>
+            <span class="stat-value"><?php echo $sessionData['completed_sessions']; ?></span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Missed:</span>
+            <span class="stat-value"><?php echo $sessionData['missed_sessions']; ?></span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Avg Duration (min):</span>
+            <span class="stat-value"><?php echo number_format($sessionData['avg_session_duration'], 1); ?></span>
+          </div>
+        </div>
+        
+        <div class="progress-table">
+          <h4>Top Progressing Members</h4>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Initial Weight</th>
+                <th>Current Weight</th>
+                <th>Change</th>
+                <th>Body Type Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php
+              $topProgressQuery = "SELECT 
+                                    fullname, 
+                                    ini_weight, 
+                                    curr_weight, 
+                                    (curr_weight - ini_weight) as weight_change,
+                                    ini_bodytype,
+                                    curr_bodytype
+                                  FROM members
+                                  WHERE ini_weight IS NOT NULL 
+                                    AND curr_weight IS NOT NULL
+                                    AND status = 'Active'
+                                  ORDER BY ABS(curr_weight - ini_weight) DESC
+                                  LIMIT 5";
+              $topProgressResult = mysqli_query($con, $topProgressQuery);
+              
+              while($row = mysqli_fetch_assoc($topProgressResult)) {
+                $changeClass = ($row['weight_change'] > 0) ? 'text-success' : 'text-error';
+                echo "<tr>
+                  <td>{$row['fullname']}</td>
+                  <td>{$row['ini_weight']} kg</td>
+                  <td>{$row['curr_weight']} kg</td>
+                  <td class='$changeClass'>" . number_format($row['weight_change'], 1) . " kg</td>
+                  <td>{$row['ini_bodytype']} → {$row['curr_bodytype']}</td>
+                </tr>";
+              }
+              ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Footer -->

@@ -180,6 +180,8 @@ function sanitizeInput($data, $type = 'string') {
     <link rel="stylesheet" href="../css/matrix-style.css" />
     <link rel="stylesheet" href="../css/matrix-media.css" />
     <link href="../font-awesome/css/all.min.css" rel="stylesheet" />
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .reminder-card {
             border-left: 4px solid;

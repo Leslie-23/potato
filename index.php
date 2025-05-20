@@ -20,7 +20,7 @@
     
         <div id="loginbox">            
             <form id="loginform" method="POST" class="form-vertical" action="#">
-            <div class="control-group normal_text"> <h3><img src="img/icontest3.png" alt="Logo" /></h3></div>
+            <div class="control-group normal_text"> <h3><img src="img/icontest3.png" alt="Logo" /></h3></h3><h3>ADMIN Login</h3></div>
                 <div class="control-group">
                     <div class="controls">
                         <div class="main_input_box">

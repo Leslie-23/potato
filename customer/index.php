@@ -27,6 +27,7 @@ if ($plan_result) {
 <link rel="stylesheet" href="../css/jquery.gritter.css" />
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <style>
     #fitness-details-section {
         display: none;
@@ -41,7 +42,7 @@ if ($plan_result) {
         <div class="span6 offset3">
             <div class="widget-box">
                 <div class="widget-title"> 
-                    <span class="icon"> <i class="icon-user"></i> </span>
+                    <span class="icon"> <i class="icon-user fas fa-user"></i> </span>
                     <h5>Customer Registration Form</h5>
                 </div>
                 <div class="widget-content nopadding">

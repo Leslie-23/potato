@@ -1,744 +1,556 @@
+<?php
+// Database connection
+require_once './dbcon.php';
+
+// Fetch statistics for the live ticker and hero section
+$activeTrainersQuery = "SELECT COUNT(*) FROM staffs WHERE designation = 'Trainer'";
+$activeMembersQuery = "SELECT COUNT(*) FROM members WHERE status = 'Active'";
+$weeklySessionsQuery = "SELECT COUNT(*) FROM training_sessions WHERE session_date BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY)";
+$caloriesBurnedQuery = "SELECT SUM(duration) FROM attendance WHERE curr_date = CURDATE()";
+$availableSpotsQuery = "SELECT COUNT(*) FROM training_sessions WHERE session_date > NOW() AND status = 'scheduled'";
+
+$activeTrainers = $conn->query($activeTrainersQuery)->fetch_row()[0];
+$activeMembers = $conn->query($activeMembersQuery)->fetch_row()[0];
+$weeklySessions = $conn->query($weeklySessionsQuery)->fetch_row()[0];
+$caloriesBurned = $conn->query($caloriesBurnedQuery)->fetch_row()[0] * 10; // Assuming 10 cal/min
+$availableSpots = $conn->query($availableSpotsQuery)->fetch_row()[0];
+
+// Fetch equipment statistics
+$equipmentStatsQuery = "SELECT 
+    COUNT(*) as total_equipment,
+    SUM(CASE WHEN status = 'good' THEN 1 ELSE 0 END) as working_equipment,
+    SUM(CASE WHEN status = 'out_of_order' OR status = 'damaged' THEN 1 ELSE 0 END) as non_working_equipment
+    FROM equipment";
+$equipmentStats = $conn->query($equipmentStatsQuery)->fetch_assoc();
+$equipmentUptime = round(($equipmentStats['working_equipment'] / $equipmentStats['total_equipment']) * 100);
+
+// Fetch member progress statistics
+$weightLossStatsQuery = "SELECT 
+    AVG(ini_weight - curr_weight) as avg_weight_loss 
+    FROM members 
+    WHERE ini_weight > curr_weight AND curr_weight > 0";
+$weightLossStats = $conn->query($weightLossStatsQuery)->fetch_assoc();
+$avgWeightLoss = round($weightLossStats['avg_weight_loss'] ?? 0);
+
+// Fetch trainers data
+$trainersQuery = "SELECT s.*, t.specialization, t.years_experience 
+                 FROM staffs s 
+                 JOIN trainers t ON s.user_id = t.trainer_id 
+                 WHERE s.designation = 'Trainer' 
+                 LIMIT 3";
+$trainers = $conn->query($trainersQuery);
+
+// Fetch success stories from members with progress
+$successStoriesQuery = "SELECT m.fullname, m.ini_weight, m.curr_weight, 
+                       (m.ini_weight - m.curr_weight) as weight_loss,
+                       m.ini_bodytype, m.curr_bodytype, m.progress_date
+                       FROM members m
+                       WHERE m.ini_weight > 0 AND m.curr_weight > 0 
+                       AND m.ini_weight != m.curr_weight
+                       ORDER BY weight_loss DESC
+                       LIMIT 3";
+$successStories = $conn->query($successStoriesQuery);
+
+// Fetch next available session
+$nextSessionQuery = "SELECT ts.session_id, ts.session_date, ts.end_date, 
+                    m.fullname as member_name, s.fullname as trainer_name,
+                    wp.workout_name, COUNT(a.id) as attendees
+                    FROM training_sessions ts
+                    JOIN members m ON ts.user_id = m.user_id
+                    JOIN staffs s ON ts.trainer_id = s.user_id
+                    JOIN workout_plan wp ON ts.table_id = wp.table_id
+                    LEFT JOIN attendance a ON a.user_id = m.user_id AND DATE(a.curr_date) = DATE(ts.session_date)
+                    WHERE ts.session_date > NOW() AND ts.status = 'scheduled'
+                    GROUP BY ts.session_id
+                    ORDER BY ts.session_date ASC
+                    LIMIT 1";
+$nextSession = $conn->query($nextSessionQuery)->fetch_assoc();
+
+// Calculate spots left (assuming max 8 per session)
+$spotsLeft = 8 - ($nextSession['attendees'] ?? 0);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="EliteFit - Premium fitness center offering personalized training programs, state-of-the-art equipment, and expert coaching.">
-    <title>EliteFit - Premium Fitness Center</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EliteFit | Next-Gen Fitness</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Additional dynamic styling based on data */
+    .progress-circle {
+      animation: fillProgress 1.5s ease-in-out forwards;
+    }
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    @keyframes fillProgress {
+      from { stroke-dashoffset: 283; }
+      to { stroke-dashoffset: <?= 283 - (283 * ($equipmentUptime / 100)) ?>; }
+    }
     
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    .satisfaction-rate .progress-circle {
+      animation-name: fillSatisfaction;
+    }
     
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="styles.css">
+    @keyframes fillSatisfaction {
+      from { stroke-dashoffset: 283; }
+      to { stroke-dashoffset: <?= 283 - (283 * 0.85) ?>; }
+    }
+  </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="https://via.placeholder.com/40" alt="EliteFit Logo" class="me-2">
-                EliteFit
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#home">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#about">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#services">Services</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#membership">Membership</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#trainers">Trainers</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#testimonials">Testimonials</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#contact">Contact</a>
-                    </li>
-                    <li class="nav-item ms-lg-3">
-                        <a class="btn btn-primary sharp" href="./gym-system/index.php">Login</a>
-                    </li>
-                </ul>
+  <div class="noise-overlay"></div>
+  
+  <!-- Navigation -->
+  <nav class="glass-nav">
+    <div class="container nav-container">
+      <div class="logo">EliteFit</div>
+      <div class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#why-us">Why Us</a>
+        <a href="#trainers">Trainers</a>
+        <a href="#success">Success Stories</a>
+        <a href="#contact">Contact Us</a>
+      </div>
+      <button class="cta-button"><a href="./gym-system/customer/index.php">Join Now</a></button>
+    </div>
+  </nav>
+
+  <!-- Live Stats Ticker -->
+  <div class="live-stats-ticker">
+    <div class="ticker-container">
+      <div class="ticker-item">
+        <span class="ticker-icon">⚡</span>
+        <span id="active-trainers"><?= $activeTrainers ?></span> certified trainers on staff
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-icon">🏋️‍♂️</span>
+        <span id="available-spots"><?= $availableSpots ?></span> open spots in upcoming classes
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-icon">🔥</span>
+        <span id="calories-burned"><?= $caloriesBurned ?></span> calories burned by members today
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section id="home" class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>Redefine Your <span class="gradient-text">Limits</span></h1>
+        <p>The future of fitness is data-driven, personalized, and measurable.</p>
+        
+        <div class="stats-container">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24" width="32" height="32">
+                <path fill="currentColor" d="M12,5.5A3.5,3.5 0 0,1 15.5,9A3.5,3.5 0 0,1 12,12.5A3.5,3.5 0 0,1 8.5,9A3.5,3.5 0 0,1 12,5.5M5,8C5.56,8 6.08,8.15 6.53,8.42C6.38,9.85 6.8,11.27 7.66,12.38C7.16,13.34 6.16,14 5,14A3,3 0 0,1 2,11A3,3 0 0,1 5,8M19,8A3,3 0 0,1 22,11A3,3 0 0,1 19,14C17.84,14 16.84,13.34 16.34,12.38C17.2,11.27 17.62,9.85 17.47,8.42C17.92,8.15 18.44,8 19,8M5.5,18.25C5.5,16.18 8.41,14.5 12,14.5C15.59,14.5 18.5,16.18 18.5,18.25V20H5.5V18.25M0,20V18.5C0,17.11 1.89,15.94 4.45,15.6C3.86,16.28 3.5,17.22 3.5,18.25V20H0M24,20H20.5V18.25C20.5,17.22 20.14,16.28 19.55,15.6C22.11,15.94 24,17.11 24,18.5V20Z" />
+              </svg>
             </div>
+            <div class="stat-content">
+              <div class="stat-value" id="active-members"><?= $activeMembers ?></div>
+              <div class="stat-label">Active Members</div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24" width="32" height="32">
+                <path fill="currentColor" d="M7,5H21V7H7V5M7,13V11H21V13H7M4,4.5A1.5,1.5 0 0,1 5.5,6A1.5,1.5 0 0,1 4,7.5A1.5,1.5 0 0,1 2.5,6A1.5,1.5 0 0,1 4,4.5M4,10.5A1.5,1.5 0 0,1 5.5,12A1.5,1.5 0 0,1 4,13.5A1.5,1.5 0 0,1 2.5,12A1.5,1.5 0 0,1 4,10.5M7,19V17H21V19H7M4,16.5A1.5,1.5 0 0,1 5.5,18A1.5,1.5 0 0,1 4,19.5A1.5,1.5 0 0,1 2.5,18A1.5,1.5 0 0,1 4,16.5Z" />
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value" id="weekly-sessions"><?= $weeklySessions ?></div>
+              <div class="stat-label">Training Sessions This Week</div>
+            </div>
+          </div>
         </div>
-    </nav>
 
-    <!-- Hero Section -->
-    <header id="home" class="hero py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-7">
-                    <h1 class="display-4 fw-bold mb-4">Fitness for Everyone, <span class="d-block">Excellence for <strong>you</strong></span></h1>
-                    <p class="lead mb-4">Experience premium fitness with state-of-the-art equipment, expert trainers, and personalized programs designed to help you achieve your fitness goals.
-                        <i class="d-block mt-2">EliteFit isn't just a gym — it's a lifestyle revolution.</i>
-                    </p>
-                    <div class="d-flex flex-column flex-sm-row gap-3">
-                        <a href="register.html" class="btn btn-primary btn-lg sharp">Get Started</a>
-                        <a href="#membership" class="btn btn-outline-primary btn-lg sharp">View Plans</a>
-                    </div>
-                </div>
-            </div>
+        <button class="cta-button primary bold-text text-big"><a href="./welcome.html">Start Your Transformation</a></button>
+      </div>
+      
+      <div class="hero-visual">
+        <div class="abstract-shape"></div>
+        <div class="abstract-shape"></div>
+        <div class="abstract-shape"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Us Section -->
+  <section id="why-us" class="why-us">
+    <div class="my-padder"></div>
+    <div class="container">
+      <h2>Why <span class="gradient-text">EliteFit</span></h2>
+      <p class="section-subtitle">Data-driven excellence that delivers results</p>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-visual">
+            <svg class="equipment-uptime" viewBox="0 0 100 100" width="80" height="80">
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#1d262e" stroke-width="8" />
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#4CAF50" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="283" class="progress-circle" />
+              <text x="50" y="55" text-anchor="middle" class="percentage"><?= $equipmentUptime ?>%</text>
+            </svg>
+          </div>
+          <h3>Equipment Uptime</h3>
+          <p>Our <?= $equipmentStats['total_equipment'] ?> state-of-the-art equipment items are maintained at peak performance, with <?= $equipmentStats['working_equipment'] ?> currently operational (<?= $equipmentUptime ?>% uptime).</p>
         </div>
-    </header>
-
-    <!-- Features Section -->
-    <section class="features py-5">
-        <div class="container">
-            <div class="row g-4">
-                <div class="col-md-6 col-lg-3">
-                    <div class="feature-card h-100 p-4 text-center">
-                        <div class="feature-icon mb-3">
-                            <i class="fas fa-dumbbell fa-2x"></i>
-                        </div>
-                        <h3 class="h4 mb-3">Modern Equipment</h3>
-                        <p class="text-muted">Access to premium, state-of-the-art fitness equipment for all your training needs.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="feature-card h-100 p-4 text-center">
-                        <div class="feature-icon mb-3">
-                            <i class="fas fa-users fa-2x"></i>
-                        </div>
-                        <h3 class="h4 mb-3">Expert Trainers</h3>
-                        <p class="text-muted">Work with certified fitness professionals who will guide your fitness journey.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="feature-card h-100 p-4 text-center">
-                        <div class="feature-icon mb-3">
-                            <i class="fas fa-calendar-check fa-2x"></i>
-                        </div>
-                        <h3 class="h4 mb-3">Flexible Classes</h3>
-                        <p class="text-muted">Choose from a variety of classes that fit your schedule and fitness goals.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="feature-card h-100 p-4 text-center">
-                        <div class="feature-icon mb-3">
-                            <i class="fas fa-heart fa-2x"></i>
-                        </div>
-                        <h3 class="h4 mb-3">Wellness Programs</h3>
-                        <p class="text-muted">Comprehensive wellness programs focusing on nutrition, recovery, and mental health.</p>
-                    </div>
-                </div>
+        
+        <div class="feature-card">
+          <div class="feature-visual">
+            <div class="weight-loss">
+              <span id="avg-weight-loss"><?= $avgWeightLoss ?></span>
+              <span class="unit">lbs</span>
             </div>
+          </div>
+          <h3>Average Weight Loss</h3>
+          <p>Our members see real results. On average, members lose <?= $avgWeightLoss ?> lbs within their first 3 months with our program.</p>
         </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="about py-5">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="section-title">About EliteFit</h2>
-                <p class="text-muted"><i>"Where fitness meets excellence"</i></p>
-            </div>
-            <div class="row align-items-center g-5">
-                <div class="col-lg-6">
-                    <img src="https://via.placeholder.com/600x500" alt="EliteFit Gym Interior" class="img-fluid sharp">
-                </div>
-                <div class="col-lg-6">
-                    <h3 class="h2 mb-4">Your Premium Fitness Destination</h3>
-                    <p class="mb-3">Founded in 2015, EliteFit has grown to become the leading fitness center focused on delivering exceptional results through personalized training and premium facilities.</p>
-                    <p class="mb-4">Our mission is to empower individuals to achieve their fitness goals in a supportive, motivating environment with access to the best equipment and expert guidance.</p>
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="fas fa-check text-primary me-2"></i>
-                                <span>24/7 Access</span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="fas fa-check text-primary me-2"></i>
-                                <span>Personal Training</span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="fas fa-check text-primary me-2"></i>
-                                <span>Nutrition Counseling</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="fas fa-check text-primary me-2"></i>
-                                <span>Group Classes</span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="fas fa-check text-primary me-2"></i>
-                                <span>Recovery Zone</span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="fas fa-check text-primary me-2"></i>
-                                <span>Mobile App</span>
-                            </div>
-                        </div>
-                    </div>
-                    <a href="#contact" class="btn btn-primary sharp">Learn More</a>
-                </div>
-            </div>
+        
+        <div class="feature-card">
+          <div class="feature-visual">
+            <svg class="satisfaction-rate" viewBox="0 0 100 100" width="80" height="80">
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#1d262e" stroke-width="8" />
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#2196F3" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="283" class="progress-circle" />
+              <text x="50" y="55" text-anchor="middle" class="percentage">85%</text>
+            </svg>
+          </div>
+          <h3>Member Satisfaction</h3>
+          <p>Based on recent surveys, 85% of our members report being highly satisfied with their results and the community we've built.</p>
         </div>
-    </section>
-
-    <!-- Services Section -->
-    <section id="services" class="services py-5">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="section-title">Our Services</h2>
-                <p class="text-muted"><i>"Comprehensive fitness solutions for everyone"</i></p>
+        
+        <div class="feature-card">
+          <div class="feature-visual">
+            <div class="trainer-ratio">
+              <span>1:<?= round($activeMembers / $activeTrainers) ?></span>
             </div>
-            <div class="row g-4">
-                <div class="col-md-6 col-lg-3">
-                    <div class="service-card h-100 sharp">
-                        <img src="https://via.placeholder.com/400x300" alt="Personal Training" class="img-fluid">
-                        <div class="service-content p-4">
-                            <h3 class="h4 mb-3">Personal Training</h3>
-                            <p class="text-muted mb-3">One-on-one sessions with certified trainers tailored to your specific goals and fitness level.</p>
-                            <a href="#" class="service-link">Learn More <i class="fas fa-arrow-right ms-1"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="service-card h-100 sharp">
-                        <img src="https://via.placeholder.com/400x300" alt="Group Classes" class="img-fluid">
-                        <div class="service-content p-4">
-                            <h3 class="h4 mb-3">Group Classes</h3>
-                            <p class="text-muted mb-3">Energetic, instructor-led classes including HIIT, yoga, cycling, and more for all fitness levels.</p>
-                            <a href="#" class="service-link">Learn More <i class="fas fa-arrow-right ms-1"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="service-card h-100 sharp">
-                        <img src="https://via.placeholder.com/400x300" alt="Nutrition Coaching" class="img-fluid">
-                        <div class="service-content p-4">
-                            <h3 class="h4 mb-3">Nutrition Coaching</h3>
-                            <p class="text-muted mb-3">Expert guidance on nutrition to complement your fitness routine and maximize results.</p>
-                            <a href="#" class="service-link">Learn More <i class="fas fa-arrow-right ms-1"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="service-card h-100 sharp">
-                        <img src="https://via.placeholder.com/400x300" alt="Recovery Services" class="img-fluid">
-                        <div class="service-content p-4">
-                            <h3 class="h4 mb-3">Recovery Services</h3>
-                            <p class="text-muted mb-3">Specialized recovery treatments including massage therapy, stretching, and cryotherapy.</p>
-                            <a href="#" class="service-link">Learn More <i class="fas fa-arrow-right ms-1"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
+          <h3>Trainer to Member Ratio</h3>
+          <p>With <?= $activeTrainers ?> trainers for <?= $activeMembers ?> members (1:<?= round($activeMembers / $activeTrainers) ?> ratio), you get personal attention in every session.</p>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- Membership Section -->
-    <section id="membership" class="membership py-5">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="section-title">Membership Plans</h2>
-                <p class="text-muted"><i>"Find the <b>perfect plan</b> for your fitness journey"</i></p>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="pricing-card h-100 sharp">
-                        <div class="pricing-header p-4 text-center border-bottom">
-                            <h3 class="h3 mb-3">Basic</h3>
-                            <div class="price mb-0">
-                                <span class="currency">$</span>
-                                <span class="amount">49</span>
-                                <span class="period">/month</span>
-                            </div>
-                        </div>
-                        <div class="pricing-features p-4">
-                            <ul class="list-unstyled">
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>Gym Access (6AM-10PM)</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>Basic Equipment</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>2 Group Classes/Month</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>Fitness Assessment</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3 text-muted">
-                                    <i class="fas fa-times me-2"></i>
-                                    <span>Personal Training</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3 text-muted">
-                                    <i class="fas fa-times me-2"></i>
-                                    <span>Nutrition Coaching</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="pricing-footer p-4 text-center">
-                            <a href="register.html" class="btn btn-outline-primary w-100 sharp">Choose Plan</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="pricing-card featured h-100 sharp">
-                        <div class="pricing-badge">Popular</div>
-                        <div class="pricing-header p-4 text-center border-bottom">
-                            <h3 class="h3 mb-3">Premium</h3>
-                            <div class="price mb-0">
-                                <span class="currency">$</span>
-                                <span class="amount">89</span>
-                                <span class="period">/month</span>
-                            </div>
-                        </div>
-                        <div class="pricing-features p-4">
-                            <ul class="list-unstyled">
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>24/7 Gym Access</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>All Equipment</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>Unlimited Group Classes</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>Advanced Fitness Assessment</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>2 Personal Training Sessions/Month</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3 text-muted">
-                                    <i class="fas fa-times me-2"></i>
-                                    <span>Nutrition Coaching</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="pricing-footer p-4 text-center">
-                            <a href="register.html" class="btn btn-primary w-100 sharp">Choose Plan</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="pricing-card h-100 sharp">
-                        <div class="pricing-header p-4 text-center border-bottom">
-                            <h3 class="h3 mb-3">Elite</h3>
-                            <div class="price mb-0">
-                                <span class="currency">$</span>
-                                <span class="amount">149</span>
-                                <span class="period">/month</span>
-                            </div>
-                        </div>
-                        <div class="pricing-features p-4">
-                            <ul class="list-unstyled">
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>24/7 Gym Access</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>All Equipment & Amenities</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>Unlimited Group Classes</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>Comprehensive Fitness Assessment</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>4 Personal Training Sessions/Month</span>
-                                </li>
-                                <li class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check text-primary me-2"></i>
-                                    <span>Monthly Nutrition Consultation</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="pricing-footer p-4 text-center">
-                            <a href="register.html" class="btn btn-outline-primary w-100 sharp">Choose Plan</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <!-- Trainers Section -->
+  <section id="trainers" class="trainers">
+    <div class="my-padder"></div>
+    <div class="container">
+      <h2>Elite <span class="gradient-text">Trainers</span></h2>
+      <p class="section-subtitle">Experts in their fields, dedicated to your success</p>
+      
+      <div class="trainers-grid">
+        <?php while($trainer = $trainers->fetch_assoc()): 
+          $specializations = explode(',', $trainer['specialization']);
+        ?>
+        <div class="trainer-card">
+          <div class="trainer-image" style="background-image: url('images/trainers/<?= strtolower(str_replace(' ', '-', $trainer['fullname'])) ?>.jpg')"></div>
+          <h3><?= $trainer['fullname'] ?></h3>
+          <p class="trainer-title"><?= $trainer['designation'] ?></p>
+          <div class="trainer-specialization">
+            <?php foreach(array_slice($specializations, 0, 3) as $spec): ?>
+              <span><?= trim($spec) ?></span>
+            <?php endforeach; ?>
+            <?php if($trainer['years_experience']): ?>
+              <span><?= $trainer['years_experience'] ?>+ Years Exp</span>
+            <?php endif; ?>
+          </div>
         </div>
-    </section>
+        <?php endwhile; ?>
+      </div>
+    </div>
+  </section>
 
-    <!-- Trainers Section -->
-    <section id="trainers" class="trainers py-5">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="section-title">Meet Our Trainers</h2>
-                <p class="text-muted"><i>"Expert guidance from <b>certified professionals</b>"</i></p>
+  <!-- Success Stories Section -->
+  <section id="success" class="success-stories">
+    <div class="my-padder"></div>
+    <div class="container">
+      <h2>Success <span class="gradient-text">Stories</span></h2>
+      <p class="section-subtitle">Real people, real transformations from our database</p>
+      
+      <div class="testimonials-container">
+        <?php 
+        $counter = 0;
+        while($story = $successStories->fetch_assoc()): 
+          $counter++;
+          $weightLoss = $story['ini_weight'] - $story['curr_weight'];
+          $muscleGain = $story['ini_weight'] > $story['curr_weight'] ? round($weightLoss * 0.4) : 0;
+          $timePeriod = round((strtotime(date('Y-m-d')) - strtotime($story['progress_date'])) / (60 * 60 * 24 * 30));
+        ?>
+        <div class="testimonial-card <?= $counter === 1 ? 'active' : '' ?>">
+          <div class="testimonial-header">
+            <div class="testimonial-image" style="background-image: url('images/members/<?= strtolower(str_replace(' ', '-', $story['fullname'])) ?>.jpg')"></div>
+            <div class="testimonial-meta">
+              <h3><?= $story['fullname'] ?></h3>
+              <div class="testimonial-stats">
+                <div class="stat">
+                  <span class="label">Lost:</span>
+                  <span class="value"><?= $weightLoss ?> lbs</span>
+                </div>
+                <div class="stat">
+                  <span class="label">Gained:</span>
+                  <span class="value"><?= $muscleGain ?>% Muscle</span>
+                </div>
+                <div class="stat">
+                  <span class="label">Time:</span>
+                  <span class="value"><?= $timePeriod ?> months</span>
+                </div>
+              </div>
             </div>
-            <div class="row g-4">
-                <div class="col-md-6 col-lg-3">
-                    <div class="trainer-card h-100 sharp">
-                        <div class="trainer-img position-relative">
-                            <img src="https://via.placeholder.com/300x300" alt="Trainer Michael Johnson" class="img-fluid w-100">
-                            <div class="trainer-social">
-                                <a href="#"><i class="fab fa-instagram"></i></a>
-                                <a href="#"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            </div>
-                        </div>
-                        <div class="trainer-info p-4">
-                            <h3 class="h4 mb-1">Michael Johnson</h3>
-                            <p class="trainer-role text-primary fw-medium mb-2">Strength & Conditioning</p>
-                            <p class="trainer-desc text-muted">10+ years experience specializing in strength training and athletic performance.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="trainer-card h-100 sharp">
-                        <div class="trainer-img position-relative">
-                            <img src="https://via.placeholder.com/300x300" alt="Trainer Sarah Williams" class="img-fluid w-100">
-                            <div class="trainer-social">
-                                <a href="#"><i class="fab fa-instagram"></i></a>
-                                <a href="#"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            </div>
-                        </div>
-                        <div class="trainer-info p-4">
-                            <h3 class="h4 mb-1">Sarah Williams</h3>
-                            <p class="trainer-role text-primary fw-medium mb-2">Yoga & Flexibility</p>
-                            <p class="trainer-desc text-muted">Certified yoga instructor with expertise in mobility and mind-body connection.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="trainer-card h-100 sharp">
-                        <div class="trainer-img position-relative">
-                            <img src="https://via.placeholder.com/300x300" alt="Trainer David Chen" class="img-fluid w-100">
-                            <div class="trainer-social">
-                                <a href="#"><i class="fab fa-instagram"></i></a>
-                                <a href="#"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            </div>
-                        </div>
-                        <div class="trainer-info p-4">
-                            <h3 class="h4 mb-1">David Chen</h3>
-                            <p class="trainer-role text-primary fw-medium mb-2">Nutrition & Weight Loss</p>
-                            <p class="trainer-desc text-muted">Nutritionist and trainer specializing in sustainable weight management programs.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="trainer-card h-100 sharp">
-                        <div class="trainer-img position-relative">
-                            <img src="https://via.placeholder.com/300x300" alt="Trainer Jessica Martinez" class="img-fluid w-100">
-                            <div class="trainer-social">
-                                <a href="#"><i class="fab fa-instagram"></i></a>
-                                <a href="#"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            </div>
-                        </div>
-                        <div class="trainer-info p-4">
-                            <h3 class="h4 mb-1">Jessica Martinez</h3>
-                            <p class="trainer-role text-primary fw-medium mb-2">HIIT & Cardio</p>
-                            <p class="trainer-desc text-muted">Energy-focused trainer specializing in high-intensity interval training and cardio workouts.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
+          <p class="testimonial-text">"EliteFit helped me transform from <?= $story['ini_bodytype'] ?> to <?= $story['curr_bodytype'] ?>. The data-driven approach made all the difference in tracking my progress."</p>
         </div>
-    </section>
+        <?php endwhile; ?>
+      </div>
+      
+      <div class="testimonial-dots">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+  </section>
 
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="testimonials py-5">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="section-title">Success Stories</h2>
-                <p class="text-muted">What our members say about us</p>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner">
-                            <div class="carousel-item active">
-                                <div class="testimonial-card p-4 sharp">
-                                    <div class="d-flex flex-column flex-md-row gap-4">
-                                        <div class="testimonial-img">
-                                            <img src="https://via.placeholder.com/80x80" alt="Client Testimonial" class="img-fluid rounded-circle">
-                                        </div>
-                                        <div class="testimonial-content">
-                                            <div class="testimonial-rating mb-2">
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                            </div>
-                                            <p class="testimonial-text fst-italic mb-3">"EliteFit completely transformed my approach to fitness. The trainers are exceptional and the facilities are top-notch. I've lost 30 pounds and gained confidence I never thought possible."</p>
-                                            <div class="testimonial-author">
-                                                <h4 class="h5 mb-1">Jennifer K.</h4>
-                                                <p class="text-muted small">Member for 1 year</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="carousel-item">
-                                <div class="testimonial-card p-4 sharp">
-                                    <div class="d-flex flex-column flex-md-row gap-4">
-                                        <div class="testimonial-img">
-                                            <img src="https://via.placeholder.com/80x80" alt="Client Testimonial" class="img-fluid rounded-circle">
-                                        </div>
-                                        <div class="testimonial-content">
-                                            <div class="testimonial-rating mb-2">
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                            </div>
-                                            <p class="testimonial-text fst-italic mb-3">"As a busy professional, I needed a gym that could accommodate my schedule. EliteFit's 24/7 access and variety of classes have made it easy to stay consistent with my fitness routine."</p>
-                                            <div class="testimonial-author">
-                                                <h4 class="h5 mb-1">Robert T.</h4>
-                                                <p class="text-muted small">Member for 2 years</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="carousel-item">
-                                <div class="testimonial-card p-4 sharp">
-                                    <div class="d-flex flex-column flex-md-row gap-4">
-                                        <div class="testimonial-img">
-                                            <img src="https://via.placeholder.com/80x80" alt="Client Testimonial" class="img-fluid rounded-circle">
-                                        </div>
-                                        <div class="testimonial-content">
-                                            <div class="testimonial-rating mb-2">
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star-half-alt text-warning"></i>
-                                            </div>
-                                            <p class="testimonial-text fst-italic mb-3">"The nutrition coaching at EliteFit was the missing piece in my fitness journey. I've not only built muscle but also learned how to fuel my body properly for optimal performance."</p>
-                                            <div class="testimonial-author">
-                                                <h4 class="h5 mb-1">Marcus L.</h4>
-                                                <p class="text-muted small">Member for 8 months</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-center mt-4">
-                            <button class="carousel-control-prev position-relative d-inline-block mx-2" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <button class="carousel-control-next position-relative d-inline-block mx-2" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <!-- Future Stats Calculator -->
+  <section class="future-stats">
+    <div class="container">
+      <h2>Your Future <span class="gradient-text">Stats</span></h2>
+      <p class="section-subtitle">See what's possible with EliteFit based on real member data</p>
+      
+      <div class="calculator-container">
+        <div class="calculator-inputs">
+          <div class="input-group">
+            <label for="current-weight">Current Weight (lbs)</label>
+            <input type="number" id="current-weight" min="80" max="400" value="180">
+          </div>
+          
+          <div class="input-group">
+            <label for="goal-type">Primary Goal</label>
+            <select id="goal-type">
+              <option value="weight-loss">Weight Loss</option>
+              <option value="muscle-gain">Muscle Gain</option>
+              <option value="endurance">Endurance</option>
+              <option value="overall">Overall Fitness</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <label for="commitment">Weekly Commitment</label>
+            <select id="commitment">
+              <option value="2">2 Sessions/Week</option>
+              <option value="3" selected>3 Sessions/Week</option>
+              <option value="4">4 Sessions/Week</option>
+              <option value="5">5+ Sessions/Week</option>
+            </select>
+          </div>
+          
+          <button id="calculate-btn" class="cta-button">Calculate Results</button>
+          <div class="calculator-disclaimer">
+            <p>Results are estimates based on statistical data from our <?= $activeMembers ?> member base. Individual results may vary based on genetics, adherence, and other factors. Our technology-driven approach typically produces results 2-3x faster than traditional methods.</p>
+          </div>
         </div>
-    </section>
-
-    <!-- Call to Action -->
-    <section class="cta py-5">
-        <div class="container">
-            <div class="row justify-content-center text-center">
-                <div class="col-lg-8">
-                    <h2 class="h1 text-white mb-4">Ready to Start Your Fitness Journey?</h2>
-                    <p class="text-white-50 mb-4">Join EliteFit today and take the first step toward a healthier, stronger you.</p>
-                    <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
-                        <a href="register.html" class="btn btn-primary btn-lg sharp">Get Started</a>
-                        <a href="#contact" class="btn btn-outline-light btn-lg sharp">Contact Us</a>
-                    </div>
-                </div>
-            </div>
+        
+        <div class="calculator-results">
+          <div class="result-card">
+            <h3>3 Months</h3>
+            <div class="result-stat" id="three-month-weight">-<?= round($avgWeightLoss * 0.6) ?> lbs</div>
+            <div class="result-stat" id="three-month-strength">+<?= round($avgWeightLoss * 0.3) ?>% Strength</div>
+            <div class="result-stat" id="three-month-endurance">+<?= round($avgWeightLoss * 0.5) ?>% Endurance</div>
+          </div>
+          
+          <div class="result-card">
+            <h3>6 Months</h3>
+            <div class="result-stat" id="six-month-weight">-<?= $avgWeightLoss ?> lbs</div>
+            <div class="result-stat" id="six-month-strength">+<?= round($avgWeightLoss * 0.6) ?>% Strength</div>
+            <div class="result-stat" id="six-month-endurance">+<?= round($avgWeightLoss * 0.9) ?>% Endurance</div>
+          </div>
+          
+          <div class="result-card">
+            <h3>12 Months</h3>
+            <div class="result-stat" id="twelve-month-weight">-<?= round($avgWeightLoss * 1.8) ?> lbs</div>
+            <div class="result-stat" id="twelve-month-strength">+<?= round($avgWeightLoss * 1.2) ?>% Strength</div>
+            <div class="result-stat" id="twelve-month-endurance">+<?= round($avgWeightLoss * 1.5) ?>% Endurance</div>
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="contact py-5">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="section-title">Contact Us</h2>
-                <p class="text-muted">We're here to answer your questions</p>
+  <!-- Next Available Session -->
+  <section class="next-session">
+    <div class="container">
+      <div class="session-card">
+        <div class="session-info">
+          <h2>Next Available <span class="gradient-text">Session</span></h2>
+          <div class="session-time">
+            <div class="time-icon">
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z" />
+              </svg>
             </div>
-            <div class="row g-4">
-                <div class="col-lg-6">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="contact-card p-4 h-100 sharp">
-                                <div class="contact-icon mb-3">
-                                    <i class="fas fa-map-marker-alt fa-2x text-primary"></i>
-                                </div>
-                                <h3 class="h4 mb-2">Our Location</h3>
-                                <p class="text-muted">86 Spintex Rd<br>00233 - Accra, GH</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="contact-card p-4 h-100 sharp">
-                                <div class="contact-icon mb-3">
-                                    <i class="fas fa-phone-alt fa-2x text-primary"></i>
-                                </div>
-                                <h3 class="h4 mb-2">Phone Number</h3>
-                                <p class="text-muted">(027) 123-4567</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="contact-card p-4 h-100 sharp">
-                                <div class="contact-icon mb-3">
-                                    <i class="fas fa-envelope fa-2x text-primary"></i>
-                                </div>
-                                <h3 class="h4 mb-2">Email Address</h3>
-                                <a href="mailto:info@elitefit.com" class="text-primary">info@elitefit.com</a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="contact-card p-4 h-100 sharp">
-                                <div class="contact-icon mb-3">
-                                    <i class="fas fa-clock fa-2x text-primary"></i>
-                                </div>
-                                <h3 class="h4 mb-2">Working Hours</h3>
-                                <p class="text-muted">Monday - Friday: 5AM - 11PM<br>Saturday - Sunday: 7AM - 9PM</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="contact-form-card p-4 sharp">
-                        <form id="contactForm">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="name" class="form-label">Full Name</label>
-                                        <input type="text" class="form-control sharp" id="name" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="email" class="form-label">Email Address</label>
-                                        <input type="email" class="form-control sharp" id="email" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="phone" class="form-label">Phone Number</label>
-                                        <input type="tel" class="form-control sharp" id="phone">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="subject" class="form-label">Subject</label>
-                                        <select class="form-select sharp" id="subject">
-                                            <option value="membership">Membership Inquiry</option>
-                                            <option value="training">Personal Training</option>
-                                            <option value="classes">Group Classes</option>
-                                            <option value="other">Other</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="mb-3">
-                                        <label for="message" class="form-label">Message</label>
-                                        <textarea class="form-control sharp" id="message" rows="5" required></textarea>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <button type="submit" class="btn btn-primary w-100 sharp">Send Message</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+            <div class="time-details">
+              <div id="next-session-day"><?= date('l', strtotime($nextSession['session_date'])) ?></div>
+              <div id="next-session-time"><?= date('g:i A', strtotime($nextSession['session_date'])) ?></div>
             </div>
+          </div>
+          
+          <div class="session-details">
+            <div class="detail-item">
+              <span class="detail-label">Class:</span>
+              <span class="detail-value" id="session-class"><?= $nextSession['workout_name'] ?></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Trainer:</span>
+              <span class="detail-value" id="session-trainer"><?= $nextSession['trainer_name'] ?></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Spots Left:</span>
+              <span class="detail-value" id="session-spots"><?= $spotsLeft ?></span>
+            </div>
+          </div>
+          
+          <button class="cta-button primary">Reserve Your Spot</button>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- Map Section -->
-    <section class="map">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d254172.46490891826!2d-0.2817812719123927!3d5.594365641147003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9084b2b7a773%3A0xbed14ed8650e2dd3!2sAccra%2C%20Ghana!5e0!3m2!1sen!2sus!4v1711095574961!5m2!1sen!2sus" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </section>
+  <!-- Industry Insights Section -->
+  <section class="industry-insights">
+    <div class="container">
+      <h2>Industry <span class="gradient-text">Insights</span></h2>
+      <p class="section-subtitle">Stay informed with the latest in fitness science and technology</p>
+      
+      <div class="insights-grid">
+        <div class="insight-card">
+          <div class="insight-image" ><img style="aspect-ratio: 1/1; object-fit: cover;" src='https://media.istockphoto.com/id/1556651444/photo/portrait-of-a-smiling-teenage-girl-doing-sports-in-the-city.webp?a=1&b=1&s=612x612&w=0&k=20&c=-oeH9y00Pb7YjEsIHxUTCI9Bq0vdhyf45BRGouWLyUU=' width='100%' height='100%'
 
-    <!-- Footer -->
-    <footer class="footer py-5">
-        <div class="container">
-            <div class="row g-4 mb-4">
-                <div class="col-lg-3 col-md-6">
-                    <div class="footer-logo d-flex align-items-center mb-3">
-                        <img src="https://via.placeholder.com/40" alt="EliteFit Logo" class="me-2">
-                        <span class="text-white h4 mb-0">EliteFit</span>
-                    </div>
-                    <p class="text-white-50 mb-3">Your premium fitness destination for transformation and excellence.</p>
-                    <div class="social-links">
-                        <a href="https://facebook.com" target="_blank" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://twitter.com" target="_blank" class="social-link"><i class="fab fa-twitter"></i></a>
-                        <a href="https://instagram.com" target="_blank" class="social-link"><i class="fab fa-instagram"></i></a>
-                        <a href="https://linkedin.com" target="_blank" class="social-link"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="https://youtube.com" target="_blank" class="social-link"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <h3 class="h5 text-white mb-3">Quick Links</h3>
-                    <ul class="footer-links list-unstyled">
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#about">About Us</a></li>
-                        <li><a href="#services">Services</a></li>
-                        <li><a href="#membership">Membership</a></li>
-                        <li><a href="#trainers">Trainers</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <h3 class="h5 text-white mb-3">Services</h3>
-                    <ul class="footer-links list-unstyled">
-                        <li><a href="#">Personal Training</a></li>
-                        <li><a href="#">Group Classes</a></li>
-                        <li><a href="#">Nutrition Coaching</a></li>
-                        <li><a href="#">Recovery Services</a></li>
-                        <li><a href="#">Fitness Assessment</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <h3 class="h5 text-white mb-3">Newsletter</h3>
-                    <p class="text-white-50 mb-3">Subscribe to our newsletter for fitness tips, promotions, and updates.</p>
-                    <form class="newsletter-form">
-                        <div class="input-group">
-                            <input type="email" class="form-control sharp" placeholder="Your email address" required>
-                            <button class="btn btn-primary sharp" type="submit"><i class="fas fa-paper-plane"></i></button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="footer-bottom pt-4 border-top border-secondary">
-                <div class="row align-items-center">
-                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        <p class="text-white-50 mb-0">&copy; 2025 EliteFit. All Rights Reserved.</p>
-                    </div>
-                    <div class="col-md-6 text-center text-md-end">
-                        <div class="footer-bottom-links">
-                            <a href="#">Privacy Policy</a>
-                            <a href="#">Terms of Service</a>
-                            <a href="#">Cookie Policy</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            
+          
+          /></div>
+          <div class="insight-content">
+            <h3>The Future of Fitness Tracking</h3>
+            <p>How our <?= $activeMembers ?> members use wearable technology to optimize their training with biometric insights.</p>
+            <a href="#training-optimization" class="insight-link">Read More</a>
+          </div>
         </div>
-    </footer>
+        
+        <div class="insight-card">
+          <div class="insight-image" ><img style="aspect-ratio: 1/1; object-fit: cover;" src='https://images.unsplash.com/photo-1740560052706-fd75ee856b44?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8TnV0cml0aW9uJTIwUGVyaW9kaXphdGlvbnxlbnwwfHwwfHx8MA%3D%3D' width='100%' height='100%'
+          
+          /></div>
+          <div class="insight-content">
+            <h3>Nutrition Periodization</h3>
+            <p>How <?= round($avgWeightLoss * 1.8) ?> lbs average annual weight loss is achieved through strategic nutrition.</p>
+            <a href="#nutrition" class="insight-link">Read More</a>
+          </div>
+        </div>
+        
+        <div class="insight-card">
+          <div class="insight-image"><img style="aspect-ratio: 1/1; object-fit: cover;" src='https://plus.unsplash.com/premium_photo-1665203632873-0f845413fcf1?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8UmVjb3ZlcnklMjBTY2llbmNlfGVufDB8fDB8fHww' width='100%' height='100%'
+          
+          /></div>
+          <div class="insight-content">
+            <h3>Recovery Science</h3>
+            <p>Why our members who focus on recovery see <?= round($avgWeightLoss * 1.2) ?>% better results than those who don't.</p>
+            <a href="#recovery-science" class="insight-link">Read More</a>
+          </div>
+        </div>
+        
+        <div class="insight-card">
+          <div class="insight-image" ><img  style="aspect-ratio: 1/1; object-fit: cover;" src='https://images.unsplash.com/photo-1716367840407-f9414a84b325?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fEFJJTIwaW4lMjBGaXRuZXNzJTIwUHJvZ3JhbW1pbmd8ZW58MHx8MHx8fDA%3D' width='100%' height='100%'
+          
+          /></div>
+          <div class="insight-content">
+            <h3>AI in Fitness Programming</h3>
+            <p>How our <?= $weeklySessions ?> weekly sessions are optimized using machine learning algorithms.</p>
+            <a href="#ai-fitness" class="insight-link">Read More</a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="industry-stats">
+        <div class="stat-item">
+          <div class="stat-number"><?= round(($activeMembers / ($activeMembers + 50)) * 100) ?>%</div>
+          <div class="stat-description">of our members use technology to track their progress</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number"><?= round($avgWeightLoss / 10, 1) ?>x</div>
+          <div class="stat-description">faster results with our data-driven training</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">87%</div>
+          <div class="stat-description">higher adherence rate with personalized programming</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number"><?= round($activeMembers * 1200) ?></div>
+          <div class="stat-description">total calories burned by our members daily</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <!-- Back to Top Button -->
-    <a href="#" class="back-to-top" id="backToTop">
-        <i class="fas fa-chevron-up"></i>
-    </a>
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">EliteFit</div>
+        <div class="footer-links">
+          <div class="footer-column">
+            <h4>Company</h4>
+            <a href="about.html">About Us</a>
+            <a href="#">Careers</a>
+            <a href="#">Press</a>
+          </div>
+          <div class="footer-column">
+            <h4>Resources</h4>
+            <a href="#">Blog</a>
+            <a href="#">Nutrition Guide</a>
+            <a href="#">Workout Library</a>
+          </div>
+          <div class="footer-column">
+            <h4>Legal</h4>
+            <a href="legal.html#privacy-policy">Privacy Policy</a>
+            <a href="legal.html#terms-of-service">Terms of Service</a>
+            <a href="legal.html#cookie-policy">Cookie Policy</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <?= date('Y') ?> EliteFit Fitness. All rights reserved.</p>
+        <div class="social-links">
+          <a href="#" class="social-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+              <path fill="currentColor" d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z" />
+            </svg>
+          </a>
+          <a href="#" class="social-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+              <path fill="currentColor" d="M22.46,6C21.69,6.35 20.86,6.58 20,6.69C20.88,6.16 21.56,5.32 21.88,4.31C21.05,4.81 20.13,5.16 19.16,5.36C18.37,4.5 17.26,4 16,4C13.65,4 11.73,5.92 11.73,8.29C11.73,8.63 11.77,8.96 11.84,9.27C8.28,9.09 5.11,7.38 3,4.79C2.63,5.42 2.42,6.16 2.42,6.94C2.42,8.43 3.17,9.75 4.33,10.5C3.62,10.5 2.96,10.3 2.38,10C2.38,10 2.38,10 2.38,10.03C2.38,12.11 3.86,13.85 5.82,14.24C5.46,14.34 5.08,14.39 4.69,14.39C4.42,14.39 4.15,14.36 3.89,14.31C4.43,16 6,17.26 7.89,17.29C6.43,18.45 4.58,19.13 2.56,19.13C2.22,19.13 1.88,19.11 1.54,19.07C3.44,20.29 5.7,21 8.12,21C16,21 20.33,14.46 20.33,8.79C20.33,8.6 20.33,8.42 20.32,8.23C21.16,7.63 21.88,6.87 22.46,6Z" />
+            </svg>
+          </a>
+          <a href="#" class="social-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+              <path fill="currentColor" d="M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H19M18.5,18.5V13.2A3.26,3.26 0 0,0 15.24,9.94C14.39,9.94 13.4,10.46 12.92,11.24V10.13H10.13V18.5H12.92V13.57C12.92,12.8 13.54,12.17 14.31,12.17A1.4,1.4 0 0,1 15.71,13.57V18.5H18.5M6.88,8.56A1.68,1.68 0 0,0 8.56,6.88C8.56,5.95 7.81,5.19 6.88,5.19A1.69,1.69 0 0,0 5.19,6.88C5.19,7.81 5.95,8.56 6.88,8.56M8.27,18.5V10.13H5.5V18.5H8.27Z" />
+            </svg>
+</a>
+</div>
+</div>
+</div>
 
-    <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</footer> <script src="script.js"></script> <script> 
+// Dynamic calculator functionality 
+document.getElementById('calculate-btn').addEventListener('click', function() { const currentWeight = parseFloat(document.getElementById('current-weight').value); const goalType = document.getElementById('goal-type').value; const commitment = parseInt(document.getElementById('commitment').value);
+   // Calculate results based on database averages and user input 
+   const weightLoss3Months = <?= round($avgWeightLoss * 0.6) ?> * (commitment / 3); const weightLoss6Months = <?= $avgWeightLoss ?> * (commitment / 3); const weightLoss12Months = <?= round($avgWeightLoss * 1.8) ?> * (commitment / 3);
+    // Strength and endurance gains are percentage of weight loss 
+    const strengthGain3Months = <?= round($avgWeightLoss * 0.3) ?> * (commitment / 3); const strengthGain6Months = <?= round($avgWeightLoss * 0.6) ?> * (commitment / 3); const strengthGain12Months = <?= round($avgWeightLoss * 1.2) ?> * (commitment / 3); const enduranceGain3Months = <?= round($avgWeightLoss * 0.5) ?> * (commitment / 3); const enduranceGain6Months = <?= round($avgWeightLoss * 0.9) ?> * (commitment / 3); const enduranceGain12Months = <?= round($avgWeightLoss * 1.5) ?> * (commitment / 3);
     
-    <!-- Custom JS -->
-    <script src="script.js"></script>
-</body>
-</html>
+     // Adjust for goal type 
+     let weightModifier = 1; let strengthModifier = 1; let enduranceModifier = 1; switch(goalType) { case 'weight-loss': weightModifier = 1.2; strengthModifier = 0.8; enduranceModifier = 1; break; case 'muscle-gain': weightModifier = 0.5; strengthModifier = 1.5; enduranceModifier = 0.7; break; case 'endurance': weightModifier = 0.8; strengthModifier = 0.7; enduranceModifier = 1.5; break; case 'overall': weightModifier = 1; strengthModifier = 1; enduranceModifier = 1; break; } ;
+     // Update results
+      document.getElementById('three-month-weight').textContent = `-${Math.round(weightLoss3Months * weightModifier)} lbs`; document.getElementById('three-month-strength').textContent = `+${Math.round(strengthGain3Months * strengthModifier)}% Strength`; document.getElementById('three-month-endurance').textContent = `+${Math.round(enduranceGain3Months * enduranceModifier)}% Endurance`; document.getElementById('six-month-weight').textContent = `-${Math.round(weightLoss6Months * weightModifier)} lbs`; document.getElementById('six-month-strength').textContent = `+${Math.round(strengthGain6Months * strengthModifier)}% Strength`; document.getElementById('six-month-endurance').textContent = `+${Math.round(enduranceGain6Months * enduranceModifier)}% Endurance`; document.getElementById('twelve-month-weight').textContent = `-${Math.round(weightLoss12Months * weightModifier)} lbs`; document.getElementById('twelve-month-strength').textContent = `+${Math.round(strengthGain12Months * strengthModifier)}% Strength`; document.getElementById('twelve-month-endurance').textContent = `+${Math.round(enduranceGain12Months * enduranceModifier)}% Endurance`; }); 
+      </script>
+      </body> 
+      </html> 

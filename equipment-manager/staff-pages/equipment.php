@@ -31,7 +31,7 @@ header('location:../index.php');
 
 
 <!--top-Header-menu-->
-<?php include '../includes/header.php'?>
+<?php $page="equipment"; include  '../includes/header.php'?>
 <!--close-top-Header-menu-->
 <!--start-top-serch-->
 <!-- <div id="search">

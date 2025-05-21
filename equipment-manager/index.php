@@ -68,6 +68,7 @@ if (isset($_POST['login'])) {
         
         if ($validPassword) {
             $_SESSION['user_id'] = $row['user_id'];
+            $_SESSION['username'] = $row['username'];
             header('location:staff-pages/index.php');
             exit();
         }

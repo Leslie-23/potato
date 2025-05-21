@@ -289,14 +289,15 @@ if(!isset($_SESSION['user_id'])){
                                 <tr>
                                     <th>Vendor</th>
                                     <th>Items Supplied</th>
+                                    <th>Amount</th>
                                     <th>Total Value</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
-                                $vendorQuery = "SELECT vendor, COUNT(*) as items, SUM(amount*quantity) as total_value 
+                                $vendorQuery = "SELECT vendor, COUNT(*) as items, SUM(amount*quantity) as total_value ,quantity ,amount
                                                FROM equipment 
-                                               GROUP BY vendor 
+                                               GROUP BY vendor , quantity ,amount
                                                ORDER BY total_value DESC 
                                                LIMIT 5";
                                 $vendorResult = mysqli_query($con, $vendorQuery);
@@ -304,7 +305,8 @@ if(!isset($_SESSION['user_id'])){
                                 while($row = mysqli_fetch_assoc($vendorResult)) {
                                     echo "<tr>
                                         <td>{$row['vendor']}</td>
-                                        <td>{$row['items']}</td>
+                                        <td>{$row['quantity']}</td>
+                                        <td>{$row['amount']}</td>
                                         <td>$".number_format($row['total_value'])."</td>
                                     </tr>";
                                 }

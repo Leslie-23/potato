@@ -2,6 +2,7 @@
 session_start();
 //the isset function to check username is already loged in and stored on the session
 if(!isset($_SESSION['user_id'])){
+  // get username from session
 header('location:../index.php');	
 }
 ?>
@@ -191,8 +192,55 @@ header('location:../index.php');
 
 	
   </div>
-  
-  
+        <!-- Repair Form Section - Only show if equipment is not in good condition -->
+      <?php if($row['status'] != 'good'): ?>
+      <div class="widget-box">
+        <div class="widget-title"> <span class="icon"> <i class="icon-wrench"></i> </span>
+          <h5>Repair Equipment</h5>
+        </div>
+        <div class="widget-content nopadding">
+          <form action="repair-equipment.php" method="POST" class="form-horizontal">
+            <div class="control-group">
+              <label class="control-label">Repair Notes:</label>
+              <div class="controls">
+                <textarea class="span11" name="repair_notes" rows="3" required></textarea>
+              </div>
+            </div>
+            
+            <div class="control-group">
+              <label class="control-label">Repair Cost:</label>
+              <div class="controls">
+                <div class="input-append">
+                  <span class="add-on">$</span> 
+                  <input type="number" placeholder="0.00" name="repair_cost" class="span11" step="0.01" min="0">
+                </div>
+              </div>
+            </div>
+            
+            <div class="control-group">
+              <label class="control-label">Repaired By:</label>
+              <div class="controls">
+                <input type="text" class="span11" name="repaired_by" value="<?php echo htmlspecialchars($_SESSION['username']); ?>" readonly>
+              </div>
+            </div>
+            
+            <div class="control-group">
+              <label class="control-label">Repair Date:</label>
+              <div class="controls">
+                <input type="date" name="repair_date" class="span11" value="<?php echo date('Y-m-d'); ?>" required>
+              </div>
+            </div>
+            
+            <input type="hidden" name="equipment_id" value="<?php echo $row['id']; ?>">
+            
+            <div class="form-actions text-center">
+              <button type="submit" class="btn btn-primary">Mark as Repaired</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <?php endif; ?>
+      
   </div>
 </div></div>
 

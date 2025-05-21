@@ -192,10 +192,11 @@ switch ($status) {
               <div class="span4">
                 <table class="">
                   <tbody>
-                    <tr><td><h4>Perfect GYM Club</h4></td></tr>
-                    <tr><td>5021 Wetzel Lane, Williamsburg</td></tr>
-                    <tr><td>Tel: 231-267-6011</td></tr>
-                    <tr><td>Email: support@perfectgym.com</td></tr>
+                    <tr><td><h4>Perfect GYM Club</h4></td></tr>                   
+                    <tr><td>Name: <?php echo $member['fullname']; ?></td></tr>
+                    <tr><td>Address: <?php echo $member['address']; ?></td></tr>                    
+                    <tr><td>Phone: <?php echo $member['contact']; ?></td></tr>                    
+                    <tr><td>Email: <?php echo $member['email']; ?></td></tr>
                   </tbody>
                 </table>
               </div>

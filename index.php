@@ -37,7 +37,8 @@ $trainersQuery = "SELECT s.*, t.specialization, t.years_experience
                  FROM staffs s 
                  JOIN trainers t ON s.user_id = t.trainer_id 
                  WHERE s.designation = 'Trainer' 
-                 LIMIT 3";
+                 LIMIT 3
+                 ";
 $trainers = $conn->query($trainersQuery);
 
 // Fetch success stories from members with progress
@@ -96,27 +97,189 @@ $spotsLeft = 8 - ($nextSession['attendees'] ?? 0);
       to { stroke-dashoffset: <?= 283 - (283 * 0.85) ?>; }
     }
   </style>
+  <style>
+/* Navigation */
+.glass-nav {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    z-index: 1001;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    transition: 0.3s ease;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.3s ease;
+}
+
+.nav-links a:hover {
+    opacity: 0.8;
+}
+
+.cta-button {
+    background: linear-gradient(45deg, #ff5733, #ff9933);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.cta-button:hover {
+    transform: translateY(-2px);
+}
+
+/* Mobile Menu Toggle */
+.menu-toggle {
+    display: none;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.hamburger {
+    width: 25px;
+    height: 3px;
+    background-color: white;
+    margin: 5px 0;
+    transition: 0.4s;
+}
+
+.mid{
+  display: flex;
+  justify-content: space-evenly;  /* Distributes space evenly between items */
+  align-items: center;            /* Centers vertically */
+  width: 100%;                    /* Ensures full width for proper spacing */
+  margin: 0 auto;   
+}
+/* Mobile Styles */
+@media screen and (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    .nav-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        height: 100vh;
+        width: 70%;
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(10px);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: right 0.3s ease;
+        padding: 2rem;
+    }
+
+    .nav-links.active {
+        right: 0;
+    }
+
+    .cta-button {
+        margin-top: 2rem;
+    }
+
+    .menu-toggle.active .hamburger:nth-child(1) {
+        transform: rotate(-45deg) translate(-5px, 6px);
+    }
+
+    .menu-toggle.active .hamburger:nth-child(2) {
+        opacity: 0;
+    }
+
+    .menu-toggle.active .hamburger:nth-child(3) {
+        transform: rotate(45deg) translate(-5px, -6px);
+    }
+
+}
+</style>
+
+
+<!-- Add this JavaScript -->
+<script>
+document.querySelector('.menu-toggle').addEventListener('click', function() {
+    this.classList.toggle('active');
+    document.querySelector('.nav-links').classList.toggle('active');
+});
+
+// Close menu when clicking outside or on a link
+document.addEventListener('click', function(event) {
+    const navLinks = document.querySelector('.nav-links');
+    const menuToggle = document.querySelector('.menu-toggle');
+    
+    if (!event.target.closest('.nav-container') && navLinks.classList.contains('active')) {
+        menuToggle.classList.remove('active');
+        navLinks.classList.remove('active');
+    }
+});
+
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+        document.querySelector('.menu-toggle').classList.remove('active');
+        document.querySelector('.nav-links').classList.remove('active');
+    });
+});
+</script>
 </head>
 <body>
   <div class="noise-overlay"></div>
   
   <!-- Navigation -->
+   <div class="md">
+
+  
   <nav class="glass-nav">
     <div class="container nav-container">
       <div class="logo">EliteFit</div>
-      <div class="nav-links">
-        <a href="#home">Home</a>
-        <a href="#why-us">Why Us</a>
-        <a href="#trainers">Trainers</a>
-        <a href="#success">Success Stories</a>
-        <a href="#contact">Contact Us</a>
+      
+       <div class="menu-toggle">
+            <div class="hamburger"></div>
+            <div class="hamburger"></div>
+            <div class="hamburger"></div>
+        </div>
+      <div class="nav-links ">
+        <a href="#home" class="">Home</a>
+        <a href="#why-us " class="">Why Us</a>
+        <a href="#trainers " class="">Trainers</a>
+        <a href="#success " class="">Success Stories</a>
+        <a href="#contact " class="">Contact Us</a>
       </div>
-      <button class="cta-button"><a href="./gym-system/customer/index.php">Join Now</a></button>
+      <button class="cta-button primary bold-text text-sm"><a href="./gym-system/customer/index.php">Join Now</a></button>
     </div>
   </nav>
+   </div>
 
   <!-- Live Stats Ticker -->
-  <div class="live-stats-ticker">
+  <!-- <div class="live-stats-ticker" style="margin-bottom: 20px;">
     <div class="ticker-container">
       <div class="ticker-item">
         <span class="ticker-icon">⚡</span>
@@ -131,7 +294,7 @@ $spotsLeft = 8 - ($nextSession['attendees'] ?? 0);
         <span id="calories-burned"><?= $caloriesBurned ?></span> calories burned by members today
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!-- Hero Section -->
   <section id="home" class="hero">
@@ -166,7 +329,7 @@ $spotsLeft = 8 - ($nextSession['attendees'] ?? 0);
           </div>
         </div>
 
-        <button class="cta-button primary bold-text text-big"><a href="./welcome.html">Start Your Transformation</a></button>
+        <button class="cta-button primary bold-text text-big"><a href="./welcome.php">Start Your Transformation</a></button>
       </div>
       
       <div class="hero-visual">
@@ -552,5 +715,30 @@ document.getElementById('calculate-btn').addEventListener('click', function() { 
      // Update results
       document.getElementById('three-month-weight').textContent = `-${Math.round(weightLoss3Months * weightModifier)} lbs`; document.getElementById('three-month-strength').textContent = `+${Math.round(strengthGain3Months * strengthModifier)}% Strength`; document.getElementById('three-month-endurance').textContent = `+${Math.round(enduranceGain3Months * enduranceModifier)}% Endurance`; document.getElementById('six-month-weight').textContent = `-${Math.round(weightLoss6Months * weightModifier)} lbs`; document.getElementById('six-month-strength').textContent = `+${Math.round(strengthGain6Months * strengthModifier)}% Strength`; document.getElementById('six-month-endurance').textContent = `+${Math.round(enduranceGain6Months * enduranceModifier)}% Endurance`; document.getElementById('twelve-month-weight').textContent = `-${Math.round(weightLoss12Months * weightModifier)} lbs`; document.getElementById('twelve-month-strength').textContent = `+${Math.round(strengthGain12Months * strengthModifier)}% Strength`; document.getElementById('twelve-month-endurance').textContent = `+${Math.round(enduranceGain12Months * enduranceModifier)}% Endurance`; }); 
       </script>
+      <!-- Add this JavaScript -->
+<script>
+document.querySelector('.menu-toggle').addEventListener('click', function() {
+    this.classList.toggle('active');
+    document.querySelector('.nav-links').classList.toggle('active');
+});
+
+// Close menu when clicking outside or on a link
+document.addEventListener('click', function(event) {
+    const navLinks = document.querySelector('.nav-links');
+    const menuToggle = document.querySelector('.menu-toggle');
+    
+    if (!event.target.closest('.nav-container') && navLinks.classList.contains('active')) {
+        menuToggle.classList.remove('active');
+        navLinks.classList.remove('active');
+    }
+});
+
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+        document.querySelector('.menu-toggle').classList.remove('active');
+        document.querySelector('.nav-links').classList.remove('active');
+    });
+});
+</script>
       </body> 
       </html> 

@@ -6,6 +6,11 @@
   <title>EliteFit - Gym Management System</title>
   <meta name="description" content="A comprehensive gym management system for tracking members, equipment, trainers, and more.">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles-2.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="./gym-system/font-awesome/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700,800" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <!-- Font import -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -24,14 +29,15 @@
         <span>EliteFit</span>
       </div>
       <nav class="nav">
-        <a href="#features" class="nav-link">Features</a>
-        <a href="#testimonials" class="nav-link">Testimonials</a>
-        <a href="#pricing" class="nav-link">Pricing</a>
-        <a href="#about" class="nav-link">About</a>
+        <a href="#features" class="nav nav-link">Features</a>
+        <a href="#testimonials" class="nav nav-link">Testimonials</a>
+        <a href="#pricing" class="nav nav-link">Pricing</a>
+        <a href="#about" class="nav nav-link">About</a>
       </nav>
       <div class="header-buttons">
-        <button class="btn btn-outline">Log In</button>
-        <button class="btn btn-primary">Sign Up</button>
+        <button type="button" class="btn btn-outline">
+          <a href="./gym-system/customer/login.php"> Log In</a></button>
+        <button type="button" class="btn btn-primary"> <a href="./gym-system/customer">Sign Up</a></button>
       </div>
       <button class="mobile-menu-toggle" aria-label="Toggle menu">
         <span></span>

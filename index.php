@@ -222,7 +222,69 @@ $spotsLeft = 8 - ($nextSession['attendees'] ?? 0);
 
 }
 </style>
+<style>
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
 
+.modal-content {
+  background-color: #2c3640;
+  margin: 15% auto;
+  padding: 2rem;
+  width: 70%;
+  max-width: 800px;
+  position: relative;
+  border-radius: 10px;
+}
+
+.close {
+  position: absolute;
+  right: 1rem;
+  top: 0.5rem;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #666;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Modal handling
+  const links = document.querySelectorAll('.insight-link');
+  const modals = document.querySelectorAll('.modal');
+  const closeBtns = document.querySelectorAll('.close');
+
+  links.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = link.getAttribute('href').substring(1);
+      document.getElementById(target).style.display = 'block';
+    });
+  });
+
+  closeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('.modal').style.display = 'none';
+    });
+  });
+
+  window.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal')) {
+      e.target.style.display = 'none';
+    }
+  });
+});
+</script>
 
 <!-- Add this JavaScript -->
 <script>
@@ -573,7 +635,7 @@ document.querySelectorAll('.nav-links a').forEach(link => {
             </div>
           </div>
           
-          <button class="cta-button primary">Reserve Your Spot</button>
+          <button class="cta-button primary"><a href="./welcome.php">Reserve Your Spot</a></button>
         </div>
       </div>
     </div>
@@ -652,6 +714,128 @@ document.querySelectorAll('.nav-links a').forEach(link => {
         </div>
       </div>
     </div>
+   <!-- Modals -->
+<div class="modal" id="training-optimization">
+  <div class="modal-content" style="background: #f9f9f9; border-radius: 12px; max-width: 800px; margin: 2rem auto; padding: 2.5rem; position: relative;">
+    <span class="close" style="position: absolute; right: 25px; top: 15px; font-size: 32px; cursor: pointer; color: #444;">&times;</span>
+    <div style="max-width: 700px; margin: 0 auto;">
+      <h3 style="font-size: 28px; color: #2a2a2a; margin-bottom: 1.5rem; border-bottom: 2px solid #4CAF50; padding-bottom: 0.5rem;">
+        The Future of Fitness Tracking
+      </h3>
+      <div style="display: flex; gap: 2rem; margin-bottom: 2rem; align-items: center;">
+        <div style="flex: 1;">
+          <p style="color: #555; line-height: 1.7; margin-bottom: 1.5rem; font-size: 16px;">
+            With <?= $activeMembers ?> active members leveraging cutting-edge wearable technology, our platform has revolutionized...
+          </p>
+          <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+            <h4 style="color: #000; margin-bottom: 1rem; font-size: 20px;">Key Benefits:</h4>
+            <ul style="list-style: none; padding-left: 0;">
+              <li style="margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color:#2c3640;">
+                <span style="position: absolute; left: 0; color: #000;">✓</span>
+                Real-time heart rate variability tracking
+              </li>
+              <!-- Add more list items -->
+            </ul>
+          </div>
+        </div>
+      </div>
+      <button style="background: #4CAF50; color: white; padding: 12px 30px; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: all 0.3s ease;" 
+              onmouseover="this.style.backgroundColor='#45a049'" 
+              onmouseout="this.style.backgroundColor='#4CAF50'">
+        <a href="./welcome.php">Start Tracking Now </a>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="nutrition">
+  <div class="modal-content" style="background: #fff; border-radius: 12px; max-width: 800px; margin: 2rem auto; padding: 2.5rem; position: relative;">
+    <span class="close" style="position: absolute; right: 25px; top: 15px; font-size: 32px; cursor: pointer; color: #444;">&times;</span>
+    <div style="max-width: 700px; margin: 0 auto;">
+      <h3 style="font-size: 28px; color: #2a2a2a; margin-bottom: 1.5rem; border-bottom: 2px solid #ff9800; padding-bottom: 0.5rem;">
+        Nutrition Periodization
+      </h3>
+      <div style="margin-bottom: 2rem;">
+        <p style="font-size: 18px; color: #666; line-height: 1.7; margin-bottom: 1.5rem;">
+          Our members achieve an average of <?= round($avgWeightLoss * 1.8) ?> lbs annual weight loss through...
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr ; gap: 1.5rem; margin-bottom: 2rem;">
+          <div style="background: #fff3e0; padding: 1.5rem; border-radius: 8px;">
+            <h4 style="color: #ef6c00; margin-bottom: 1rem;">Macro Cycling</h4>
+            <p style="color: #666; font-size: 15px;">Strategic carbohydrate rotation.</p>
+            <p style="color: #666; font-size: 15px;">Increase in protein intake. </p>
+          </div>
+          <!-- Add more grid items -->
+        </div>
+      </div>
+      <button style="background: #ff9800; color: white; padding: 12px 30px; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: all 0.3s ease;" 
+              onmouseover="this.style.backgroundColor='#f57c00'" 
+              onmouseout="this.style.backgroundColor='#ff9800'">
+        <a href="./welcome.php">Nutrition Plan </a>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="recovery-science">
+  <div class="modal-content" style="background: #fff; border-radius: 12px; max-width: 800px; margin: 2rem auto; padding: 2.5rem; position: relative;">
+    <span class="close" style="position: absolute; right: 25px; top: 15px; font-size: 32px; cursor: pointer; color: #444;">&times;</span>
+    <div style="max-width: 700px; margin: 0 auto;">
+      <h3 style="font-size: 28px; color: #2a2a2a; margin-bottom: 1.5rem; border-bottom: 2px solid #ff9800; padding-bottom: 0.5rem;">
+        Recovery Science
+      </h3>
+      <div style="margin-bottom: 2rem;">
+        <p style="font-size: 18px; color: #666; line-height: 1.7; margin-bottom: 1.5rem;">
+          Our members achieve an average of <?= round($avgWeightLoss * 1.8) ?> lbs annual weight loss through...
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr ; gap: 1.5rem; margin-bottom: 2rem;">
+          <div style="background: #fff6e0; padding: 1.5rem; border-radius: 8px;">
+            <h4 style="color: #ef6c00; margin-bottom: 1rem;">Rest as an Excercise</h4>
+            <p style="color: #666; font-size: 15px;">Periodic rest excercises</p>
+            <p style="color: #666; font-size: 15px;">Activities to bring the nerves down and ensure that muscles get time to recover </p>
+          </div>
+          <!-- Add more grid items -->
+        </div>
+      </div>
+      <button style="background: green; color: white; padding: 12px 30px; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: all 0.3s ease;" 
+              onmouseover="this.style.backgroundColor='#f57c00'" 
+              onmouseout="this.style.backgroundColor='#ff9800'">
+        <a href="./welcome.php">Join Us Today</a>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="ai-fitness">
+  <div class="modal-content" style="background: #fff; border-radius: 12px; max-width: 800px; margin: 2rem auto; padding: 2.5rem; position: relative;">
+    <span class="close" style="position: absolute; right: 25px; top: 15px; font-size: 32px; cursor: pointer; color: #444;">&times;</span>
+    <div style="max-width: 700px; margin: 0 auto;">
+      <h3 style="font-size: 28px; color: #2a2a2a; margin-bottom: 1.5rem; border-bottom: 2px solid #ff9800; padding-bottom: 0.5rem;">
+        AI in Fitness Programming
+      </h3>
+      <div style="margin-bottom: 2rem;">
+        <p style="font-size: 18px; color: #666; line-height: 1.7; margin-bottom: 1.5rem;">
+          The simple idea of the organization that AI and systematic programming bring to the scope of 'working' out is impeccable
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+          <div style="background: #fff3e0; padding: 1.5rem; border-radius: 8px; ">
+            <h4 style="color: #ef6c00; margin-bottom: 1rem;">Systematic Scheduling</h4>
+            <p style="color: #666; font-size: 15px;">Have all your tasks regulated by AI to gain maximum results</p>
+          </div>
+          <!-- <div style="background: #fff3e0; padding: 1.5rem; border-radius: 8px; width:100%">
+            <h4 style="color: #ef6c00; margin-bottom: 1rem;">Systematic Scheduling</h4>
+            <p style="color: #666; font-size: 15px;">Have all your tasks regulated by AI to gain maximum results</p>
+          </div> -->
+          <!-- Add more grid items -->
+        </div>
+      </div>
+      <button style="background: green; color: white; padding: 12px 30px; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: all 0.3s ease;" 
+              onmouseover="this.style.backgroundColor='#f57c00'" 
+              onmouseout="this.style.backgroundColor='#ff9800'">
+        <a href="./welcome.php">Register Now </a>
+      </button>
+    </div>
+  </div>
+</div>
+
   </section>
 
   <!-- Footer -->

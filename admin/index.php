@@ -455,6 +455,7 @@ if(!$announcement_result) die("Announcement query failed: " . mysqli_error($con)
 <style>
     #footer {
         color: white;
+        background: #2c3640;
     }
     .widget-content {
         padding: 15px;

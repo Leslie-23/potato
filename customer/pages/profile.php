@@ -200,7 +200,7 @@ if(isset($_POST['change_password'])) {
             <div class="span12">
                 <div class="profile-container">
                     <div class="profile-header">
-                        <img src="<?php echo !empty($user['profile_pic']) ? $user['profile_pic'] : '../img/default-profile.jpg'; ?>" class="profile-pic" alt="Profile Picture">
+                        <img src="<?php echo !empty($user['profile_pic']) ? $user['profile_pic'] : '../img/default-male-avatar.png'; ?>" class="profile-pic" alt="Profile Picture">
                         <h2><?php echo $user['fullname']; ?></h2>
                         <p>Member since: <?php echo date('F j, Y', strtotime($user['dor'])); ?></p>
                     </div>

@@ -171,7 +171,7 @@ hr {
 #header {
   height: 77px;
   position: relative;
-  width: 100%;
+  /* width: 100%; */
   z-index: -9;
 }
 #header h1 {

@@ -51,7 +51,7 @@ if(!isset($_SESSION['user_id'])){
 <!--close-Header-part--> 
 
 <!--sidebar-menu-->
-<?php $page="equipment"; include '../includes/sidebar.php'?>
+<?php $page="equipment"; include '../includes/sidebar.php' ; include '../includes/header.php'?>
 <!--sidebar-menu-->
 
 <!--main-container-part-->
@@ -78,7 +78,7 @@ if(!isset($_SESSION['user_id'])){
                                 $row = mysqli_fetch_assoc($result);
                                 echo $row['total'];
                             ?></h2>
-                            <p>Items in inventory</p>
+                            <p>Categories in inventory</p>
                         </div>
                     </div>
                 </div>

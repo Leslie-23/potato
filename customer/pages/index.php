@@ -165,7 +165,7 @@
                             include "session.php";
                             
                             // Get member fitness data
-                            $memberQuery = "SELECT user_height, user_weight ,fitness_goal_1,fitness_goal_2,fitness_goal_3,user_bodytype FROM members_fitness WHERE id = '".$_SESSION['user_id']."'";
+                            $memberQuery = "SELECT user_height, user_weight ,fitness_goal_1,fitness_goal_2,fitness_goal_3,user_bodytype FROM members_fitness WHERE user_id = '".$_SESSION['user_id']."'";
                             $memberResult = mysqli_query($con, $memberQuery);
                             $memberData = mysqli_fetch_assoc($memberResult);
                             
@@ -395,7 +395,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <?php else: ?>
                 <div class="alert alert-info" style="margin: 10px;">
                     <i class="fas fa-info-circle"></i> No upcoming sessions scheduled.
-                    <a href="book-session.php" class="btn btn-small btn-primary" style="margin-left: 10px;">
+                    <a href="./trainer-sessions.php" class="btn btn-small btn-primary" style="margin-left: 10px;">
                         <i class="fas fa-plus"></i> Book a Session
                     </a>
                 </div>

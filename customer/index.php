@@ -346,7 +346,7 @@ if ($plan_result) {
     if (empty($profilePic)) {
         function getDefaultAvatar($gender) {
     $gender = strtolower($gender);
-    return ($gender == 'female') ? '../img/default-female-avatar.png' : '../img/default-male-avatar.png';
+    return ($gender == 'Female') ? './img/default-female-avatar.png' : './img/default-male-avatar.png';
 }
         $gender = $_POST['gender']; // Assuming you have a gender field
         $profilePic = getDefaultAvatar($gender);

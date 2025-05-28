@@ -39,6 +39,9 @@ $todo_query = "SELECT t.*, m.fullname FROM todo t JOIN members m ON t.user_id = 
 $todo_result = mysqli_query($con, $todo_query);
 if(!$todo_result) die("Todo query failed: " . mysqli_error($con));
 
+$admin_query = "SELECT * FROM admin";
+$admin_result = mysqli_query($con, $admin_query);
+
 $announcement_query = "SELECT * FROM announcements";
 $announcement_result = mysqli_query($con, $announcement_query);
 if(!$announcement_result) die("Announcement query failed: " . mysqli_error($con));

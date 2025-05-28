@@ -43,7 +43,13 @@ if ($plan_result) {
             <div class="widget-box">
                 <div class="widget-title"> 
                     <span class="icon"> <i class="icon-user fas fa-user"></i> </span>
-                    <h5>Customer Registration Form</h5>
+                    <h5>Customer Registration Form</h5> 
+                     <div class="text-center">
+                        <button style="margin-top: 6px; background-color: #2c3640; color:#fff; border-radius: 5px">
+
+                            <a href="./login.php"> <span  style=" font-size: 12px; color:#fff"> Member Login</span> </a>
+                        </button>
+                        </div>
                 </div>
                 <div class="widget-content nopadding">
                     <form action="" method="POST" class="form-horizontal" id="registration-form">
@@ -328,19 +334,62 @@ if ($plan_result) {
                         }
                         // Handle profile picture upload
     $profilePic = null;
-    if (!empty($_FILES['profile_pic']['name'])) {
-        $uploadDir = '../uploads/profile_pics/';
-        $fileName = uniqid() . '_' . basename($_FILES['profile_pic']['name']);
-        $targetPath = $uploadDir . $fileName;
-        
-        // Check if image file is actual image
-        $check = getimagesize($_FILES['profile_pic']['tmp_name']);
-        if ($check !== false) {
-            if (move_uploaded_file($_FILES['profile_pic']['tmp_name'], $targetPath)) {
-                $profilePic = $fileName;
-            }
-        }
+if (!empty($_FILES['profile_pic']['name'])) {
+    $target_dir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/profile_pics/';
+    
+    // Create directory if it doesn't exist
+    if (!file_exists($target_dir)) {
+        mkdir($target_dir, 0755, true);
     }
+
+    // Generate unique filename with original extension
+    $original_name = basename($_FILES['profile_pic']['name']);
+    $file_extension = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
+    $new_filename = uniqid() . '_' . md5($original_name) . '.' . $file_extension;
+    $target_file = $target_dir . $new_filename;
+
+    // Validate image
+    $check = getimagesize($_FILES['profile_pic']['tmp_name']);
+    if ($check === false) {
+        $_SESSION['error'] = 'File is not a valid image';
+        header('Location: login.php');
+        exit();
+    }
+
+    // Check file size (max 2MB)
+    if ($_FILES['profile_pic']['size'] > 2000000) {
+        $_SESSION['error'] = 'File size exceeds 2MB limit';
+        header('Location: login.php');
+        exit();
+    }
+
+    // Allow only specific formats
+    $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
+    if (!in_array($file_extension, $allowed_types)) {
+        $_SESSION['error'] = 'Only JPG, JPEG, PNG & GIF files are allowed';
+        header('Location: login.php');
+        exit();
+    }
+
+    // Attempt upload
+    if (move_uploaded_file($_FILES['profile_pic']['tmp_name'], $target_file)) {
+        // Store web-accessible path
+        $profile_pic = '/uploads/profile_pics/' . $new_filename;
+    } else {
+        $_SESSION['error'] = 'Error uploading file';
+        header('Location: login.php');
+        exit();
+    }
+}
+
+// Set default avatar if no upload (for new users only)
+if (empty($profile_pic) && $is_new_user) { // Implement your own $is_new_user check
+    $gender = strtolower($_POST['gender'] ?? 'male');
+    $profile_pic = ($gender === 'female') 
+        ? '/img/default-female-avatar.png' 
+        : '/img/default-male-avatar.png';
+}
+
     
     // If no picture uploaded, use default based on gender
     if (empty($profilePic)) {

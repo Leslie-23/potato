@@ -214,7 +214,7 @@ $result = $stmt->get_result();
 $member = $result->fetch_assoc();
 function getDefaultAvatar($gender) {
     $gender = strtolower($gender);
-    return ($gender == 'female') ? '../img/default-female-avatar.png' : '../img/default-male-avatar.png';
+    return ($gender == 'Female') ? '../img/default-female-avatar.png' : '../img/default-male-avatar.png';
 }
 // Set default avatar if no profile picture
 if (empty($member['profile_pic'])) {

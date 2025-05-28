@@ -32,14 +32,16 @@ $weightLossStatsQuery = "SELECT
 $weightLossStats = $conn->query($weightLossStatsQuery)->fetch_assoc();
 $avgWeightLoss = round($weightLossStats['avg_weight_loss'] ?? 0);
 
-// Fetch trainers data
-$trainersQuery = "SELECT s.*, t.specialization, t.years_experience 
+// Fetch trainers data (updated to include image_url)
+$trainersQuery = "SELECT s.fullname, s.designation, s.image_url, 
+                  t.specialization, t.years_experience 
                  FROM staffs s 
                  JOIN trainers t ON s.user_id = t.trainer_id 
                  WHERE s.designation = 'Trainer' 
-                 LIMIT 3
-                 ";
+                 LIMIT 3";
 $trainers = $conn->query($trainersQuery);
+
+
 
 // Fetch success stories from members with progress
 $successStoriesQuery = "SELECT m.fullname, m.ini_weight, m.curr_weight, 
@@ -77,7 +79,68 @@ $spotsLeft = 8 - ($nextSession['attendees'] ?? 0);
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EliteFit | Next-Gen Fitness</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.contact-card {
+  background: #2c3640;
+  padding: 2rem;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease;
+}
+
+.contact-card:hover {
+  transform: translateY(-5px);
+}
+
+.contact-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.contact-btn {
+  display: inline-block;
+  padding: 12px 30px;
+  color: white!important;
+  border-radius: 30px;
+  text-decoration: none;
+  margin-top: 1rem;
+  transition: filter 0.3s ease;
+}
+
+.contact-btn:hover {
+  filter: brightness(110%);
+}
+
+.map-container {
+  margin-top: 3rem;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+</style>
+  <style>
+    .trainer-image {
+  width: 100%;
+  height: 300px;
+  border-radius: 15px 15px 0 0;
+  background-repeat: no-repeat;
+}
     /* Additional dynamic styling based on data */
     .progress-circle {
       animation: fillProgress 1.5s ease-in-out forwards;
@@ -458,34 +521,39 @@ document.querySelectorAll('.nav-links a').forEach(link => {
     </div>
   </section>
 
-  <!-- Trainers Section -->
-  <section id="trainers" class="trainers">
-    <div class="my-padder"></div>
-    <div class="container">
-      <h2>Elite <span class="gradient-text">Trainers</span></h2>
-      <p class="section-subtitle">Experts in their fields, dedicated to your success</p>
-      
-      <div class="trainers-grid">
-        <?php while($trainer = $trainers->fetch_assoc()): 
-          $specializations = explode(',', $trainer['specialization']);
-        ?>
-        <div class="trainer-card">
-          <div class="trainer-image" style="background-image: url('images/trainers/<?= strtolower(str_replace(' ', '-', $trainer['fullname'])) ?>.jpg')"></div>
-          <h3><?= $trainer['fullname'] ?></h3>
-          <p class="trainer-title"><?= $trainer['designation'] ?></p>
-          <div class="trainer-specialization">
-            <?php foreach(array_slice($specializations, 0, 3) as $spec): ?>
-              <span><?= trim($spec) ?></span>
-            <?php endforeach; ?>
-            <?php if($trainer['years_experience']): ?>
-              <span><?= $trainer['years_experience'] ?>+ Years Exp</span>
-            <?php endif; ?>
-          </div>
+ <!-- Trainers Section -->
+<section id="trainers" class="trainers">
+  <div class="my-padder"></div>
+  <div class="container">
+    <h2>Elite <span class="gradient-text">Trainers</span></h2>
+    <p class="section-subtitle">Experts in their fields, dedicated to your success</p>
+    
+    <div class="trainers-grid">
+      <?php while($trainer = $trainers->fetch_assoc()): 
+        $specializations = explode(',', $trainer['specialization']);
+      ?>
+      <div class="trainer-card">
+        <!-- Updated image section -->
+        <div class="trainer-image" 
+             style="background-image: url('<?= $trainer['image_url'] ?>');
+                   background-size: cover;
+                   background-position: center;">
         </div>
-        <?php endwhile; ?>
+        <h3><?= $trainer['fullname'] ?></h3>
+        <p class="trainer-title"><?= $trainer['designation'] ?></p>
+        <div class="trainer-specialization">
+          <?php foreach(array_slice($specializations, 0, 3) as $spec): ?>
+            <span><?= trim($spec) ?></span>
+          <?php endforeach; ?>
+          <?php if($trainer['years_experience']): ?>
+            <span><?= $trainer['years_experience'] ?>+ Years Exp</span>
+          <?php endif; ?>
+        </div>
       </div>
+      <?php endwhile; ?>
     </div>
-  </section>
+  </div>
+</section>
 
   <!-- Success Stories Section -->
   <section id="success" class="success-stories">
@@ -838,6 +906,70 @@ document.querySelectorAll('.nav-links a').forEach(link => {
 
   </section>
 
+
+
+  <!-- Contact Section -->
+<section id="contact" class="contact-section">
+  <div class="my-padder"></div>
+  <div class="container">
+    <h2>Get in <span class="gradient-text">Touch</span></h2>
+    <p class="section-subtitle">We're here to help you achieve your fitness goals</p>
+
+    <div class="contact-grid">
+      <!-- Contact Cards -->
+      <div class="contact-card">
+        <div class="contact-icon" style="background: #4CAF50;">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <h3>Email Us</h3>
+        <p>Questions or feedback? We respond within 24 hours</p>
+        <a href="mailto:fitness@gmail.com" class="contact-btn" style="background: #4CAF50;">
+          fitness@gmail.com
+        </a>
+      </div>
+
+      <div class="contact-card">
+        <div class="contact-icon" style="background: #2196F3;">
+          <i class="fas fa-phone"></i>
+        </div>
+        <h3>Call Us</h3>
+        <p>Speak directly with our fitness experts. 
+          <!-- bootstrap info icon -->
+          <i class="fas fa-info-circle" style="color: #2196F3;"></i>
+        info</p>
+        <a href="tel:+233123456789" class="contact-btn" style="background: #2196F3;">
+          +233 123 456 789
+        </a>
+      </div>
+
+      <div class="contact-card">
+        <div class="contact-icon" style="background: #ff9800;">
+          <i class="fas fa-map-marker-alt"></i>
+        </div>
+        <h3>Visit Us</h3>
+        <p>Our flagship location in Accra</p>
+        <a href="https://goo.gl/maps/abc123xyz" target="_blank" class="contact-btn" style="background: #ff9800;">
+          Open in Maps
+        </a>
+      </div>
+    </div>
+
+    <!-- Embedded Google Map -->
+    <div class="map-container">
+      <iframe 
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.755653715719!2d-0.181069685556683!3d5.606686295932724!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9084b2b85193%3A0x34a02905a6df7e0e!2sThe%20Junction%20Mall!5e0!3m2!1sen!2sgh!4v1623436789018!5m2!1sen!2sgh" 
+        width="100%" 
+        height="450" 
+        style="border:0;" 
+        allowfullscreen="" 
+        loading="lazy"
+        aria-label="Our Location in Accra">
+      </iframe>
+    </div>
+  </div>
+</section>
+
+
   <!-- Footer -->
   <footer>
     <div class="container">
@@ -847,14 +979,14 @@ document.querySelectorAll('.nav-links a').forEach(link => {
           <div class="footer-column">
             <h4>Company</h4>
             <a href="about.html">About Us</a>
-            <a href="#">Careers</a>
-            <a href="#">Press</a>
+            <a href="careers.html">Careers</a>
+            <a href="press.html">Press</a>
           </div>
           <div class="footer-column">
             <h4>Resources</h4>
-            <a href="#">Blog</a>
-            <a href="#">Nutrition Guide</a>
-            <a href="#">Workout Library</a>
+            <a href="https://medium.com/tag/fitness" >Blog</a>
+            <a href="https://medium.com/@drjasonfung/control-hunger-not-calories-95c9076710f0">Nutrition Guide</a>
+            <a href="https://medium.com/tag/workout-routines">Workout Library</a>
           </div>
           <div class="footer-column">
             <h4>Legal</h4>
@@ -866,23 +998,44 @@ document.querySelectorAll('.nav-links a').forEach(link => {
       </div>
       <div class="footer-bottom">
         <p>&copy; <?= date('Y') ?> EliteFit Fitness. All rights reserved.</p>
-        <div class="social-links">
-          <a href="#" class="social-icon">
-            <svg viewBox="0 0 24 24" width="24" height="24">
-              <path fill="currentColor" d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z" />
-            </svg>
-          </a>
-          <a href="#" class="social-icon">
-            <svg viewBox="0 0 24 24" width="24" height="24">
-              <path fill="currentColor" d="M22.46,6C21.69,6.35 20.86,6.58 20,6.69C20.88,6.16 21.56,5.32 21.88,4.31C21.05,4.81 20.13,5.16 19.16,5.36C18.37,4.5 17.26,4 16,4C13.65,4 11.73,5.92 11.73,8.29C11.73,8.63 11.77,8.96 11.84,9.27C8.28,9.09 5.11,7.38 3,4.79C2.63,5.42 2.42,6.16 2.42,6.94C2.42,8.43 3.17,9.75 4.33,10.5C3.62,10.5 2.96,10.3 2.38,10C2.38,10 2.38,10 2.38,10.03C2.38,12.11 3.86,13.85 5.82,14.24C5.46,14.34 5.08,14.39 4.69,14.39C4.42,14.39 4.15,14.36 3.89,14.31C4.43,16 6,17.26 7.89,17.29C6.43,18.45 4.58,19.13 2.56,19.13C2.22,19.13 1.88,19.11 1.54,19.07C3.44,20.29 5.7,21 8.12,21C16,21 20.33,14.46 20.33,8.79C20.33,8.6 20.33,8.42 20.32,8.23C21.16,7.63 21.88,6.87 22.46,6Z" />
-            </svg>
-          </a>
-          <a href="#" class="social-icon">
-            <svg viewBox="0 0 24 24" width="24" height="24">
-              <path fill="currentColor" d="M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H19M18.5,18.5V13.2A3.26,3.26 0 0,0 15.24,9.94C14.39,9.94 13.4,10.46 12.92,11.24V10.13H10.13V18.5H12.92V13.57C12.92,12.8 13.54,12.17 14.31,12.17A1.4,1.4 0 0,1 15.71,13.57V18.5H18.5M6.88,8.56A1.68,1.68 0 0,0 8.56,6.88C8.56,5.95 7.81,5.19 6.88,5.19A1.69,1.69 0 0,0 5.19,6.88C5.19,7.81 5.95,8.56 6.88,8.56M8.27,18.5V10.13H5.5V18.5H8.27Z" />
-            </svg>
-</a>
-</div>
+ <div class="social-links">
+            <a
+              href="https://instagram.com/elitefit"
+              target="_blank"
+              class="social-icon"
+            >
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <path
+                  fill="currentColor"
+                  d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z"
+                />
+              </svg>
+            </a>
+            <a
+              href="https://x.com/elitefit"
+              target="_blank"
+              class="social-icon"
+            >
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <path
+                  fill="currentColor"
+                  d="M22.46,6C21.69,6.35 20.86,6.58 20,6.69C20.88,6.16 21.56,5.32 21.88,4.31C21.05,4.81 20.13,5.16 19.16,5.36C18.37,4.5 17.26,4 16,4C13.65,4 11.73,5.92 11.73,8.29C11.73,8.63 11.77,8.96 11.84,9.27C8.28,9.09 5.11,7.38 3,4.79C2.63,5.42 2.42,6.16 2.42,6.94C2.42,8.43 3.17,9.75 4.33,10.5C3.62,10.5 2.96,10.3 2.38,10C2.38,10 2.38,10 2.38,10.03C2.38,12.11 3.86,13.85 5.82,14.24C5.46,14.34 5.08,14.39 4.69,14.39C4.42,14.39 4.15,14.36 3.89,14.31C4.43,16 6,17.26 7.89,17.29C6.43,18.45 4.58,19.13 2.56,19.13C2.22,19.13 1.88,19.11 1.54,19.07C3.44,20.29 5.7,21 8.12,21C16,21 20.33,14.46 20.33,8.79C20.33,8.6 20.33,8.42 20.32,8.23C21.16,7.63 21.88,6.87 22.46,6Z"
+                />
+              </svg>
+            </a>
+            <a
+              href="https://linkedin.com/elitefit"
+              target="_blank"
+              class="social-icon"
+            >
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <path
+                  fill="currentColor"
+                  d="M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H19M18.5,18.5V13.2A3.26,3.26 0 0,0 15.24,9.94C14.39,9.94 13.4,10.46 12.92,11.24V10.13H10.13V18.5H12.92V13.57C12.92,12.8 13.54,12.17 14.31,12.17A1.4,1.4 0 0,1 15.71,13.57V18.5H18.5M6.88,8.56A1.68,1.68 0 0,0 8.56,6.88C8.56,5.95 7.81,5.19 6.88,5.19A1.69,1.69 0 0,0 5.19,6.88C5.19,7.81 5.95,8.56 6.88,8.56M8.27,18.5V10.13H5.5V18.5H8.27Z"
+                />
+              </svg>
+            </a>
+          </div>
 </div>
 </div>
 

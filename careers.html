@@ -5,6 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Careers | EliteFit</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.contact-card {
+  background: #2c3640;
+  padding: 2rem;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease;
+}
+
+.contact-card:hover {
+  transform: translateY(-5px);
+}
+
+.contact-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.contact-btn {
+  display: inline-block;
+  padding: 12px 30px;
+  color: white!important;
+  border-radius: 30px;
+  text-decoration: none;
+  margin-top: 1rem;
+  transition: filter 0.3s ease;
+}
+
+.contact-btn:hover {
+  filter: brightness(110%);
+}
+
+.map-container {
+  margin-top: 3rem;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+</style>
   </head>
   <body>
     <div class="noise-overlay"></div>
@@ -19,9 +75,24 @@
             <a href="./careers.html">Careers</a>
             <a href="./press.html">Press</a>
           </div>
-          <button class="cta-button">
-            <a href="./gym-system/customer/index.php">Join Now</a>
-          </button>
+         <a
+  href="./gym-system/customer/index.php"
+  class="cta-button"
+  style="
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(to right, #10b981, #3b82f6);
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 0.375rem;
+    font-weight: bold;
+    font-size: 1rem;
+  "
+>
+  Join Now
+</a>
+
         </div>
       </nav>
     </nav>
@@ -35,7 +106,7 @@
 
     <section class="careers-content">
       <div class="container">
-        <div class="careers-intro glass-card">
+        <div class="careers-intro ">
           <h2>Why Work With Us?</h2>
           <p>
             At EliteFit, we're building the next generation of fitness
@@ -63,7 +134,7 @@
               Develop biometric tracking systems and implement new training
               protocols.
             </p>
-            <button class="cta-button outline">Apply Now</button>
+            <!-- <button class="cta-button outline">Apply Now</button> -->
           </div>
 
           <div class="position-card">
@@ -77,8 +148,59 @@
               Deliver personalized training through our virtual coaching
               platform.
             </p>
-            <button class="cta-button outline">Apply Now</button>
+            <!-- <button class="cta-button outline">Apply Now</button> -->
           </div>
+           <div class="contact-grid">
+      <!-- Contact Cards -->
+      <div class="contact-card">
+        <div class="contact-icon" style="background: #4CAF50;">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <h3>Email Us</h3>
+        <p>Questions or feedback? We respond within 24 hours</p>
+        <a href="mailto:employyment@gmail.com" class="contact-btn" style="background: #4CAF50;">
+          employyment@gmail.com
+        </a>
+      </div>
+  <div class="contact-card">
+        <div class="contact-icon" style="background: #2196F3;">
+          <i class="fas fa-phone"></i>
+        </div>
+        <h3>Call Us</h3>
+        <p>Speak directly with our fitness experts. 
+          <!-- bootstrap info icon -->
+          <i class="fas fa-info-circle" style="color: #2196F3;"></i>
+        info</p>
+        <a href="tel:+233123456789" class="contact-btn" style="background: #2196F3;">
+          +233 123 456 789
+        </a>
+      </div>
+
+      <div class="contact-card">
+        <div class="contact-icon" style="background: #ff9800;">
+          <i class="fas fa-map-marker-alt"></i>
+        </div>
+        <h3>Visit Us</h3>
+        <p>Our flagship location in Accra</p>
+        <a href="https://goo.gl/maps/abc123xyz" target="_blank" class="contact-btn" style="background: #ff9800;">
+          Open in Maps
+        </a>
+      </div>
+    </div>
+        </div>
+    <!-- Embedded Google Map -->
+    <div class="map-container">
+      <iframe 
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.755653715719!2d-0.181069685556683!3d5.606686295932724!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9084b2b85193%3A0x34a02905a6df7e0e!2sThe%20Junction%20Mall!5e0!3m2!1sen!2sgh!4v1623436789018!5m2!1sen!2sgh" 
+        width="100%" 
+        height="450" 
+        style="border:0;" 
+        allowfullscreen="" 
+        loading="lazy"
+        aria-label="Our Location in Accra">
+      </iframe>
+    </div>
+          
         </div>
       </div>
     </section>
@@ -98,9 +220,14 @@
               </div>
               <div class="footer-column">
                 <h4>Resources</h4>
-                <a href="#">Blog</a>
-                <a href="#">Nutrition Guide</a>
-                <a href="#">Workout Library</a>
+                <a href="https://medium.com/tag/fitness">Blog</a>
+                <a
+                  href="https://medium.com/@drjasonfung/control-hunger-not-calories-95c9076710f0"
+                  >Nutrition Guide</a
+                >
+                <a href="https://medium.com/tag/workout-routines"
+                  >Workout Library</a
+                >
               </div>
               <div class="footer-column">
                 <h4>Legal</h4>
@@ -113,7 +240,11 @@
           <div class="footer-bottom">
             <p>&copy; 2025 EliteFit Fitness. All rights reserved.</p>
             <div class="social-links">
-              <a href="#" class="social-icon">
+              <a
+                href="https://instagram.com/elitefit"
+                target="_blank"
+                class="social-icon"
+              >
                 <svg viewBox="0 0 24 24" width="24" height="24">
                   <path
                     fill="currentColor"
@@ -121,7 +252,11 @@
                   />
                 </svg>
               </a>
-              <a href="#" class="social-icon">
+              <a
+                href="https://x.com/elitefit"
+                target="_blank"
+                class="social-icon"
+              >
                 <svg viewBox="0 0 24 24" width="24" height="24">
                   <path
                     fill="currentColor"
@@ -129,7 +264,11 @@
                   />
                 </svg>
               </a>
-              <a href="#" class="social-icon">
+              <a
+                href="https://linkedin.com/elitefit"
+                target="_blank"
+                class="social-icon"
+              >
                 <svg viewBox="0 0 24 24" width="24" height="24">
                   <path
                     fill="currentColor"
@@ -138,7 +277,7 @@
                 </svg>
               </a>
             </div>
-          </div>
+         
         </div>
       </footer>
     </footer>

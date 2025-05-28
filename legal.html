@@ -114,28 +114,45 @@
   <body>
     <div class="noise-overlay"></div>
 
-    <nav class="glass-nav">
+    <nav
+      class="glass-nav"
+      style="position: sticky; top: 0; background-color: #2c3e50"
+    >
       <div class="container nav-container">
         <div class="logo">EliteFit</div>
         <div class="nav-links">
-          <a href="./index.php">Home</a>
-          <a href="./about.html">About</a>
-          <a href="./careers.html">Careers</a>
-          <a href="./press.html">Press</a>
+          <a style="color: #fff; text-decoration: none" href="./index.php"
+            >Home</a
+          >
+          <a style="color: #fff; text-decoration: none" href="./about.html"
+            >About</a
+          >
+          <a style="color: #fff; text-decoration: none" href="./careers.html"
+            >Careers</a
+          >
+          <a style="color: #fff; text-decoration: none" href="./press.html"
+            >Press</a
+          >
         </div>
-        <button class="cta-button">Join Now</button>
+        <a
+          href="./gym-system/customer/index.php"
+          class="cta-button"
+          style="
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(to right, #10b981, #3b82f6);
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: bold;
+            font-size: 1rem;
+          "
+        >
+          Join Now
+        </a>
       </div>
     </nav>
-
-    <section class="page-header">
-      <div class="container">
-        <h1>Legal <span class="gradient-text">Information</span></h1>
-        <p class="section-subtitle">
-          Policies and terms governing your use of EliteFit
-        </p>
-      </div>
-    </section>
-
     <div class="legal-nav">
       <div class="container">
         <ul class="legal-nav-list">
@@ -145,6 +162,17 @@
         </ul>
       </div>
     </div>
+    <section class="page-header">
+      <div class="container">
+        <h1>
+          <span class="gradient-text">Legal</span>
+          <span class="gradient-text">Information</span>
+        </h1>
+        <p class="section-subtitle">
+          Policies and terms governing your use of EliteFit
+        </p>
+      </div>
+    </section>
 
     <div class="container">
       <div id="privacy-policy" class="legal-section">
@@ -387,9 +415,14 @@
             </div>
             <div class="footer-column">
               <h4>Resources</h4>
-              <a href="blog.html">Blog</a>
-              <a href="#">Nutrition Guide</a>
-              <a href="#">Workout Library</a>
+              <a href="https://medium.com/tag/fitness">Blog</a>
+              <a
+                href="https://medium.com/@drjasonfung/control-hunger-not-calories-95c9076710f0"
+                >Nutrition Guide</a
+              >
+              <a href="https://medium.com/tag/workout-routines"
+                >Workout Library</a
+              >
             </div>
             <div class="footer-column">
               <h4>Legal</h4>
@@ -402,7 +435,11 @@
         <div class="footer-bottom">
           <p>&copy; 2025 EliteFit Fitness. All rights reserved.</p>
           <div class="social-links">
-            <a href="#" class="social-icon">
+            <a
+              href="https://instagram.com/elitefit"
+              target="_blank"
+              class="social-icon"
+            >
               <svg viewBox="0 0 24 24" width="24" height="24">
                 <path
                   fill="currentColor"
@@ -410,7 +447,11 @@
                 />
               </svg>
             </a>
-            <a href="#" class="social-icon">
+            <a
+              href="https://x.com/elitefit"
+              target="_blank"
+              class="social-icon"
+            >
               <svg viewBox="0 0 24 24" width="24" height="24">
                 <path
                   fill="currentColor"
@@ -418,7 +459,11 @@
                 />
               </svg>
             </a>
-            <a href="#" class="social-icon">
+            <a
+              href="https://linkedin.com/elitefit"
+              target="_blank"
+              class="social-icon"
+            >
               <svg viewBox="0 0 24 24" width="24" height="24">
                 <path
                   fill="currentColor"

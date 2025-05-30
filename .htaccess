@@ -1,0 +1,24 @@
+# Custom 404 error page
+
+ErrorDocument 404 /404.php
+
+# Disable directory listing
+
+# Prevent access to .htaccess itself
+
+# Enable URL rewriting (mod_rewrite)
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Set base URL (VERY important for subfolders in WAMP)
+    RewriteBase /elitefit-01/
+
+    # If the request is not a real file or directory
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Redirect all other requests to index.php
+    RewriteRule ^ index.php [L]
+
+</IfModule>

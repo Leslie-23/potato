@@ -21,26 +21,50 @@ if(isset($_POST['update_profile'])) {
     $email = mysqli_real_escape_string($con, $_POST['email']);
     $date_of_birth = mysqli_real_escape_string($con, $_POST['date_of_birth']);
     
+
+
+    
     // Handle profile picture upload
-    if(!empty($_FILES['profile_pic']['name'])) {
-        $target_dir = "../uploads/profiles/";
-        $target_file = $target_dir . basename($_FILES["profile_pic"]["name"]);
-        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+   $profile_pic = $user['profile_pic']; // Keep current by default
+
+if(!empty($_FILES['profile_pic']['name'])) {
+    $target_dir = "../uploads/profiles/";
+    if (!file_exists($target_dir)) {
+        mkdir($target_dir, 0755, true);
+    }
+    
+    // Validate image
+    $check = getimagesize($_FILES["profile_pic"]["tmp_name"]);
+    if($check === false) {
+        $error_msg = "File is not a valid image";
+    } elseif ($_FILES["profile_pic"]["size"] > 2000000) {
+        $error_msg = "File is too large (max 2MB)";
+    } else {
+        $ext = strtolower(pathinfo($_FILES["profile_pic"]["name"], PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
         
-        // Check if image file is valid
-        $check = getimagesize($_FILES["profile_pic"]["tmp_name"]);
-        if($check !== false) {
+        if(in_array($ext, $allowed)) {
+            // Delete old profile picture if it's not a default avatar
+            if (!empty($user['profile_pic']) && 
+                strpos($user['profile_pic'], 'default-') === false) {
+                @unlink($user['profile_pic']);
+            }
+            
             // Generate unique filename
-            $new_filename = "user_" . $user_id . "_" . time() . "." . $imageFileType;
+            $new_filename = "user_" . $user_id . "_" . time() . "." . $ext;
             $target_file = $target_dir . $new_filename;
             
             if(move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target_file)) {
                 $profile_pic = $target_file;
+            } else {
+                $error_msg = "Error uploading file";
             }
+        } else {
+            $error_msg = "Only JPG, JPEG, PNG & GIF files are allowed";
         }
-    } else {
-        $profile_pic = $user['profile_pic'];
     }
+}
+    
     
     // Update query
     $update_query = "UPDATE members SET 
@@ -114,7 +138,8 @@ if(isset($_POST['change_password'])) {
     <link rel="stylesheet" href="../css/bootstrap-responsive.min.css" />
     <link rel="stylesheet" href="../css/matrix-style.css" />
     <link rel="stylesheet" href="../css/matrix-media.css" />
-    <link href="../font-awesome/css/font-awesome.css" rel="stylesheet" />
+    <link href="../font-awesome/css/font-awesome.css" rel="stylesheet" /><link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700,800" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .profile-container {
             background: #fff;
@@ -200,7 +225,34 @@ if(isset($_POST['change_password'])) {
             <div class="span12">
                 <div class="profile-container">
                     <div class="profile-header">
-                        <img src="<?php echo !empty($user['profile_pic']) ? $user['profile_pic'] : '../img/default-male-avatar.png'; ?>" class="profile-pic" alt="Profile Picture">
+                        <?php
+include('dbcon.php');
+// Get member data including new fields
+$sql = "SELECT username, fullname, email, address, gender, contact, profile_pic, date_of_birth 
+        FROM members WHERE user_id = ?";
+$stmt = $con->prepare($sql);
+$stmt->bind_param("i", $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+$member = $result->fetch_assoc();
+function getDefaultAvatar($gender) {
+    $gender = strtolower($gender);
+    return ($gender == 'female') ? '../img/default-female-avatar.png' : '../img/default-male-avatar.png';
+}
+// Set default avatar if no profile picture
+if (empty($member['profile_pic'])) {
+    // $member['profile_pic'] = getDefaultAvatar($member['gender']);
+}
+
+// Calculate age from date of birth
+$dob = new DateTime($member['date_of_birth']);
+$today = new DateTime();
+$age = $today->diff($dob)->y;
+?><img src="<?php echo htmlspecialchars(!empty($user['profile_pic']) ? $user['profile_pic'] : getDefaultAvatar($user['gender'])); ?>" 
+     width="300" height="300" 
+     alt="<?php echo htmlspecialchars($user['fullname']); ?>'s Profile Picture" 
+     style="border-radius: 8px; object-fit: cover; border: 2px solid #fff;"
+     onerror="this.src='<?php echo htmlspecialchars(getDefaultAvatar($user['gender'])); ?>'">
                         <h2><?php echo $user['fullname']; ?></h2>
                         <p>Member since: <?php echo date('F j, Y', strtotime($user['dor'])); ?></p>
                     </div>
@@ -264,7 +316,7 @@ if(isset($_POST['change_password'])) {
                                     </div>
                                     
                                     <div class="form-actions">
-                                        <button type="submit" name="update_profile" class="btn btn-success">Update Profile</button>
+                                        <button type="submit" name="update_profile" class="btn btn-success ">  <i class="fas fa-save"></i> Update Profile</button>
                                     </div>
                                 </form>
                             </div>

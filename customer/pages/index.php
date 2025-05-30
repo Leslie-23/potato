@@ -214,11 +214,11 @@ $result = $stmt->get_result();
 $member = $result->fetch_assoc();
 function getDefaultAvatar($gender) {
     $gender = strtolower($gender);
-    return ($gender == 'Female') ? '../img/default-female-avatar.png' : '../img/default-male-avatar.png';
+    return ($gender == 'female') ? '../img/default-female-avatar.png' : '../img/default-male-avatar.png';
 }
 // Set default avatar if no profile picture
 if (empty($member['profile_pic'])) {
-    $member['profile_pic'] = getDefaultAvatar($member['gender']);
+    // $member['profile_pic'] = getDefaultAvatar($member['gender']);
 }
 
 // Calculate age from date of birth
@@ -226,11 +226,12 @@ $dob = new DateTime($member['date_of_birth']);
 $today = new DateTime();
 $age = $today->diff($dob)->y;
 ?>
-                               <div class="user-thumb">
-    <img src="<?php echo htmlspecialchars($member['profile_pic']); ?>" 
-        width="70" height="70" 
-        alt="Profile Picture" 
-        style="border-radius: 50%; object-fit: cover; border: 2px solid #fff;">
+                              
+      <img src="<?php echo htmlspecialchars($member['profile_pic']); ?>"
+        width="150" height="150" 
+        alt="<?php echo htmlspecialchars($member['fullname']); ?>'s Profile Picture" 
+        style="border-radius: 0px; object-fit: cover; "
+        onerror="this.src='<?php echo getDefaultAvatar($member['gender']); ?>'">
 </div>
                                 </div>
                                 <div class="article-post">
@@ -316,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         </tr>
                                     </table>
                                     <a href="workout-me.php">
-                                        <button class="btn btn-success btn-mini">View Workout History</button>
+                                        <button class="btn btn-success btn-mini">View Workout & Fitness Stats</button>
                                     </a>
                                 </div>
                             </li>

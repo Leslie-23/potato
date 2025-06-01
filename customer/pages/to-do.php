@@ -42,7 +42,7 @@ header('location:../index.php');
 <div id="content">
 <!--breadcrumbs-->
   <div id="content-header">
-    <div id="breadcrumb"> <a href="index.php" title="You're right here" class="tip-bottom"><i class="icon-home"></i> Home</a></div>
+    <div id="breadcrumb"> <a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> <a href="to-do.php" title="You're right here"  class="tip-bottom current" class="current"><i class="icon-list"></i> To-Do</a></div>
   </div>
 <!--End-breadcrumbs-->
 

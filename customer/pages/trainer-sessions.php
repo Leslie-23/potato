@@ -40,7 +40,10 @@ if(!isset($_SESSION['user_id'])){
 <div id="content">
 <!--breadcrumbs-->
   <div id="content-header">
-    <div id="breadcrumb"> <a href="index.php" title="You're right here" class="tip-bottom"><i class="icon-home"></i> Home</a></div>
+    <div id="breadcrumb"> <a href="index.php" title="Go to Home" class="tip-bottom"><i class="icon-home"></i> Home</a>
+<a href="trainer-sessions.php"  class="current" title="Sessions & Schedule" class="tip-bottom"><i class="icon-calendar"></i> Sessions & Schedule</a>
+
+</div>
   </div>
 <!--End-breadcrumbs-->
 

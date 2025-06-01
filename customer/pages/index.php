@@ -56,7 +56,7 @@
     <!-- Breadcrumbs -->
     <div id="content-header">
         <div id="breadcrumb"> 
-            <a href="index.php" title="You're right here" class="tip-bottom">
+            <a href="index.php" title="You're right here" class="tip-bottom current">
                 <i class="fas fa-home"></i> Home
             </a>
         </div>
@@ -216,6 +216,11 @@ function getDefaultAvatar($gender) {
     $gender = strtolower($gender);
     return ($gender == 'female') ? '../img/default-female-avatar.png' : '../img/default-male-avatar.png';
 }
+$isDefaultAvatar = empty($member['profile_pic']);
+if ($isDefaultAvatar) {
+    $member['profile_pic'] = getDefaultAvatar($member['gender']);
+}
+
 // Set default avatar if no profile picture
 if (empty($member['profile_pic'])) {
     // $member['profile_pic'] = getDefaultAvatar($member['gender']);
@@ -225,13 +230,21 @@ if (empty($member['profile_pic'])) {
 $dob = new DateTime($member['date_of_birth']);
 $today = new DateTime();
 $age = $today->diff($dob)->y;
+
+// Debug
+echo "<!-- Debug: profile_pic path: " . htmlspecialchars($member['profile_pic']) . " -->";
+echo "<!-- Debug: full image path: ../" . htmlspecialchars($member['profile_pic']) . " -->";
+echo "<!-- Debug: file exists: " . (file_exists("../" . $member['profile_pic']) ? 'YES' : 'NO') . " -->";
 ?>
                               
-      <img src="<?php echo htmlspecialchars($member['profile_pic']); ?>"
+      <img src="<?php echo "../" . htmlspecialchars($member['profile_pic']); ?>"
         width="150" height="150" 
         alt="<?php echo htmlspecialchars($member['fullname']); ?>'s Profile Picture" 
         style="border-radius: 0px; object-fit: cover; "
-        onerror="this.src='<?php echo getDefaultAvatar($member['gender']); ?>'">
+        onerror="this.onerror=null; this.src='<?php echo getDefaultAvatar($member['gender']); ?>'">
+<?php if ($isDefaultAvatar): ?>
+    <span class="avatar-update-message">Please update your profile picture</span>
+<?php endif; ?>         
 </div>
                                 </div>
                                 <div class="article-post">

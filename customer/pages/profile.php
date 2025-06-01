@@ -4,6 +4,7 @@ if(!isset($_SESSION['user_id'])) {
     header('location:../index.php');
 }
 
+
 include "dbcon.php";
 
 // Get user data
@@ -24,11 +25,11 @@ if(isset($_POST['update_profile'])) {
 
 
     
-    // Handle profile picture upload
-   $profile_pic = $user['profile_pic']; // Keep current by default
+// Handle profile picture upload
+$profile_pic = $user['profile_pic']; // Keep current by default
 
 if(!empty($_FILES['profile_pic']['name'])) {
-    $target_dir = "../uploads/profiles/";
+    $target_dir = "../uploads/profiles/";  // Added ../ to match your structure
     if (!file_exists($target_dir)) {
         mkdir($target_dir, 0755, true);
     }
@@ -44,9 +45,10 @@ if(!empty($_FILES['profile_pic']['name'])) {
         $allowed = ['jpg', 'jpeg', 'png', 'gif'];
         
         if(in_array($ext, $allowed)) {
-            // Delete old profile picture if it's not a default avatar
+            // Delete old profile picture if it exists and isn't a default avatar
             if (!empty($user['profile_pic']) && 
-                strpos($user['profile_pic'], 'default-') === false) {
+                strpos($user['profile_pic'], 'default-') === false &&
+                file_exists($user['profile_pic'])) {
                 @unlink($user['profile_pic']);
             }
             
@@ -55,9 +57,11 @@ if(!empty($_FILES['profile_pic']['name'])) {
             $target_file = $target_dir . $new_filename;
             
             if(move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target_file)) {
-                $profile_pic = $target_file;
+                $profile_pic = "uploads/profiles/" . $new_filename; // Store relative path without ../
             } else {
                 $error_msg = "Error uploading file";
+                // Keep existing profile pic if upload fails
+                $profile_pic = $user['profile_pic'];
             }
         } else {
             $error_msg = "Only JPG, JPEG, PNG & GIF files are allowed";
@@ -208,7 +212,7 @@ if(isset($_POST['change_password'])) {
 <!--main-container-part-->
 <div id="content">
     <div id="content-header">
-        <div id="breadcrumb"> <a href="index.php" title="Go to Home" class="tip-bottom"><i class="icon-home"></i> Home</a> <a href="#" class="current">My Profile</a></div>
+        <div id="breadcrumb"> <a href="index.php" title="Go to Home" class="tip-bottom"><i class="icon-home"></i> Home</a> <a href="#" class="current"><i class="fas fa-user"></i> My Profile</a></div>
         <!-- <h1>My Profile</h1> -->
     </div>
     
@@ -225,7 +229,7 @@ if(isset($_POST['change_password'])) {
             <div class="span12">
                 <div class="profile-container">
                     <div class="profile-header">
-                        <?php
+                    <?php
 include('dbcon.php');
 // Get member data including new fields
 $sql = "SELECT username, fullname, email, address, gender, contact, profile_pic, date_of_birth 
@@ -235,24 +239,31 @@ $stmt->bind_param("i", $_SESSION['user_id']);
 $stmt->execute();
 $result = $stmt->get_result();
 $member = $result->fetch_assoc();
+
 function getDefaultAvatar($gender) {
     $gender = strtolower($gender);
     return ($gender == 'female') ? '../img/default-female-avatar.png' : '../img/default-male-avatar.png';
 }
-// Set default avatar if no profile picture
-if (empty($member['profile_pic'])) {
-    // $member['profile_pic'] = getDefaultAvatar($member['gender']);
+
+// Determine which image to display
+$display_image = "";
+if (!empty($member['profile_pic']) && file_exists("../" . $member['profile_pic'])) {
+    $display_image = "../" . $member['profile_pic'];  // Prepend ../ for correct path
+} else {
+    $display_image = getDefaultAvatar($member['gender']);
 }
 
-// Calculate age from date of birth
-$dob = new DateTime($member['date_of_birth']);
-$today = new DateTime();
-$age = $today->diff($dob)->y;
-?><img src="<?php echo htmlspecialchars(!empty($user['profile_pic']) ? $user['profile_pic'] : getDefaultAvatar($user['gender'])); ?>" 
+// Debug
+echo "<!-- Debug: profile_pic in DB: " . htmlspecialchars($member['profile_pic']) . " -->";
+echo "<!-- Debug: display_image: " . htmlspecialchars($display_image) . " -->";
+echo "<!-- Debug: file exists: " . (file_exists($display_image) ? 'YES' : 'NO') . " -->";
+?>
+
+<img src="<?php echo htmlspecialchars($display_image); ?>" 
      width="300" height="300" 
-     alt="<?php echo htmlspecialchars($user['fullname']); ?>'s Profile Picture" 
+     alt="<?php echo htmlspecialchars($member['fullname']); ?>'s Profile Picture" 
      style="border-radius: 8px; object-fit: cover; border: 2px solid #fff;"
-     onerror="this.src='<?php echo htmlspecialchars(getDefaultAvatar($user['gender'])); ?>'">
+     onerror="this.onerror=null; this.src='<?php echo htmlspecialchars(getDefaultAvatar($member['gender'])); ?>'">
                         <h2><?php echo $user['fullname']; ?></h2>
                         <p>Member since: <?php echo date('F j, Y', strtotime($user['dor'])); ?></p>
                     </div>

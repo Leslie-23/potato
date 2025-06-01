@@ -36,7 +36,7 @@ function handleProfilePictureUpload($gender) {
         }
 
         // Create upload directory if it doesn't exist
-        $target_dir = "uploads/profile_pictures/";
+        $target_dir = "uploads/profiles/";
         if (!file_exists($target_dir)) {
             mkdir($target_dir, 0755, true);
         }
@@ -53,7 +53,8 @@ function handleProfilePictureUpload($gender) {
         }
     } else {
         // Set default avatar based on gender
-        $profile_pic_path = ($gender == 'Female') ? 'img/default-female-avatar.png' : 'img/default-male-avatar.png';
+        // $profile_pic_path = ($gender == 'Female') ? 'img/default-female-avatar.png' : 'img/default-male-avatar.png';
+          $profile_pic_path = $target_path;
     }
     
     return ['path' => $profile_pic_path];
@@ -197,6 +198,7 @@ if (isset($_POST['register'])) {
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
     #fitness-details-section {
         display: none;
@@ -243,11 +245,29 @@ if (isset($_POST['register'])) {
                             </div>
                         </div>
                         <div class="control-group">
-                            <label class="control-label">Password :</label>
-                            <div class="controls">
-                                <input type="password" class="span11" name="password" placeholder="Password" required />
-                            </div>
-                        </div>
+    <label class="control-label">Password:</label>
+    <div class="controls">
+        <div class="input-append">
+            <input type="password" id="password" class="span11" name="password" placeholder="Password" required />
+            <button class="btn" type="button" onclick="togglePassword('password')">
+                <i class="icon icon-eye-open fas fa-eye"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="control-group">
+    <label class="control-label">Confirm Password:</label>
+    <div class="controls">
+        <div class="input-append">
+            <input type="password" id="confirm_password" class="span11" name="confirm_password" placeholder="Confirm Password" required oninput="checkPasswordMatch()" />
+            <button class="btn" type="button" onclick="togglePassword('confirm_password')">
+                <i class="icon icon-eye-open fas  fa-eye"></i>
+            </button>
+        </div>
+        <span id="password_match_message" style="margin-top:5px;display:block;"></span>
+    </div>
+</div>
                         <div class="control-group">
                             <label class="control-label">Date of Birth</label>
                             <div class="controls">
@@ -470,8 +490,61 @@ $(document).ready(function(){
         }
     });
 });
-</script>
+$(document).ready(function() {
+    $('form').submit(function(e) {
+        const dob = new Date($('[name="date_of_birth"]').val());
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+        
+        if (age < 18) {
+            e.preventDefault();
+            alert('You must be at least 18 years old');
+            return false;
+        }
+        
+        if (age > 100) {
+            e.preventDefault();
+            alert('Age cannot be more than 100 years');
+            return false;
+        }
+        
+        return true;
+    });
 
+});
+</script>
+<script>
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    if (field.type === "password") {
+        field.type = "text";
+    } else {
+        field.type = "password";
+    }
+}
+
+function checkPasswordMatch() {
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirm_password").value;
+    const message = document.getElementById("password_match_message");
+    
+    if (confirmPassword === "") {
+        message.innerHTML = "";
+        message.style.color = "";
+    } else if (password === confirmPassword) {
+        message.innerHTML = "Passwords match!";
+        message.style.color = "green";
+    } else {
+        message.innerHTML = "Passwords do not match!";
+        message.style.color = "red";
+    }
+}
+</script>
 <script src="../js/excanvas.min.js"></script> 
 <script src="../js/jquery.ui.custom.js"></script> 
 <script src="../js/bootstrap.min.js"></script> 

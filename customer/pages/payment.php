@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['make_payment'])) {
         <a href="index.php" title="Go to Home" class="tip-bottom">
             <i class="fas fa-home"></i> Home
         </a> 
-        <a href="payment.php" class="current">My Payments</a> 
+        <a href="payment.php" title="You're right here" class="current">My Payments</a> 
     </div>
     <h1 class="text-center">My Payment Information <i class="fas fa-receipt"></i></h1>
   </div>

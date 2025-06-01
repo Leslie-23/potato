@@ -22,7 +22,43 @@
 .badge-pending { background-color: #FFC107; color: #000; }
 .badge-denied { background-color: #F44336; }
 </style>
+
 <style>
+    /* Hide elements when printing */
+    @media print {
+        .no-print, #header, #content-header,.sidebar,#sidebar,#user-nav, #footer, #breadcrumb, #content-header {
+            display: none !important;
+        }
+        
+        #content {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+        
+        body {
+            background: white !important;
+            color: black !important;
+            font-size: 12pt !important;
+        }
+        
+        /* Add any other print-specific styles here */
+        .report-container {
+            page-break-after: avoid;
+            page-break-inside: avoid;
+        }
+    }
+    
+    /* Optional: Style for print button in screen view */
+    .no-print {
+        margin-top: 20px;
+        padding: 20px 0;
+        border-top: 1px solid #eee;
+    }
+</style>
+
+<style>
+  
 /* Payment History Styles */
 .payment-history-container {
   padding: 10px;
@@ -174,7 +210,7 @@ switch ($status) {
   <div id="content-header">
     <div id="breadcrumb"> 
       <a href="index.php" title="Go to Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-      <a href="my-report.php" class="current">My Report</a> 
+      <a href="my-report.php"  title="You're right here" class="current"><i class="fas fa-file-alt"></i> My Report</a> 
     </div>
   </div>
   
@@ -215,7 +251,7 @@ switch ($status) {
                   </thead>
                   <tbody>
                     <tr>
-                      <td>PGC-<?php echo $member['user_id']; ?></td>
+                      <td>EFG-<?php echo $member['user_id']; ?></td>
                       <td><?php echo $member['services']; ?></td>
                       <td><?php echo $member['plan']; ?> Month/s</td>
                       <td><?php echo $member['dor']; ?></td>
@@ -237,11 +273,11 @@ switch ($status) {
                   <div class="widget-content">
                     <table class="table table-bordered">
                       <tr>
-                        <th>Initial Weight</th>
+                        <th  title="Weight upon registration">Initial Weight</th>
                         <td><?php echo $fitness['user_weight'] ?? 'N/A'; ?> kg</td>
                       </tr>
                       <tr>
-                        <th>Current Weight</th>
+                        <th  title="Weight after Training">Current Weight</th>
                         <td><?php echo $member['curr_weight'] ?? 'N/A'; ?> kg</td>
                       </tr>
                       <tr>
@@ -260,7 +296,7 @@ switch ($status) {
                   </div>
                 </div>
               </div>
-              
+                 
               <!-- Payment Summary -->
               <div class="span6">
                 <div class="widget-box">
@@ -308,7 +344,29 @@ switch ($status) {
                 </div>
               </div>
             </div>
-            
+            <!-- Fitness Progress -->
+             
+              <?php if(!empty($member['ini_weight']) && !empty($member['curr_weight'])): ?>
+                              <div class="profile-section span6">
+                                  <h3>Fitness Tracker</h3>
+                                  <div class="progress progress-striped active">
+                                      <div class="bar" style="width: <?php 
+                                          $progress = (($member['curr_weight'] - $member['ini_weight']) / $member['ini_weight']) * 100;
+                                          echo abs($progress);
+                                      ?>%; background-color: <?php echo $progress > 0 ? '#f0ad4e' : '#5cb85c'; ?>"></div>
+                                  </div>
+                                  <p>
+                                      <strong title="Verified by Trainer">Initial Weight:</strong> <?php echo $member['ini_weight']; ?> kg<br>
+                                      <strong>Current Weight:</strong> <?php echo $member['curr_weight']; ?> kg<br>
+                                      <strong>Change:</strong> <span style="color: <?php echo $progress > 0 ? '#f0ad4e' : '#5cb85c'; ?>">
+                                          <?php echo ($progress > 0 ? '+' : '') . number_format($progress, 1); ?>%
+                                      </span>
+                                  </p>
+                                  <p>
+                                      <strong>Body Type:</strong> <?php echo $member['ini_bodytype']; ?> → <?php echo $member['curr_bodytype']; ?>
+                                  </p>
+                              </div>
+                              <?php endif; ?>
 <!-- Payment History Section -->
 <div class="row-fluid">
   <div class="span12">
@@ -393,6 +451,15 @@ switch ($status) {
                 <img src="../img/report/stamp-sample.png" width="124px;" alt=""><br>
                 <small>Auto-generated report</small>
               </div>
+              
+            </div>
+            <div class="form-actions no-print" style="text-align: center; margin-top: 20px;">
+                <button onclick="window.print()" class="btn btn-primary">
+                    <i class="icon-print"></i> Print Report
+                </button>
+                  <button onclick="window.location.reload()" class="btn" style="margin-left:10px;">
+      <i class="icon-refresh"></i> Refresh
+  </button>
             </div>
           </div>
         </div>
@@ -418,5 +485,69 @@ $(document).ready(function(){
     });
 });
 </script>
+<script>
+<script>
+function printReport() {
+    // Create print header with user info
+    const printHeader = document.createElement('div');
+    printHeader.className = 'print-header';
+    printHeader.innerHTML = `
+        <h2>My Report</h2>
+        <p>Generated for: <?php echo htmlspecialchars($user['fullname']); ?> | Date: ${new Date().toLocaleDateString()}</p>
+    `;
+    
+    // Create print footer
+    const printFooter = document.createElement('div');
+    printFooter.className = 'print-footer';
+    printFooter.innerHTML = `
+        Page <span class="page-number"></span> | <?php echo date('Y'); ?> <?php echo $site_name; ?>
+    `;
+    
+    // Insert them into the report
+    const reportContent = document.getElementById('content').cloneNode(true);
+    reportContent.insertBefore(printHeader, reportContent.firstChild);
+    reportContent.appendChild(printFooter);
+    
+    // Open print window
+    const printWindow = window.open('', '', 'width=800,height=600');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>My Report - <?php echo htmlspecialchars($user['fullname']); ?></title>
+            <style>
+                ${document.querySelector('style[media="print"]').innerHTML}
+                body { font-family: Arial, sans-serif; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid #ddd; padding: 8px; }
+                th { background-color: #f2f2f2; }
+            </style>
+        </head>
+        <body>
+            ${reportContent.innerHTML}
+            <script>
+                // Update page numbers
+                const pages = document.querySelectorAll('.page-number');
+                for (let i = 0; i < pages.length; i++) {
+                    pages[i].textContent = (i + 1);
+                }
+            <\/script>
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    
+    // Delay print to allow content to load
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 500);
+    
+    return false;
+}
+</script>
+
 </body>
 </html>

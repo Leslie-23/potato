@@ -265,10 +265,10 @@ $age = $today->diff($dob)->y;
     <!-- Breadcrumbs -->
     <div id="content-header">
         <div id="breadcrumb"> 
-            <a href="index.php" title="You're right here" class="tip-bottom">
+            <a href="index.php" title="Go to Home" class="tip-bottom">
                 <i class="fas fa-home"></i> Home
             </a>
-            <a href="#" class="current">Workouts & Fitness Plan</a>
+            <a href="workout-me.php" title="You're right here" class="current">Workouts & Fitness Plan</a>
         </div>
         <h1>My Workouts & Fitness Plan</h1>
     </div>
@@ -507,10 +507,10 @@ $age = $today->diff($dob)->y;
                                 
                             </div>
                             <div class="user-thumb">
-                                    <img src="<?php echo htmlspecialchars($member['profile_pic']); ?>" 
+                                    <!-- <img src="<?php echo htmlspecialchars($member['profile_pic']); ?>" 
                                     width="240" height="120" 
                                     alt="Profile Picture" 
-                                    >
+                                    > -->
                         </div>
                         
                         <div class="row-fluid">
@@ -550,9 +550,12 @@ $age = $today->diff($dob)->y;
                     </div>
                     
                 </div>
+                <?php else: ?>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No fitness plan saved yet.
+                    </div>
                 <?php endif; ?>
             </div>
-            
         </div>
     </div>
 </div>

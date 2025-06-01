@@ -1,0 +1,93 @@
+{
+  "name": "EliteFit Gym System",
+  "short_name": "EliteFit",
+  "description": "Gym management and member portal",
+  "start_url": "/index.php",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#2c3e50",
+  "theme_color": "#3498db",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "gym-system/img/icontest3.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "gym-system/img/icontest3.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "gym-system/img/icontest3.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "gym-system/img/icontest3.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/img/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/img/screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Member Dashboard"
+    },
+    {
+      "src": "/img/screenshots/schedule.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Workout Schedule"
+    }
+  ],
+  "features": [
+    "Cross-platform",
+    "Fast loading",
+    "Offline capabilities",
+    "Push notifications"
+  ],
+  "categories": ["health", "fitness", "business"],
+  "shortcuts": [
+    {
+      "name": "My Workouts",
+      "short_name": "Workouts",
+      "description": "View your workout schedule",
+      "url": "/workouts.php",
+      "icons": [{ "src": "./gym-system/img/icontest3.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "My Progress",
+      "short_name": "Progress",
+      "description": "Track your fitness progress",
+      "url": "/progress.php",
+      "icons": [{ "src": "./gym-system/img/icontest3.png", "sizes": "96x96" }]
+    }
+  ]
+}

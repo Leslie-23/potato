@@ -564,7 +564,7 @@ document.querySelectorAll('.nav-links a').forEach(link => {
       
       <div class="testimonials-container">
         <?php 
-        $counter = 0;
+        $counter = 3;
         while($story = $successStories->fetch_assoc()): 
           $counter++;
           $weightLoss = $story['ini_weight'] - $story['curr_weight'];
@@ -947,7 +947,9 @@ document.querySelectorAll('.nav-links a').forEach(link => {
           <i class="fas fa-map-marker-alt"></i>
         </div>
         <h3>Visit Us</h3>
-        <p>Our flagship location in Accra</p>
+        <p>Our flagship location in Accra
+          Open 5am to 10pm daily
+          <i class="fas fa-info-circle" style="color: #ff9800;"></i></p>
         <a href="https://goo.gl/maps/abc123xyz" target="_blank" class="contact-btn" style="background: #ff9800;">
           Open in Maps
         </a>

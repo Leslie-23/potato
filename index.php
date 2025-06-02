@@ -206,7 +206,7 @@ $spotsLeft = 8 - ($nextSession['attendees'] ?? 0);
 }
 
 .cta-button {
-    background: linear-gradient(45deg, #ff5733, #ff9933);
+    background: linear-gradient(45deg, #00cae9, #009db5);
     border: none;
     padding: 0.8rem 1.5rem;
     border-radius: 5px;
@@ -398,7 +398,11 @@ document.querySelectorAll('.nav-links a').forEach(link => {
         <a href="#success " class="">Success Stories</a>
         <a href="#contact " class="">Contact Us</a>
       </div>
-      <button class="cta-button primary bold-text text-sm"><a href="./gym-system/customer/index.php">Join Now</a></button>
+      <a href="./gym-system/customer/index.php " class="cta-button">
+      <!-- <button class="cta-button primary bold-text text-sm"> -->
+        Join Now
+      <!-- </button> -->
+    </a>
     </div>
   </nav>
    </div>
@@ -453,8 +457,11 @@ document.querySelectorAll('.nav-links a').forEach(link => {
             </div>
           </div>
         </div>
-
-        <button class="cta-button primary bold-text text-big"><a href="./welcome.php">Start Your Transformation</a></button>
+<a href="./welcome.php" class="cta-button">
+        <!-- <button class="cta-button primary bold-text text-big"> -->
+          Start Your Transformation
+        <!-- </button> -->
+      </a>
       </div>
       
       <div class="hero-visual">
@@ -553,6 +560,7 @@ document.querySelectorAll('.nav-links a').forEach(link => {
       <?php endwhile; ?>
     </div>
   </div>
+  <div style="margin-top: 20px;"><a href="trainers.php" class="cta-button primary bold-text text-sm">View All</a> </div>
 </section>
 
   <!-- Success Stories Section -->
@@ -983,6 +991,7 @@ document.querySelectorAll('.nav-links a').forEach(link => {
             <a href="about.html">About Us</a>
             <a href="careers.html">Careers</a>
             <a href="press.html">Press</a>
+            <a href="portal.php">Management Portal </a>
           </div>
           <div class="footer-column">
             <h4>Resources</h4>

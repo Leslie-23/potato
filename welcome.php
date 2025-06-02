@@ -97,9 +97,23 @@ $spotsLeft = 8 - ($nextSession['attendees'] ?? 0);
   .divvy-1{
       background: linear-gradient(#2c3640, #2c3630) !important;
     }
+    .cta-button {
+    background: linear-gradient(45deg, #00cae9, #009db5);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.cta-button:hover {
+    transform: translateY(-2px);
+}
   </style>
   <body>
-    <div class="noise-overlay"></div>
+    <!-- <div class="noise-overlay"></div> -->
 
     <!-- Navigation -->
    
@@ -116,7 +130,11 @@ $spotsLeft = 8 - ($nextSession['attendees'] ?? 0);
             Join the data-driven fitness revolution that's helping thousands
             achieve their goals faster
           </p>
-<button class="cta-button primary bold-text text-big"><a href="./Gym-System/customer/index.php">Start Your Transformation</a></button>
+          <a href="./Gym-System/customer/index.php" class="cta-button">
+<!-- <button class="cta-button primary bold-text text-big"> -->
+  Join Us Today
+<!-- </button> -->
+</a>
 <!-- <button class="cta-button primary bold-text text-big"><a href="./Gym-System/index.php">Start Your Transformation</a></button> -->
         </div></div>
         <!-- </section> -->
@@ -381,6 +399,7 @@ $spotsLeft = 8 - ($nextSession['attendees'] ?? 0);
     </section>
 
     <!-- Footer -->
+       <footer>
     <div class="container">
       <div class="footer-content">
         <div class="footer-logo">EliteFit</div>
@@ -388,14 +407,14 @@ $spotsLeft = 8 - ($nextSession['attendees'] ?? 0);
           <div class="footer-column">
             <h4>Company</h4>
             <a href="about.html">About Us</a>
-            <a href="#">Careers</a>
-            <a href="#">Press</a>
+            <a href="careers.html">Careers</a>
+            <a href="press.html">Press</a>
           </div>
           <div class="footer-column">
             <h4>Resources</h4>
-            <a href="#">Blog</a>
-            <a href="#">Nutrition Guide</a>
-            <a href="#">Workout Library</a>
+            <a href="https://medium.com/tag/fitness" >Blog</a>
+            <a href="https://medium.com/@drjasonfung/control-hunger-not-calories-95c9076710f0">Nutrition Guide</a>
+            <a href="https://medium.com/tag/workout-routines">Workout Library</a>
           </div>
           <div class="footer-column">
             <h4>Legal</h4>

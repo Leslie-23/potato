@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: May 27, 2025 at 12:01 PM
+-- Generation Time: Jun 02, 2025 at 02:49 AM
 -- Server version: 8.0.35
 -- PHP Version: 8.2.13
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -46,7 +46,7 @@ INSERT INTO `admin` (
 VALUES (
         2,
         'admin',
-        '$2y$10$YwAYmJZCEBM9/kfiDXc5WekY7wKECDSZAzCnlgswuKoW1Md8OKhUe',
+        '$2y$10$t6YpyvrzVaki.CmhShyne.mN/dM41pEGauooPOPdVCS1QHHEyW.gS',
         'admin',
         'admin'
     );
@@ -103,7 +103,6 @@ VALUES (
         'final tests for the messaging.\r\n',
         '2025-04-30'
     ),
-    (15, NULL, '', '2025-05-30'),
     (16, NULL, 'lorem ipsum.', '2025-05-20');
 -- --------------------------------------------------------
 --
@@ -121,7 +120,87 @@ CREATE TABLE IF NOT EXISTS `attendance` (
     `status` enum('present', 'absent', 'completed') NOT NULL,
     `duration` time DEFAULT NULL,
     PRIMARY KEY (`id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 77 DEFAULT CHARSET = latin1;
+) ENGINE = InnoDB AUTO_INCREMENT = 84 DEFAULT CHARSET = latin1;
+--
+-- Dumping data for table `attendance`
+--
+INSERT INTO `attendance` (
+        `id`,
+        `user_id`,
+        `curr_date`,
+        `curr_time`,
+        `present`,
+        `check_in`,
+        `check_out`,
+        `status`,
+        `duration`
+    )
+VALUES (
+        78,
+        '6',
+        '2025-06-01',
+        '10:20 PM',
+        1,
+        NULL,
+        '22:27:29',
+        'completed',
+        '00:00:00'
+    ),
+    (
+        79,
+        '8',
+        '2025-06-01',
+        '22:27:34',
+        1,
+        '22:27:34',
+        '22:27:37',
+        'completed',
+        '00:00:03'
+    ),
+    (
+        80,
+        '11',
+        '2025-06-01',
+        '22:30:49',
+        1,
+        '22:30:49',
+        '22:56:08',
+        'completed',
+        '00:25:19'
+    ),
+    (
+        81,
+        '14',
+        '2025-06-01',
+        '22:30:50',
+        1,
+        '22:30:50',
+        '22:56:12',
+        'completed',
+        '00:25:22'
+    ),
+    (
+        82,
+        '17',
+        '2025-06-01',
+        '22:30:52',
+        1,
+        '22:30:52',
+        '22:56:14',
+        'completed',
+        '00:25:22'
+    ),
+    (
+        83,
+        '19',
+        '2025-06-01',
+        '23:40:38',
+        1,
+        '23:40:38',
+        '23:40:40',
+        'completed',
+        '00:00:02'
+    );
 -- --------------------------------------------------------
 --
 -- Table structure for table `equipment`
@@ -133,7 +212,7 @@ CREATE TABLE IF NOT EXISTS `equipment` (
     `amount` int NOT NULL,
     `quantity` int NOT NULL,
     `vendor` varchar(50) NOT NULL,
-    `status` enum('good', 'out_of_order', 'damaged') DEFAULT NULL,
+    `status` enum('good', 'out_of_order', 'damaged') CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT 'good',
     `description` varchar(50) NOT NULL,
     `address` varchar(20) NOT NULL,
     `contact` varchar(10) NOT NULL,
@@ -141,7 +220,7 @@ CREATE TABLE IF NOT EXISTS `equipment` (
     `trainer_id` int DEFAULT NULL,
     PRIMARY KEY (`id`),
     KEY `fk_equipment_trainer` (`trainer_id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 12 DEFAULT CHARSET = latin1;
+) ENGINE = InnoDB AUTO_INCREMENT = 13 DEFAULT CHARSET = latin1;
 --
 -- Dumping data for table `equipment`
 --
@@ -234,7 +313,7 @@ VALUES (
         '52 Weekley Street',
         '7412585555',
         '2021-06-12',
-        NULL
+        6
     ),
     (
         11,
@@ -247,7 +326,20 @@ VALUES (
         'Spintex',
         '000222555',
         '2025-04-10',
-        NULL
+        6
+    ),
+    (
+        12,
+        'Dumbell (100kg)',
+        2000,
+        4,
+        'Elite Traders Eqp',
+        'good',
+        'Single handed dumb bell ',
+        'Spintex',
+        '0000000041',
+        '2025-06-08',
+        6
     );
 -- --------------------------------------------------------
 --
@@ -322,7 +414,7 @@ CREATE TABLE IF NOT EXISTS `members` (
     PRIMARY KEY (`user_id`),
     KEY `idx_members_email` (`email`),
     KEY `idx_members_otp` (`otp`, `otp_expiry`)
-) ENGINE = InnoDB AUTO_INCREMENT = 86 DEFAULT CHARSET = latin1;
+) ENGINE = InnoDB AUTO_INCREMENT = 109 DEFAULT CHARSET = latin1;
 --
 -- Dumping data for table `members`
 --
@@ -359,14 +451,14 @@ VALUES (
         6,
         'Harry Denn',
         'harry',
-        '$2y$12$/dwm4QCt.9ln5y7EAg8uKuDBvSEvvlfFHx3Uy/biDztREyOYRuR1.',
+        '$2y$10$3pZ4AnAidLH6/AUwt6pLFenxRTNpkU.G41.dqYmtdPbmI0DCSfiNy',
         'Male',
         '2019-12-25',
         'Fitness',
-        480000,
-        '2025-05-07',
+        480155,
+        '2025-05-29',
         2025,
-        '12',
+        '1',
         '64 Mulberry Lane',
         '8545878546',
         'Active',
@@ -376,12 +468,12 @@ VALUES (
         'Slim',
         'Ectomorph',
         '2025-04-29',
-        1,
+        0,
         'harry@gmail.com',
         NULL,
         NULL,
         NULL,
-        '../img/cc1.jpg',
+        'uploads/profiles/user_6_1748710024.png',
         '2000-01-01'
     ),
     (
@@ -2471,6 +2563,673 @@ VALUES (
         '2025-05-27 11:34:26',
         'd376c8fb-0955-40c3-8e38-18cbb5a7d6d6.jpeg',
         '1858-05-27'
+    ),
+    (
+        86,
+        'Rooney Wayne ',
+        'Rooney',
+        '$2y$12$t68kl0dKDt37xXvY5CpOYuUtVZeKx73iZmZfPlimE1L7Yph3ooOUm',
+        'Male',
+        '2025-05-28',
+        'Sauna',
+        100,
+        NULL,
+        NULL,
+        '1',
+        'Spintex',
+        '1212343456',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'Rooney@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-28 13:00:23',
+        'a44b72b7-a860-4cf1-8605-e76c4eba7c02.jpeg',
+        '1980-05-28'
+    ),
+    (
+        87,
+        'Van Persie',
+        'Van',
+        '$2y$12$Y3IfD8qagQ1cRzWiBlWjL.EuqgQQr9VEjSyn6gNDNba65aYY7lluy',
+        'Male',
+        '2025-05-28',
+        'Sauna',
+        800,
+        NULL,
+        NULL,
+        '12',
+        'Spintex',
+        '2468101214',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'Van@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-28 13:17:53',
+        '432880c3-a106-4ecd-bed2-b6ecbc8a584c.jpeg',
+        '1989-05-28'
+    ),
+    (
+        88,
+        'Agogo Ye',
+        'Agogo',
+        '$2y$12$a4Ks4psedY9.u5WCxRymsurvUSZGOjVTyo4kLRitsai3jekQmh.Qm',
+        'Male',
+        '2025-05-28',
+        'Sauna',
+        450,
+        NULL,
+        NULL,
+        '6',
+        'Spintex',
+        '3691215181',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'Agogo@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-28 13:51:10',
+        'be58746c-16ed-43e0-a77b-b9ba836dd438.jpeg',
+        '1980-05-28'
+    ),
+    (
+        89,
+        'Mimo Avvv',
+        'mimo',
+        '$2y$12$/7Vy3863giXWXScn9c4Sve50stcuJQ.WFilGz1Dd3gqjty8UcFC3a',
+        'Male',
+        '2025-05-28',
+        'Fitness',
+        800,
+        NULL,
+        NULL,
+        '12',
+        'Spintex',
+        '0271239977',
+        'Pending',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'Mimo@gmail.com',
+        NULL,
+        NULL,
+        NULL,
+        'cc1.jpg',
+        '2007-05-28'
+    ),
+    (
+        90,
+        'p p',
+        'pp',
+        '$2y$12$wqTgd7mjruInYTcq/RwjQusqYpRfLzsllrh3EFKrgLfxKyuLaxxXC',
+        'Male',
+        '2025-05-28',
+        'Fitness',
+        250,
+        NULL,
+        NULL,
+        '3',
+        '8 Osram Avenue',
+        '0000000022',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'ppp@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-28 21:18:57',
+        'cc1.jpg',
+        '2007-05-28'
+    ),
+    (
+        91,
+        'qq',
+        'qq',
+        '$2y$12$lTyRxbA2zL3lZRPztvB70eNfeSkRrBQeyFtT5miqEJRVVK/BGgr6C',
+        'Male',
+        '2025-05-28',
+        'Fitness',
+        800,
+        NULL,
+        NULL,
+        '12',
+        '8 Osram Avenue',
+        '0000000023',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'qq@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-28 21:40:17',
+        'eltonDSA-img.png',
+        '2007-05-28'
+    ),
+    (
+        92,
+        'quack',
+        'quack',
+        '$2y$12$a.zDfxR6eyCS3Wm.Mny0MOP4gH7Qy4ybfb7YP5wnx5F4IrQKI7Rvu',
+        'Female',
+        '2025-05-28',
+        'Fitness',
+        450,
+        NULL,
+        NULL,
+        '6',
+        'Spintex',
+        '0000000024',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'quack@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-28 21:49:16',
+        'eltonDSA-img.png',
+        '2007-05-28'
+    ),
+    (
+        93,
+        'quackeroo',
+        'quackeroo',
+        '$2y$12$Cf94Zq1fMHX3bkCs9X4Pv.H19HqKdzZF0TTy0XzIu3Q0gKKK738wG',
+        'Male',
+        '2025-05-28',
+        'Fitness',
+        450,
+        NULL,
+        NULL,
+        '6',
+        'Spintex',
+        '0000000025',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'quackeroo@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-28 22:12:28',
+        'dx-1.png',
+        '2007-05-28'
+    ),
+    (
+        94,
+        'kwaku G',
+        'kwaku',
+        '$2y$12$iJU5CjzVIHFn8tJmrJXZ.ONTlUu0HNEwoDA2uOW2UZ22qTnIfUBRW',
+        'Male',
+        '2025-05-28',
+        'Fitness',
+        450,
+        NULL,
+        NULL,
+        '6',
+        'Spintex',
+        '0000000026',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'kwaku@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-28 22:21:36',
+        'dx-1.png',
+        '2007-05-28'
+    ),
+    (
+        95,
+        'abena kobena',
+        'abenaK',
+        '$2y$12$vacQFeUl/y/RV7XXptkzHOfGq/VEZ8r9T7AXZ9faul3WQxeep3y/u',
+        'Female',
+        '2025-05-28',
+        'Fitness',
+        800,
+        NULL,
+        NULL,
+        '12',
+        'Spintex',
+        '0000000027',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'abena@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-28 22:49:29',
+        '',
+        '2007-05-28'
+    ),
+    (
+        96,
+        'Jerry eze',
+        'Jerry',
+        '$2y$12$FAcdccm6sHOSx2wb6ED7a.cuX7pKUSpWBacodMHV928WmlNpjzPKS',
+        'Male',
+        '2025-05-28',
+        'Sauna',
+        800,
+        NULL,
+        NULL,
+        '12',
+        'JWH6+Q26, Accra',
+        '0000000028',
+        'Pending',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'Jerry@gmail.com',
+        NULL,
+        NULL,
+        NULL,
+        '',
+        '1966-05-28'
+    ),
+    (
+        97,
+        'Monkey Hundred',
+        'monkey',
+        '$2y$12$b7hTy4kh3OgXG1En2qR2QujSs.5oa.6rKLk/0bui1dEYEGPRKAxle',
+        'Male',
+        '2025-05-28',
+        'Fitness',
+        800,
+        NULL,
+        NULL,
+        '12',
+        'JWH6+Q26, Accra',
+        '0000000029',
+        'Pending',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'Monkey@gmail.com',
+        NULL,
+        NULL,
+        NULL,
+        '',
+        '2007-05-28'
+    ),
+    (
+        98,
+        'Money Cedis',
+        'money',
+        '$2y$12$LhEUVsncKFOkGHUo7uZQB.5eVBuiIXrDkqKS6h8n1ATf41MAiic3G',
+        'Male',
+        '2025-05-28',
+        'Fitness',
+        800,
+        NULL,
+        NULL,
+        '12',
+        'Spintex',
+        '0000000030',
+        'Pending',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'Money@gmail.com',
+        NULL,
+        NULL,
+        NULL,
+        '',
+        '2007-05-28'
+    ),
+    (
+        99,
+        'Bronya ',
+        'Bronya',
+        '$2y$12$Me70qe.AVsSHwkx5mWxSy.4Hsl/PoHEPhn1icQ8xZJUr.fPG6Gmr2',
+        'Male',
+        '2025-05-28',
+        'Fitness',
+        100,
+        NULL,
+        NULL,
+        '1',
+        'Spintex',
+        '0000000032',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'bronyaa@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-28 23:58:48',
+        '../uploads/profiles/user_99_1748478666.png',
+        '1992-05-28'
+    ),
+    (
+        100,
+        'loo',
+        'loo',
+        '$2y$12$v40Jk4RCyvh1m.9/gYuGFOLGVRiTeM.hdeUK8y/kFODyo2S84Ow1S',
+        'Male',
+        '2025-05-29',
+        'Fitness',
+        800,
+        NULL,
+        NULL,
+        '12',
+        'Spintex',
+        '0000000031',
+        'Pending',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'loo@gmail.com',
+        NULL,
+        NULL,
+        NULL,
+        'img/default-male-avatar.png',
+        '2007-05-28'
+    ),
+    (
+        101,
+        'Zidane Zin',
+        'Zidane',
+        '$2y$12$Ag4NQ7GUJUcjUlIJDK3Esu5RRiVxFm5.vGUshnwLlzWZ1lzROn3Sy',
+        'Male',
+        '2025-05-30',
+        'Cardio',
+        250,
+        NULL,
+        NULL,
+        '3',
+        'Spintex',
+        '0000001111',
+        'Pending',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'zidane@gmail.com',
+        NULL,
+        NULL,
+        NULL,
+        'uploads/profile_pictures/profile_6839b4bfa2dcf3.72539609.jpeg',
+        '1996-05-30'
+    ),
+    (
+        102,
+        'Zidane Zin',
+        'Zidane1996',
+        '$2y$12$kGLdUug7tk2b32X3V1wDLeKFjh7s1Z4u50uvqLpyAhWYqZJqk053m',
+        'Male',
+        '2025-05-30',
+        'Cardio',
+        250,
+        NULL,
+        NULL,
+        '3',
+        'Spintex',
+        '0000001111',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'zidane1996@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-30 13:42:24',
+        '../uploads/profiles/user_102_1748612682.jpeg',
+        '1996-05-30'
+    ),
+    (
+        103,
+        'Samuel Eto',
+        'SamEto',
+        '$2y$12$vC6pSOioPpEU71Mo91O9c.BxSJyvqOd00iJelfTh.yv5c4R1/IjZa',
+        'Male',
+        '2025-05-31',
+        'Fitness',
+        800,
+        NULL,
+        NULL,
+        '12',
+        'Spintex',
+        '0000000033',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'Samuel@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-31 04:28:49',
+        '../uploads/profiles/user_103_1748665894.jpg',
+        '2007-05-31'
+    ),
+    (
+        104,
+        'Lionel Messi',
+        'Messi',
+        '$2y$12$gdQv8BdmP./Wxdq2h3xdiuBDvLrvLMLsEsVoyKAfafxFU3CM6AH.O',
+        'Male',
+        '2025-05-31',
+        'Fitness',
+        800,
+        NULL,
+        NULL,
+        '12',
+        'JWH6+Q26, Accra',
+        '0000000034',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'Lionel@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-31 04:42:54',
+        '../uploads/profiles/user_104_1748666752.png',
+        '2007-05-31'
+    ),
+    (
+        105,
+        'Lebron James',
+        'KingJames',
+        '$2y$12$KjwBbno71qbW37i/qx3eOuGBngGP9ao0fcLF3IsXHvWZ03q6J2WoG',
+        'Male',
+        '2025-05-31',
+        'Fitness',
+        800,
+        NULL,
+        NULL,
+        '12',
+        'Spintex',
+        '0000000035',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'Lebron@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-31 04:59:15',
+        '../uploads/profiles/user_105_1748697225.jpg',
+        '2007-05-31'
+    ),
+    (
+        106,
+        'Qwee Sanders',
+        'QueeSanders003',
+        '$2y$12$3yhTD2wvjcnOdtVm9Z4nc.QcyoYF3fzAntyOvtUxXnl6xK4mSKBE6',
+        'Male',
+        '2025-05-31',
+        'Fitness',
+        800,
+        NULL,
+        NULL,
+        '12',
+        'JWH6+Q26, Accra',
+        '0000000036',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'qwee@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-31 13:34:25',
+        '../uploads/profile_pictures/user_106_1748700104.png',
+        '2007-05-31'
+    ),
+    (
+        107,
+        'Roberta Queen',
+        'Roberta1234',
+        '$2y$12$kAf7FRevTwWtJsNuT78T0OTKrUalKFaxNogNMqFVEsyoVDryuqQGK',
+        'Female',
+        '2025-05-31',
+        'Fitness',
+        250,
+        NULL,
+        NULL,
+        '3',
+        'Spintex',
+        '0000000037',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'roberta@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-31 14:09:23',
+        'uploads/profiles/user_107_1748701570.png',
+        '2007-05-23'
+    ),
+    (
+        108,
+        'Blessing Grace',
+        'Blessing123456',
+        '$2y$12$UIH8.F2TpXGa/CeFH8bYFuysoS7rUXtZ0wFOu1ZtsGMfPl1atexJm',
+        'Female',
+        '2025-05-31',
+        'Fitness',
+        800,
+        NULL,
+        NULL,
+        '12',
+        'Spintex',
+        '0000000040',
+        'Active',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0,
+        'Blessing@gmail.com',
+        NULL,
+        NULL,
+        '2025-05-31 15:12:14',
+        'uploads/profiles/user_108_1748705131.png',
+        '2007-05-31'
     );
 -- --------------------------------------------------------
 --
@@ -2493,7 +3252,7 @@ CREATE TABLE IF NOT EXISTS `members_fitness` (
     `experience_level` int NOT NULL,
     `health_condition_desc` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     PRIMARY KEY (`id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 86 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB AUTO_INCREMENT = 108 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 --
 -- Dumping data for table `members_fitness`
 --
@@ -3104,6 +3863,358 @@ VALUES (
         4,
         1,
         ''
+    ),
+    (
+        86,
+        86,
+        123,
+        123,
+        'Ectomorph',
+        1,
+        'Opor',
+        'Polopi',
+        'Ui',
+        'None',
+        3,
+        8,
+        1,
+        ''
+    ),
+    (
+        87,
+        87,
+        70,
+        170,
+        'Ectomorph',
+        7,
+        'Weight loss',
+        'Red',
+        'Terommy',
+        'None',
+        9,
+        3,
+        1,
+        ''
+    ),
+    (
+        88,
+        88,
+        70.5,
+        175.5,
+        'Ectomorph',
+        10,
+        'Strong',
+        'Tough ',
+        'Bulk',
+        'None',
+        9,
+        16,
+        1,
+        ''
+    ),
+    (
+        89,
+        89,
+        170,
+        170,
+        'Ectomorph',
+        2,
+        'Tough',
+        'Strong',
+        'Bulk',
+        'None',
+        5,
+        12,
+        1,
+        ''
+    ),
+    (
+        90,
+        90,
+        123,
+        123,
+        'Ectomorph',
+        16,
+        'Tough',
+        'Strong',
+        'Bulk',
+        'None',
+        15,
+        14,
+        1,
+        ''
+    ),
+    (
+        91,
+        91,
+        123,
+        123,
+        'Ectomorph',
+        16,
+        'Tough',
+        'Strong',
+        'Bulk',
+        'Asthma',
+        10,
+        7,
+        9,
+        ''
+    ),
+    (
+        92,
+        92,
+        123,
+        123,
+        'Mesomorph',
+        1,
+        'Tough',
+        'Strength',
+        'Bulk',
+        'None',
+        2,
+        16,
+        1,
+        ''
+    ),
+    (
+        93,
+        93,
+        123,
+        123,
+        'Ectomorph',
+        16,
+        'Tough',
+        'Strong',
+        'Bulk',
+        'None',
+        15,
+        14,
+        1,
+        ''
+    ),
+    (
+        94,
+        94,
+        123,
+        123,
+        'Mesomorph',
+        16,
+        'Tough',
+        'Strength',
+        'lkjhgfd',
+        'None',
+        12,
+        5,
+        1,
+        ''
+    ),
+    (
+        95,
+        95,
+        123,
+        123,
+        'Mesomorph',
+        16,
+        'Tough',
+        'Strong',
+        'Bulk',
+        'None',
+        10,
+        12,
+        1,
+        ''
+    ),
+    (
+        96,
+        96,
+        70,
+        30,
+        'Ectomorph',
+        7,
+        'Qwerty',
+        'Poiu',
+        'Asdf',
+        'None',
+        9,
+        12,
+        1,
+        ''
+    ),
+    (
+        97,
+        97,
+        123,
+        123,
+        'Mesomorph',
+        1,
+        'Tough',
+        'Strong',
+        'Bulk',
+        'None',
+        2,
+        4,
+        5,
+        ''
+    ),
+    (
+        98,
+        98,
+        123,
+        123,
+        'Ectomorph',
+        15,
+        'Tough',
+        'Strong',
+        'Bulk',
+        'None',
+        11,
+        7,
+        1,
+        ''
+    ),
+    (
+        99,
+        99,
+        180,
+        80,
+        'Mesomorph',
+        7,
+        'Qw',
+        'Er',
+        'Ty',
+        'Joint Problems',
+        9,
+        11,
+        5,
+        ''
+    ),
+    (
+        100,
+        100,
+        123,
+        123,
+        'Ectomorph',
+        16,
+        'Tough',
+        'Strong',
+        'Bulk',
+        'Diabetes',
+        14,
+        9,
+        5,
+        ''
+    ),
+    (
+        101,
+        102,
+        1234,
+        123,
+        'Ectomorph',
+        7,
+        'Grooo',
+        'Oooort',
+        'Pooii',
+        'None',
+        8,
+        6,
+        1,
+        ''
+    ),
+    (
+        102,
+        103,
+        70.5,
+        175.5,
+        'Ectomorph',
+        15,
+        'Weight gain',
+        'Trim fat',
+        'Big arms',
+        'None',
+        16,
+        10,
+        1,
+        ''
+    ),
+    (
+        103,
+        104,
+        70,
+        170,
+        'Ectomorph',
+        16,
+        'Tough',
+        'Strong',
+        'Bulk',
+        'None',
+        15,
+        9,
+        1,
+        ''
+    ),
+    (
+        104,
+        105,
+        200,
+        200,
+        'Ectomorph',
+        16,
+        'Tough',
+        'Strong',
+        'Bulk',
+        'None',
+        15,
+        14,
+        1,
+        ''
+    ),
+    (
+        105,
+        106,
+        70,
+        170,
+        'Ectomorph',
+        12,
+        'Strength',
+        'bulk',
+        'tough',
+        'Asthma',
+        16,
+        7,
+        1,
+        ''
+    ),
+    (
+        106,
+        107,
+        70,
+        170,
+        'Ectomorph',
+        16,
+        'Tough',
+        'Strong',
+        'Bulk',
+        'None',
+        12,
+        8,
+        1,
+        ''
+    ),
+    (
+        107,
+        108,
+        123,
+        123,
+        'Ectomorph',
+        16,
+        'Tough',
+        'Strong',
+        'Bulk',
+        'None',
+        14,
+        9,
+        5,
+        ''
     );
 -- --------------------------------------------------------
 --
@@ -3124,7 +4235,7 @@ CREATE TABLE IF NOT EXISTS `payment_logs` (
     PRIMARY KEY (`log_id`),
     KEY `transaction_id` (`transaction_id`),
     KEY `admin_id` (`admin_id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 8 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 --
 -- Dumping data for table `payment_logs`
 --
@@ -3187,6 +4298,30 @@ VALUES (
         'approved',
         '',
         '2025-05-07 18:22:56'
+    ),
+    (
+        8,
+        49,
+        '',
+        480000,
+        6,
+        2,
+        'pending',
+        'approved',
+        '',
+        '2025-05-29 00:59:51'
+    ),
+    (
+        9,
+        46,
+        '',
+        100,
+        6,
+        2,
+        'pending',
+        'approved',
+        '',
+        '2025-05-29 01:00:38'
     );
 -- --------------------------------------------------------
 --
@@ -3319,7 +4454,7 @@ CREATE TABLE IF NOT EXISTS `staffs` (
     `gender` varchar(10) NOT NULL,
     `contact` int NOT NULL,
     PRIMARY KEY (`user_id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 20 DEFAULT CHARSET = latin1;
+) ENGINE = InnoDB AUTO_INCREMENT = 26 DEFAULT CHARSET = latin1;
 --
 -- Dumping data for table `staffs`
 --
@@ -3439,7 +4574,7 @@ VALUES (
         'Sarah Johnson',
         '456 Fitness Ave',
         'Trainer',
-        'https://images.unsplash.com/photo-1599749290264-6b6c6a373316?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
+        'https://images.unsplash.com/photo-1705417280569-e6fc34faee98?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGJsYWNrJTIwdHJhaW5lcnxlbnwwfHwwfHx8MA%3D%3D',
         'Female',
         5550202
     ),
@@ -3457,22 +4592,22 @@ VALUES (
     ),
     (
         11,
-        'trainer_john',
+        'trainer_jacob',
         '482c811da5d5b4bc6d497ffa98491e38',
-        'john@example.com',
-        'John Smith',
+        'jacob@example.com',
+        'Jacob Isaac',
         '123 Gym St',
         'Trainer',
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
+        'https://plus.unsplash.com/premium_photo-1672420330305-6da3823ad9b6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fHJhbmRvbSUyMGd1eSUyMHRyYWluZXJ8ZW58MHx8MHx8fDA%3D',
         'Male',
         5550101
     ),
     (
         12,
-        'trainer_sarah',
+        'trainer_erica',
         '482c811da5d5b4bc6d497ffa98491e38',
-        'sarah@example.com',
-        'Sarah Johnson',
+        'erica@example.com',
+        'Erica Nlewedim',
         '456 Fitness Ave',
         'Trainer',
         'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
@@ -3481,10 +4616,10 @@ VALUES (
     ),
     (
         13,
-        'trainer_mike',
+        'trainer_bernard',
         '482c811da5d5b4bc6d497ffa98491e38',
-        'mike@example.com',
-        'Mike Williams',
+        'bernard@example.com',
+        'Bernard Emmanuel',
         '789 Workout Blvd',
         'Trainer',
         'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
@@ -3559,9 +4694,163 @@ VALUES (
         'Selorm Prince',
         'Spintex',
         'Trainer',
-        NULL,
+        'https://images.unsplash.com/photo-1627991089434-572540237fb7?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGJsYWNrJTIwdHJhaW5lcnxlbnwwfHwwfHx8MA%3D%3D',
         'Male',
         275558887
+    ),
+    (
+        20,
+        'alex_coach',
+        '$2y$10$t6YpyvrzVaki.CmhShyne.mN/dM41pEGauooPOPdVCS1QHHEyW.gS',
+        'alex@elitefit.com',
+        'Alex Rivera',
+        '45 Fitness Ave',
+        'Trainer',
+        'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b',
+        'Male',
+        5551001
+    ),
+    (
+        21,
+        'taylor_fit',
+        '$2y$10$t6YpyvrzVaki.CmhShyne.mN/dM41pEGauooPOPdVCS1QHHEyW.gS',
+        'taylor@elitefit.com',
+        'Taylor Chen',
+        '89 Wellness St',
+        'Trainer',
+        'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7',
+        'Female',
+        5551002
+    ),
+    (
+        22,
+        'jamal_strength',
+        '$2y$10$t6YpyvrzVaki.CmhShyne.mN/dM41pEGauooPOPdVCS1QHHEyW.gS',
+        'jamal@elitefit.com',
+        'Jamal Williams',
+        '32 Power Lane',
+        'Trainer',
+        'https://images.unsplash.com/photo-1572459815294-26edc555608e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8YmxhY2slMjB0cmFpbmVyfGVufDB8fDB8fHww',
+        'Male',
+        5551003
+    ),
+    (
+        23,
+        'priya_yoga',
+        '$2y$10$t6YpyvrzVaki.CmhShyne.mN/dM41pEGauooPOPdVCS1QHHEyW.gS',
+        'priya@elitefit.com',
+        'Priya Patel',
+        '78 Balance Rd',
+        'Trainer',
+        'https://images.unsplash.com/photo-1549060279-7e168fcee0c2',
+        'Female',
+        5551004
+    ),
+    (
+        24,
+        'marcus_power',
+        '$2y$10$t6YpyvrzVaki.CmhShyne.mN/dM41pEGauooPOPdVCS1QHHEyW.gS',
+        'marcus@elitefit.com',
+        'Marcus Johnson',
+        '21 Strength Blvd',
+        'Trainer',
+        'https://images.unsplash.com/photo-1606030458133-9cc15619c9d0?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8YmxhY2slMjB0cmFpbmVyfGVufDB8fDB8fHww',
+        'Male',
+        5551005
+    ),
+    (
+        25,
+        'newman',
+        '$2y$10$gfotT464.pSL4bCvpbx98eJCK0e4hniNPNxtg7tw2vt7WHbSajYeS',
+        'newman@gmail.com',
+        'newman',
+        'Spintex',
+        'Trainer',
+        NULL,
+        'Male',
+        1111111143
+    );
+-- --------------------------------------------------------
+--
+-- Table structure for table `tasks`
+--
+DROP TABLE IF EXISTS `tasks`;
+CREATE TABLE IF NOT EXISTS `tasks` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `admin_id` int NOT NULL,
+    `title` varchar(255) NOT NULL,
+    `description` text,
+    `start_datetime` datetime NOT NULL,
+    `end_datetime` datetime DEFAULT NULL,
+    `is_all_day` tinyint(1) DEFAULT '0',
+    `status` enum('pending', 'in_progress', 'completed', 'cancelled') DEFAULT 'pending',
+    `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `admin_id` (`admin_id`)
+) ENGINE = InnoDB AUTO_INCREMENT = 6 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+--
+-- Dumping data for table `tasks`
+--
+INSERT INTO `tasks` (
+        `id`,
+        `admin_id`,
+        `title`,
+        `description`,
+        `start_datetime`,
+        `end_datetime`,
+        `is_all_day`,
+        `status`,
+        `created_at`,
+        `updated_at`
+    )
+VALUES (
+        1,
+        2,
+        'Meet with new clients',
+        NULL,
+        '2025-05-28 00:00:00',
+        '2025-05-29 00:00:00',
+        0,
+        'pending',
+        '2025-05-28 00:40:46',
+        '2025-05-28 00:40:46'
+    ),
+    (
+        2,
+        2,
+        'hmmm',
+        NULL,
+        '2025-04-04 00:00:00',
+        '2025-04-05 00:00:00',
+        0,
+        'pending',
+        '2025-05-28 00:41:07',
+        '2025-05-28 00:41:07'
+    ),
+    (
+        3,
+        2,
+        'Employ more staff',
+        NULL,
+        '2025-05-29 00:00:00',
+        '2025-05-30 00:00:00',
+        0,
+        'pending',
+        '2025-05-28 00:41:35',
+        '2025-05-28 00:41:35'
+    ),
+    (
+        4,
+        2,
+        'Contact Suppliers',
+        NULL,
+        '2025-05-29 00:00:00',
+        '2025-05-30 00:00:00',
+        0,
+        'pending',
+        '2025-05-28 00:41:55',
+        '2025-05-28 00:41:55'
     );
 -- --------------------------------------------------------
 --
@@ -3574,7 +4863,7 @@ CREATE TABLE IF NOT EXISTS `todo` (
     `task_desc` varchar(30) NOT NULL,
     `user_id` int NOT NULL,
     PRIMARY KEY (`id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 34 DEFAULT CHARSET = latin1;
+) ENGINE = InnoDB AUTO_INCREMENT = 35 DEFAULT CHARSET = latin1;
 --
 -- Dumping data for table `todo`
 --
@@ -3585,7 +4874,8 @@ VALUES (20, 'In Progress', 'Test Completed', 14),
     (28, 'In Progress', 'Test 1', 23),
     (31, 'In Progress', 'Mastering Crunches', 2),
     (32, 'In Progress', 'Mastering Crunches', 6),
-    (33, 'Pending', 'Decline dumbbell bench pres', 6);
+    (33, 'Pending', 'Decline dumbbell bench pres', 6),
+    (34, 'Pending', 'Mastering Crunches2.0', 6);
 -- --------------------------------------------------------
 --
 -- Table structure for table `trainers`
@@ -3610,53 +4900,123 @@ INSERT INTO `trainers` (
         `years_experience`
     )
 VALUES (
+        2,
+        'General Fitness',
+        'Michelle R. Lane is a professional trainer specializing in general fitness principles.',
+        'ACE Certified',
+        3
+    ),
+    (
+        3,
+        'General Fitness',
+        'James Brown is a professional trainer specializing in general fitness principles.',
+        'ACE Certified',
+        5
+    ),
+    (
+        5,
+        'Body Building',
+        'Paul O is a professional trainer specializing in bodybuilding and physique development.',
+        'IFBB Professional',
+        6
+    ),
+    (
         6,
-        'Weight Loss',
-        'Certified personal trainer with 5 years experience',
-        'NASM Certified',
+        'Weight Loss Specialist',
+        'Specializes in weight loss programs with a focus on sustainable results through metabolic conditioning and nutrition coaching.',
+        'NASM-CPT, ACE-WMS, Precision Nutrition L1',
         5
     ),
     (
         7,
-        'Body Building',
-        'Professional bodybuilder turned trainer',
-        'ACE Certified',
+        'Bodybuilding Coach',
+        'Professional bodybuilding coach with expertise in hypertrophy training and competition preparation.',
+        'IFBB Pro, ISSA-BBC, NSCA-CSCS',
         8
     ),
     (
         8,
-        'Cardio Fitness',
-        'Marathon runner and HIIT specialist',
-        'ISSA Certified',
+        'Cardio & Endurance Expert',
+        'Endurance specialist creating customized cardio programs for runners and athletes of all levels.',
+        'RRCA, USATF-1, ACE-CPT',
         3
     ),
     (
         9,
-        'Weight Loss',
-        'Certified personal trainer with 5 years experience',
-        'NASM Certified',
+        'Weight Loss Specialist',
+        'Weight loss expert combining exercise programming with behavior change strategies for long-term success.',
+        'NASM-CPT, ACE-WMS, Precision Nutrition L1',
         5
     ),
     (
         10,
-        'Body Building',
-        'Professional bodybuilder turned trainer',
-        'ACE Certified',
+        'Strength & Conditioning Coach',
+        'Strength coach focused on power development and athletic performance enhancement.',
+        'NSCA-CSCS, FMS, ISSA-SCS',
         8
     ),
     (
         11,
-        'Cardio Fitness',
-        'Marathon runner and HIIT specialist',
-        'ISSA Certified',
+        'Functional Fitness Trainer',
+        'Functional movement specialist helping clients move better for sports and daily life.',
+        'FMS, ACE-FTC, NASM-CES',
         3
     ),
     (
         12,
-        'Full Body Strength',
-        'bla bla bla',
-        'NASS',
+        'Strength & Performance Coach',
+        'Performance coach integrating strength, mobility and movement quality into all programs.',
+        'NSCA-CPT, NASM-PES, ISSA-SCS',
         5
+    ),
+    (
+        13,
+        'Strength Conditioning',
+        'Mike Williams is a professional trainer specializing in strength development and power conditioning.',
+        'NSCA Certified Strength Coach',
+        10
+    ),
+    (
+        19,
+        'Athletic Performance',
+        'Selorm Prince is a professional trainer specializing in sports-specific athletic performance.',
+        'EXOS Performance Specialist',
+        2
+    ),
+    (
+        20,
+        'HIIT & Metabolic Conditioning',
+        'Alex specializes in high-intensity interval training and metabolic conditioning programs that deliver maximum results in minimal time. Former collegiate athlete with a passion for helping clients push their limits.',
+        'ACE Certified Personal Trainer, Precision Nutrition L1, CrossFit L2',
+        7
+    ),
+    (
+        21,
+        'Functional Mobility & Corrective Exercise',
+        'Taylor focuses on functional movement patterns, mobility, and corrective exercise to help clients move better and reduce injury risk. Background in physical therapy assistance.',
+        'NASM Certified Personal Trainer, FMS Level 2, NASM-CES',
+        5
+    ),
+    (
+        22,
+        'Strength & Power Development',
+        'Jamal is a competitive powerlifter who trains athletes and general population clients in proper strength development techniques. Believes in fundamentals first.',
+        'NSCA Certified Strength Coach, USAW Level 1, CPR/AED',
+        8
+    ),
+    (
+        23,
+        'Yoga & Mind-Body Integration',
+        'Priya integrates traditional yoga practices with modern fitness principles for holistic wellness. Specializes in stress reduction and recovery techniques.',
+        'RYT-500, ACE Certified Group Fitness, Yoga Medicine Certified',
+        6
+    ),
+    (
+        24,
+        'Sports Performance & Athletic Development',
+        'Marcus trains competitive athletes with a focus on sport-specific movement patterns, speed development, and power transfer. Former D1 football strength coach.',
+        'CSCS, EXOS Performance Specialist, USA Track & Field Level 2',
+        10
     );
 -- --------------------------------------------------------
 --
@@ -3667,10 +5027,58 @@ CREATE TABLE IF NOT EXISTS `trainer_workout_specialization` (
     `id` int NOT NULL AUTO_INCREMENT,
     `trainer_id` int NOT NULL,
     `plan_id` int NOT NULL,
+    `years_experience` int DEFAULT NULL,
+    `certification` varchar(100) DEFAULT NULL,
     PRIMARY KEY (`id`),
-    KEY `trainer_id` (`trainer_id`),
+    UNIQUE KEY `trainer_plan_unique` (`trainer_id`, `plan_id`),
     KEY `plan_id` (`plan_id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 2 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB AUTO_INCREMENT = 37 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+--
+-- Dumping data for table `trainer_workout_specialization`
+--
+INSERT INTO `trainer_workout_specialization` (
+        `id`,
+        `trainer_id`,
+        `plan_id`,
+        `years_experience`,
+        `certification`
+    )
+VALUES (1, 6, 1, 5, 'NASM Certified Personal Trainer'),
+    (2, 6, 4, 4, 'Precision Nutrition Level 1'),
+    (3, 6, 11, 3, 'ACE Weight Management Specialist'),
+    (4, 7, 3, 8, 'IFBB Professional Bodybuilder'),
+    (5, 7, 7, 6, 'ISSA Bodybuilding Specialist'),
+    (6, 7, 15, 5, 'NSCA Certified Strength Coach'),
+    (7, 8, 2, 7, 'RRCA Certified Running Coach'),
+    (8, 8, 9, 5, 'ACE Certified Personal Trainer'),
+    (9, 8, 16, 4, 'USATF Level 1 Coach'),
+    (10, 9, 1, 5, 'NASM Certified Personal Trainer'),
+    (11, 9, 4, 4, 'Precision Nutrition Level 1'),
+    (12, 9, 14, 3, 'ACE Weight Management Specialist'),
+    (13, 10, 3, 8, 'NSCA Certified Strength Coach'),
+    (14, 10, 5, 6, 'Functional Movement Specialist'),
+    (15, 10, 8, 5, 'ISSA Strength Coach'),
+    (16, 11, 5, 7, 'Functional Movement Specialist'),
+    (17, 11, 10, 5, 'FMS Level 1'),
+    (18, 11, 6, 4, 'ACE Functional Training Cert'),
+    (19, 12, 1, 5, 'NSCA Certified Personal Trainer'),
+    (20, 12, 3, 4, 'ISSA Strength Coach'),
+    (21, 12, 12, 3, 'NASM Performance Enhancement'),
+    (22, 20, 9, 5, 'ACE HIIT Specialist'),
+    (23, 20, 2, 4, 'CrossFit L2 Trainer'),
+    (24, 20, 1, 3, 'ACE Certified PT'),
+    (25, 21, 10, 5, 'FMS Level 2'),
+    (26, 21, 6, 4, 'NASM-CES'),
+    (27, 21, 5, 3, 'Functional Aging Specialist'),
+    (28, 22, 3, 6, 'NSCA-CSCS'),
+    (29, 22, 8, 5, 'USAW Level 1'),
+    (30, 22, 12, 4, 'Powerlifting Coach Cert'),
+    (31, 23, 10, 6, 'RYT-500'),
+    (32, 23, 6, 5, 'Yoga Medicine Cert'),
+    (33, 23, 1, 4, 'ACE Group Fitness'),
+    (34, 24, 5, 8, 'CSCS'),
+    (35, 24, 3, 7, 'EXOS Performance Spec'),
+    (36, 24, 16, 6, 'USATF Level 2');
 -- --------------------------------------------------------
 --
 -- Table structure for table `training_sessions`
@@ -3700,7 +5108,7 @@ CREATE TABLE IF NOT EXISTS `training_sessions` (
     KEY `user_id` (`user_id`),
     KEY `trainer_id` (`trainer_id`),
     KEY `plan_id` (`table_id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 21 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB AUTO_INCREMENT = 22 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 --
 -- Dumping data for table `training_sessions`
 --
@@ -3906,13 +5314,13 @@ VALUES (
         11,
         '2025-11-21 13:40:00',
         '2026-02-13 13:40:00',
-        'scheduled',
+        'cancelled',
         NULL,
         NULL,
         NULL,
         NULL,
         '2025-05-19 13:40:17',
-        '2025-05-19 13:40:17'
+        '2025-06-01 22:09:41'
     ),
     (
         18,
@@ -3921,13 +5329,13 @@ VALUES (
         11,
         '2026-02-19 15:21:00',
         '2026-05-14 15:21:00',
-        'scheduled',
+        'cancelled',
         NULL,
         NULL,
         NULL,
         NULL,
         '2025-05-19 15:22:09',
-        '2025-05-19 15:22:09'
+        '2025-06-01 22:09:44'
     ),
     (
         19,
@@ -3958,6 +5366,21 @@ VALUES (
         NULL,
         '2025-05-27 10:51:56',
         '2025-05-27 10:51:56'
+    ),
+    (
+        21,
+        108,
+        8,
+        16,
+        '2030-11-01 18:35:00',
+        '2030-12-13 18:35:00',
+        'scheduled',
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        '2025-06-01 18:35:39',
+        '2025-06-01 18:35:39'
     );
 -- --------------------------------------------------------
 --
@@ -3979,7 +5402,7 @@ CREATE TABLE IF NOT EXISTS `transactions` (
     KEY `user_id` (`user_id`),
     KEY `idx_status` (`status`),
     KEY `idx_processed_date` (`processed_date`)
-) ENGINE = InnoDB AUTO_INCREMENT = 49 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB AUTO_INCREMENT = 50 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 --
 -- Dumping data for table `transactions`
 --
@@ -4541,11 +5964,11 @@ VALUES (
         100.00,
         '2025-05-04',
         'Credit Card',
-        NULL,
-        'pending',
-        NULL,
-        NULL,
-        NULL
+        '',
+        'approved',
+        2,
+        '2025-05-29 01:00:38',
+        ''
     ),
     (
         47,
@@ -4569,6 +5992,18 @@ VALUES (
         'approved',
         2,
         '2025-05-07 18:22:56',
+        ''
+    ),
+    (
+        49,
+        6,
+        480000.00,
+        '2025-05-29',
+        'Credit Card',
+        '',
+        'approved',
+        2,
+        '2025-05-29 00:59:51',
         ''
     );
 -- --------------------------------------------------------
@@ -4594,20 +6029,80 @@ INSERT INTO `workout_plan` (
         `difficulty_level`,
         `duration_weeks`
     )
-VALUES (1, 'Full Body Strength', NULL, NULL, 8),
-    (2, 'Cardio Blast', NULL, NULL, 8),
-    (3, 'Muscle Gain Plan', NULL, NULL, 12),
-    (4, 'Weight Loss Program', NULL, NULL, 3),
-    (5, 'Athletic Performance', NULL, NULL, 7),
-    (6, 'Core Strength Training', NULL, NULL, 5),
-    (7, 'Leg Day Routine', NULL, NULL, 2),
-    (8, 'Upper Body Pump', NULL, NULL, 4),
-    (9, 'HIIT (High Intensity)', NULL, NULL, 2),
-    (10, 'Flexibility & Mobility', NULL, NULL, 2),
+VALUES (
+        1,
+        'Full Body Strength',
+        'Balanced workout for building overall strength',
+        'Intermediate',
+        8
+    ),
+    (
+        2,
+        'Cardio Blast',
+        '	High-energy cardio sessions to boost endurance and burn fat',
+        'Intermediate',
+        8
+    ),
+    (
+        3,
+        'Muscle Gain Plan',
+        '	Structured program to increase muscle mass with progressive overload',
+        'Advanced',
+        12
+    ),
+    (
+        4,
+        'Weight Loss Program',
+        'Fat-burning routine focused on full-body movements and calorie control',
+        'Intermediate',
+        3
+    ),
+    (
+        5,
+        'Athletic Performance',
+        'Performance-focused training for agility, speed, and coordination',
+        'Advanced',
+        7
+    ),
+    (
+        6,
+        'Core Strength Training',
+        '	Midsection training plan to improve core power and stability',
+        'Beginner',
+        5
+    ),
+    (
+        7,
+        'Leg Day Routine',
+        'Targeted leg workout with strength and hypertrophy elements',
+        'Advanced',
+        2
+    ),
+    (
+        8,
+        'Upper Body Pump',
+        'Upper body-focused plan for size and definition',
+        'Intermediate',
+        4
+    ),
+    (
+        9,
+        'HIIT (High Intensity)',
+        'Short bursts of high-intensity training to maximize calorie burn',
+        'Advanced',
+        2
+    ),
+    (
+        10,
+        'Flexibility & Mobility',
+        '	Flexibility drills and mobility work to improve range of motion',
+        'Beginner',
+        2
+    ),
     (
         11,
         'Weight Loss Beginner',
-        '12-week weight loss program for beginners',
+        '6-week weight loss program for beginners',
         'Beginner',
         12
     ),
@@ -4627,7 +6122,7 @@ VALUES (1, 'Full Body Strength', NULL, NULL, 8),
     ),
     (
         14,
-        'Weight Loss Beginner',
+        'Weight Loss Advanced',
         '12-week weight loss program for beginners',
         'Beginner',
         12
@@ -4641,8 +6136,8 @@ VALUES (1, 'Full Body Strength', NULL, NULL, 8),
     ),
     (
         16,
-        'Cardio Conditioning',
-        '6-week cardiovascular endurance program',
+        'Cardio Conditioning Advanced',
+        '12-week cardiovascular endurance program',
         'Intermediate',
         6
     );
@@ -4671,6 +6166,11 @@ ADD CONSTRAINT `payment_logs_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `
 --
 ALTER TABLE `session_reminders`
 ADD CONSTRAINT `session_reminders_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `training_sessions` (`session_id`);
+--
+-- Constraints for table `tasks`
+--
+ALTER TABLE `tasks`
+ADD CONSTRAINT `tasks_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`user_id`) ON DELETE CASCADE;
 --
 -- Constraints for table `trainers`
 --

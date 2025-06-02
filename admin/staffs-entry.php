@@ -124,17 +124,40 @@ header('location:../index.php');
                 <div class="control-group">
                   <label class="control-label">Contact Number</label>
                   <div class="controls">
-                    <input id="contact" type="number" name="contact" required/>
+                    <input id="contact" type="number" name="contact" maxlength="10" minlength="10" pattern="[0-9]{10}" required/>
                   </div>
-                </div>
+              
 
-              </div>
+             
 
+              <!-- Trainer-specific fields -->
+<div id="trainerFields" style="display: none; margin-top: 20px;">
+  <h4>Trainer Details</h4>
+  <div class="form-group">
+    <label for="specialization">Specialization</label>
+    <input type="text" class="form-control" name="specialization" required />
+  </div>
+  <div class="form-group">
+    <label for="certification">Certification</label>
+    <input type="text" class="form-control" name="certification" required />
+  </div>
+  <div class="form-group">
+    <label for="bio">Bio</label>
+    <input type="text" class="form-control" name="bio" placeholder="Brief Desription of Trainer" required />
+  </div>
+  <div class="form-group">
+    <label for="experience">Experience</label>
+    <input type="text" class="form-control" name="experience" placeholder="Experience in years" required />
+  </div>
+</div>
+ </div>  </div>
               <div class="form-actions">
                 <input id="back" class="btn btn-primary" type="reset" value="Back" />
                 <input id="next" class="btn btn-primary" type="submit" value="Proceed Next Step" />
                 <div id="status"></div>
               </div>
+
+
               <div id="submitted"></div>
             </form>
           </div>
@@ -153,6 +176,20 @@ header('location:../index.php');
   color: white;
 }
 </style>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const designationSelect = document.querySelector('select[name="designation"]');
+    const trainerFields = document.getElementById("trainerFields");
+
+    designationSelect?.addEventListener("change", function () {
+        if (this.value.toLowerCase() === "trainer") {
+            trainerFields.style.display = "block";
+        } else {
+            trainerFields.style.display = "none";
+        }
+    });
+});
+</script>
 <!--end-Footer-part-->
 <script src="../js/jquery.min.js"></script> 
 <script src="../js/jquery.ui.custom.js"></script> 

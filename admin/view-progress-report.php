@@ -48,7 +48,7 @@ header('location:../index.php');
 
 <div id="content">
   <div id="content-header">
-    <div id="breadcrumb"> <a href="index.php" title="Go to Home" class="tip-bottom"><i class="fas fa-home"></i> Home</a> <a href="member-report.php" class="current">Member Reports</a> </div>
+    <div id="breadcrumb"> <a href="index.php" title="Go to Home" class="tip-bottom"><i class="fas fa-home"></i> Home</a> <a href="progress-report.php" class="tip-bottom">Progress Reports</a><a href="member-report.php" class="current">Individual Report</a> </div>
     <h1 class="text-center">Progress Report <i class="fas fa-tasks"></i></h1>
   </div>
   <div class="container-fluid">

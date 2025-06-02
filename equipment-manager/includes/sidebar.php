@@ -22,8 +22,8 @@
         <li ><a href="edit-equipment.php">Update Equipment Details</a></li>
       </ul>
     </li>
-    <!-- <li class="<?php if($page=='membersts'){ echo 'active'; }?>"><a href="member-status.php"><i class="icon icon-eye-open"></i> <span>Member's Status</span></a></li>
-    <li class="<?php if($page=='payment'){ echo 'active'; }?>"><a href="payment.php"><i class="icon icon-money"></i> <span>Payments</span></a></li>
+    <li class="<?php if($page=='profile'){ echo 'active'; }?>"><a href="profile.php"><i class="icon icon-user"></i> <span>Profile</span></a></li>
+    <!-- <li class="<?php if($page=='payment'){ echo 'active'; }?>"><a href="payment.php"><i class="icon icon-money"></i> <span>Payments</span></a></li>
     <li class="<?php if($page=='attendance'){ echo 'active'; }?>"><a href="attendance.php"><i class="icon icon-calendar"></i> <span>Manage Attendance</span></a></li> -->
 
   </ul>

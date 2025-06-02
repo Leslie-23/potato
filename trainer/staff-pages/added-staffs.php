@@ -54,60 +54,56 @@ if(!isset($_SESSION['user_id'])){
         $password = $_POST["password"];
         $email = $_POST["email"];
         $address = $_POST["address"];
-        $designation = $_POST["designation"];
+        $designation = $_POST["designation"]; // Changed to match your DB column
         $gender = $_POST["gender"];
         $contact = $_POST["contact"];
 
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
         include 'dbcon.php';
-        $qry = "INSERT INTO staffs(fullname,username,password,email,address,designation,gender,contact) VALUES ('$fullname','$username','$hashedPassword','$email','$address','$designation','$gender','$contact')";
-        $result = mysqli_query($con,$qry);
-
-
-if($designation === "trainer") {
-    // Get inserted staff ID
-    $staff_id = mysqli_insert_id($con); 
-
-    // Capture additional fields
-    $specialty = $_POST["specialization"];
-    $certification = $_POST["certification"];
-    $bio = $_POST["bio"];
-    $experience = $_POST["experience"];
-
-    // Insert into trainers table
-    $trainer_sql = "INSERT INTO trainers (staff_id, specialization, certification, bio,experience) 
-                    VALUES ('$staff_id', '$specialty', '$certification', '$bio', '$experience')";
-    $trainer_result = mysqli_query($con, $trainer_sql);
-
-    if(!$trainer_result){
-        echo "<script>console.error('Failed to insert trainer details: " . mysqli_error($con) . "');</script>";
-    }
-}
+        
+        // Use prepared statement to prevent SQL injection
+        $qry = "INSERT INTO staffs(fullname, username, password, email, address, designation, gender, contact) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        $stmt = mysqli_prepare($con, $qry);
+        mysqli_stmt_bind_param($stmt, "ssssssss", $fullname, $username, $hashedPassword, $email, $address, $designation, $gender, $contact);
+        $result = mysqli_stmt_execute($stmt);
 
         if(!$result){
-            echo"<div class='container-fluid'>";
-                echo"<div class='row-fluid'>";
-                echo"<div class='span12'>";
-                echo"<div class='widget-box'>";
-                echo"<div class='widget-title'> <span class='icon'> <i class='fas fa-info'></i> </span>";
-                    echo"<h5>Error Message</h5>";
-                    echo"</div>";
-                    echo"<div class='widget-content'>";
-                        echo"<div class='error_ex'>";
-                        echo"<h1 style='color:maroon;'>Error 404</h1>";
-                        echo"<h3>Error occurred while submitting your details</h3>";
-                        echo"<p>Please Try Again</p>";
-                        echo"<a class='btn btn-warning btn-big'  href='edit-member.php'>Go Back</a> </div>";
-                    echo"</div>";
-                    echo"</div>";
-                echo"</div>";
-                echo"</div>";
-            echo"</div>";
+            echo "<div class='container-fluid'>
+                <div class='row-fluid'>
+                <div class='span12'>
+                <div class='widget-box'>
+                <div class='widget-title'> <span class='icon'> <i class='fas fa-info'></i> </span>
+                    <h5>Error Message</h5>
+                    </div>
+                    <div class='widget-content'>
+                        <div class='error_ex'>
+                        <h1 style='color:maroon;'>Error 404</h1>
+                        <h3>Error occurred while submitting your details</h3>
+                        <p>Error: " . mysqli_error($con) . "</p>
+                        <a class='btn btn-warning btn-big' href='edit-member.php'>Go Back</a> </div>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            </div>";
         } else {
+            $user_id = mysqli_insert_id($con);
+            
+            // If this is a trainer, add to trainers table
+            if($designation == 'Trainer') {
+                $trainer_qry = "INSERT INTO trainers (user_id, specialization, certification, years_of_experience, bio)
+                               VALUES (?, 'General Fitness', 'Pending', 0, 'New trainer')";
+                $stmt = mysqli_prepare($con, $trainer_qry);
+                mysqli_stmt_bind_param($stmt, "i", "$user_id");
+                mysqli_stmt_execute($stmt);
+            }
+
             // Send email with credentials
             echo "<script>
-                emailjs.send('service_x3zoj59', 'template_7he6yyj', {
+                emailjs.send('service_csp86fr', 'template_3s06bzm', {
                     to_email: '$email',
                     fullname: '$fullname',
                     username: '$username',
@@ -120,31 +116,30 @@ if($designation === "trainer") {
                 });
             </script>";
 
-            echo"<div class='container-fluid'>";
-                echo"<div class='row-fluid'>";
-                echo"<div class='span12'>";
-                echo"<div class='widget-box'>";
-                echo"<div class='widget-title'> <span class='icon'> <i class='fas fa-info'></i> </span>";
-                    echo"<h5>Message</h5>";
-                    echo"</div>";
-                    echo"<div class='widget-content'>";
-                        echo"<div class='error_ex'>";
-                        echo"<h1>Success</h1>";
-                        echo"<h3>Staff details has been added!</h3>";
-                        echo"<p>The requested staff details are added to database. Login credentials have been sent to $email.</p>";
-                        echo"<a class='btn btn-inverse btn-big'  href='staffs.php'>Go Back</a> </div>";
-                    echo"</div>";
-                    echo"</div>";
-                echo"</div>";
-                echo"</div>";
-            echo"</div>";
+            echo "<div class='container-fluid'>
+                <div class='row-fluid'>
+                <div class='span12'>
+                <div class='widget-box'>
+                <div class='widget-title'> <span class='icon'> <i class='fas fa-info'></i> </span>
+                    <h5>Message</h5>
+                    </div>
+                    <div class='widget-content'>
+                        <div class='error_ex'>
+                        <h1>Success</h1>
+                        <h3>Staff details has been added!</h3>
+                        <p>The requested staff details are added to database. Login credentials have been sent to $email.</p>
+                        <a class='btn btn-inverse btn-big' href='staffs.php'>Go Back</a> </div>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            </div>";
         }
+        mysqli_stmt_close($stmt);
     } else {
         echo"<h3>YOU ARE NOT AUTHORIZED TO REDIRECT THIS PAGE. GO BACK to <a href='index.php'> DASHBOARD </a></h3>";
     }
-    ?>      
-    
-    
+    ?>                                    
   </form>
 </div>
 

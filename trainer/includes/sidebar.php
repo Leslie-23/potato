@@ -26,6 +26,9 @@
     <!-- <li class="<?php if($page=='payment'){ echo 'active'; }?>"><a href="payment.php"><i class="fas fa-money-bill-wave"></i> <span>Payments</span></a></li> -->
     <li class="<?php if($page=='attendance'){ echo 'active'; }?>"><a href="attendance.php"><i class="fas fa-calendar-check"></i> <span>Manage Attendance</span></a></li>
     <li class="<?php if($page=='reminder'){ echo 'active'; }?>"><a href="reminder.php"><i class="fas fa-bell"></i> <span>Reminders & Announcements</span></a></li>
+     <li class="<?php if($page=='manage-customer-progress'){ echo 'active'; }?>"><a href="customer-progress.php"><i class="fas fa-user"></i> <span>Manage Trainees</span></a></li>
+    <li class="<?php if($page=='profile'){ echo 'active'; }?>"><a href="profile.php"><i class="fas fa-user"></i> <span>Profile</span></a></li>
+   
   </ul>
 </div>
 <!--sidebar-menu-->

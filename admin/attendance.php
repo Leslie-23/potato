@@ -1,11 +1,12 @@
 <?php
 session_start();
-//the isset function to check username is already loged in and stored on the session
 if(!isset($_SESSION['user_id'])){
-header('location:../index.php');	
+    header('location:../index.php');    
 }
+
+include "dbcon.php";
 ?>
- 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,16 +19,30 @@ header('location:../index.php');
 <link rel="stylesheet" href="../css/select2.css" />
 <link rel="stylesheet" href="../css/matrix-style.css" />
 <link rel="stylesheet" href="../css/matrix-media.css" />
-<link rel="stylesheet" href="../css/font-awesome.css" rel="stylesheet"/>
 <link href="../font-awesome/css/font-awesome.css" rel="stylesheet" />
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
-<!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-IQsoLXlDZ+0rT6Azc+PstzlJ7Uq/NzvIuChnD9+jZWcyldj/4VSS9avFba2aYV0M" crossorigin="anonymous"> -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoDnUH/s0O9QjxkHgvrnKf2Z5W4wPcA4wCk5tczlF8NnKj+" crossorigin="anonymous"></script>
-<!-- Font Awesome Free (version 6) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    .attendance-status {
+        font-weight: bold;
+    }
+    .checked-in {
+        color: #5cb85c;
+    }
+    .checked-out {
+        color: #d9534f;
+    }
+    .duration {
+        color: #337ab7;
+    }
+    #footer {
+        color: white;
+    }
+    .time-display {
+        font-family: monospace;
+        font-size: 0.9em;
+    }
+</style>
 </head>
 <body>
 
@@ -37,17 +52,10 @@ header('location:../index.php');
 </div>
 <!--close-Header-part--> 
 
-
 <!--top-Header-menu-->
 <?php include './includes/topheader.php'?>
-
 <!--close-top-Header-menu-->
-<!--start-top-serch-->
-<!-- <div id="search">
-  <input type="hidden" placeholder="Search here..."/>
-  <button type="submit" class="tip-bottom" title="Search"><i class="icon-search icon-white"></i></button>
-</div> -->
-<!--close-top-serch-->
+
 <!--sidebar-menu-->
 <?php $page="attendance"; include './includes/sidebar.php'?>
 <!--sidebar-menu-->
@@ -63,78 +71,103 @@ header('location:../index.php');
 
       <div class='widget-box'>
           <div class='widget-title'> <span class='icon'> <i class='icon-th'></i> </span>
-            <h5>Attendance Table</h5>
+            <h5>Attendance Table - <?php echo date('l, F j, Y'); ?></h5>
+            <div class='buttons'>
+                <a href='attendance-report.php' class='btn btn-info'><i class='icon-list-alt'></i> View Reports</a>
+            </div>
           </div>
           <div class='widget-content nopadding'>
-	  
-	  <?php
-
-      include "dbcon.php";
-     
-
-        
-          echo"<table class='table table-bordered'>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Fullname</th>
-                  <th>Contact Number</th>
-                  <th>Choosen Service</th>
-                  <th>Action</th>
-                </tr>
-              </thead>";
-
-              date_default_timezone_set('Africa/Accra');
-              //$current_date = date('Y-m-d h:i:s');
-                 $current_date = date('Y-m-d h:i A');
-                $exp_date_time = explode(' ', $current_date);
-                 $todays_date =  $exp_date_time['0'];
-                     $qry="SELECT * FROM members WHERE status = 'Active'";
-                    $result=mysqli_query($con,$qry);
-                   $i=1;
-                   $cnt = 1;
+          
+          <?php
+          include "dbcon.php";
+          // Get today's date in correct format
+          date_default_timezone_set('Africa/Accra');
+          $current_date = date('Y-m-d');
+          
+          // Get all active members
+          $qry = "SELECT * FROM members WHERE status = 'Active'";
+          $result = mysqli_query($con, $qry);
+          
+          if(mysqli_num_rows($result) > 0) {
+              echo "<table class='table table-bordered table-striped'>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Member Name</th>
+                      <th>Contact</th>
+                      <th>Service</th>
+                      <th>Check-In Time</th>
+                      <th>Check-Out Time</th>
+                      <th>Duration</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>";
               
-            while($row=mysqli_fetch_array($result)){ ?>
-            
-           <tbody> 
-               
-                <td><div class='text-center'><?php echo $cnt; ?></div></td>
-                <td><div class='text-center'><?php echo $row['fullname']; ?></div></td>
-                <td><div class='text-center'><?php echo $row['contact']; ?></div></td>
-                <td><div class='text-center'><?php echo $row['services']; ?></div></td>
-
-                <!-- <span>count</span><br>CHECK IN</td> -->
-                <input type="hidden" name="user_id" value="<?php echo $row['user_id'];?>">
-
-            <?php
-                $qry = "select * from attendance where curr_date = '$todays_date' AND user_id = '".$row['user_id']."'";
-                $res = $con->query($qry);
-                $num_count  = mysqli_num_rows($res);
-                $row_exist = mysqli_fetch_array($res);
-                $curr_date = $row_exist['curr_date'] ?? "";
-                if($curr_date == $todays_date){
-  
-    ?>
-                <td><div class='text-center'><span class="label label-inverse"><?php echo $row_exist['curr_date'];?>  <?php echo $row_exist['curr_time'];?></span></div>
-                <div class='text-center'><a href='actions/delete-attendance.php?id=<?php echo $row['user_id'];?>'><button class='btn btn-danger'>Check Out <i class='icon icon-time'></i></button> </a></div>
-                </td>
-
-              <?php } else {
+              $cnt = 1;
+              while($row = mysqli_fetch_array($result)) {
+                  $member_id = $row['user_id'];
                   
-                  ?>
-
-                <td><div class='text-center'><a href='actions/check-attendance.php?id=<?php echo $row['user_id'];?>'><button class='btn btn-info'>Check In <i class='icon icon-map-marker'></i></button> </a></div></td>
-             
-                <?php $cnt++; }
-
-              ?>
-
-              </tbody>
-
-           <?php } ?>
-           
-
-            </table>
+                  // Check attendance for today
+                  $attendance_qry = "SELECT * FROM attendance 
+                                    WHERE user_id = '$member_id' 
+                                    AND curr_date = '$current_date'
+                                    ORDER BY id DESC LIMIT 1";
+                  $attendance_res = mysqli_query($con, $attendance_qry);
+                  $attendance = mysqli_fetch_assoc($attendance_res);
+                  
+                  echo "<tr>
+                      <td><div class='text-center'>$cnt</div></td>
+                      <td>".htmlspecialchars($row['fullname'])."</td>
+                      <td>".htmlspecialchars($row['contact'])."</td>
+                      <td>".htmlspecialchars($row['services'])."</td>";
+                      
+                  if($attendance) {
+                      // Member has attendance record for today
+                      $check_in = $attendance['check_in'] ? date('h:i A', strtotime($attendance['check_in'])) : '--';
+                      $check_out = $attendance['check_out'] ? date('h:i A', strtotime($attendance['check_out'])) : '--';
+                      $duration = $attendance['duration'] ? $attendance['duration'] : '--';
+                      
+                      echo "<td class='time-display'>$check_in</td>
+                          <td class='time-display'>$check_out</td>
+                          <td class='duration'>$duration</td>";
+                      
+                      if($attendance['check_out']) {
+                          echo "<td class='attendance-status checked-out'>Checked Out</td>
+                              <td><div class='text-center'>
+                                  <span class='label label-success'>Completed</span>
+                              </div></td>";
+                      } else {
+                          echo "<td class='attendance-status checked-in'>Checked In</td>
+                              <td><div class='text-center'>
+                                  <a href='actions/check-out.php?id=$member_id' class='btn btn-danger'>
+                                      <i class='icon-time'></i> Check Out
+                                  </a>
+                              </div></td>";
+                      }
+                  } else {
+                      // No attendance record for today
+                      echo "<td class='time-display'>--</td>
+                          <td class='time-display'>--</td>
+                          <td class='duration'>--</td>
+                          <td class='attendance-status'>Absent</td>
+                          <td><div class='text-center'>
+                              <a href='actions/check-in.php?id=$member_id' class='btn btn-info'>
+                                  <i class='icon-map-marker'></i> Check In
+                              </a>
+                          </div></td>";
+                  }
+                  
+                  echo "</tr>";
+                  $cnt++;
+              }
+              
+              echo "</tbody></table>";
+          } else {
+              echo "<div class='alert alert-info'>No active members found.</div>";
+          }
+          ?>
           </div>
         </div>
 
@@ -146,17 +179,9 @@ header('location:../index.php');
 <!--end-main-container-part-->
 
 <!--Footer-part-->
-
 <div class="row-fluid">
-  <div id="footer" class="span12"> <?php echo date("Y");?> &copy; Developed By Leslie Paul Ajayi</a> </div>
+  <div id="footer" class="span12"> <?php echo date("Y");?> &copy; Developed By Leslie Paul Ajayi</div>
 </div>
-
-<style>
-#footer {
-  color: white;
-}
-</style>
-
 <!--end-Footer-part-->
 
 <script src="../js/jquery.min.js"></script> 
@@ -167,8 +192,7 @@ header('location:../index.php');
 <script src="../js/jquery.uniform.js"></script> 
 <script src="../js/select2.min.js"></script> 
 <script src="../js/jquery.dataTables.min.js"></script> 
-<script src="../js/matrix.tables.js"></script> 
+<script src="../js/matrix.tables.js"></script>
 
-</script>
 </body>
 </html>

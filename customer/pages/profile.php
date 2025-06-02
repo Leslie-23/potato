@@ -279,6 +279,12 @@ echo "<!-- Debug: file exists: " . (file_exists($display_image) ? 'YES' : 'NO') 
                                             <input type="text" class="span12" name="fullname" value="<?php echo $user['fullname']; ?>" required>
                                         </div>
                                     </div>
+                                    <div class="control-group">
+                                        <label class="control-label">Username:</label>
+                                        <div class="controls">
+                                            <input type="text" disabled title="username updates are currently being fixed" class="span12" name="username" value="<?php echo $user['username']; ?>" required>
+                                        </div>
+                                    </div>
                                     
                                     <div class="control-group">
                                         <label class="control-label">Gender:</label>
@@ -315,7 +321,7 @@ echo "<!-- Debug: file exists: " . (file_exists($display_image) ? 'YES' : 'NO') 
                                     <div class="control-group">
                                         <label class="control-label">Email:</label>
                                         <div class="controls">
-                                            <input type="email" class="span12" name="email" value="<?php echo $user['email']; ?>">
+                                            <input type="email" class="span12" disabled title="Email updates are currently being fixed" name="email" value="<?php echo $user['email']; ?>">
                                         </div>
                                     </div>
                                     

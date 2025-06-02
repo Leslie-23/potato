@@ -39,6 +39,7 @@ include('dbcon.php');
                     <span class="add-on bg_ly"><i class="fas fa-lock"></i></span>
                     <input type="password" name="password" placeholder="Password" required/>
                 </div>
+                <div><a href="forgot-password.php">Forgot Password ?</a></div>
             </div>
         </div>
 

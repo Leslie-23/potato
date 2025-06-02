@@ -313,7 +313,7 @@ if(!isset($_SESSION['user_id'])){
                                 ?>
                             </tbody>
                         </table>
-                        <a href="add-equipment.php" class="btn btn-success btn-block"><i class="icon-plus"></i> Add New Equipment</a>
+                        <a href="equipment-entry.php" class="btn btn-success btn-block"><i class="icon-plus"></i> Add New Equipment</a>
                     </div>
                 </div>
             </div>

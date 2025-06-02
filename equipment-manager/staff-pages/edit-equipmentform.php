@@ -193,7 +193,7 @@ header('location:../index.php');
 	
   </div>
         <!-- Repair Form Section - Only show if equipment is not in good condition -->
-      <?php if($row['status'] != 'good'): ?>
+      <?php if($row['status'] = 'damaged'): ?>
       <div class="widget-box">
         <div class="widget-title"> <span class="icon"> <i class="icon-wrench"></i> </span>
           <h5>Repair Equipment</h5>
@@ -230,9 +230,8 @@ header('location:../index.php');
                 <input type="date" name="repair_date" class="span11" value="<?php echo date('Y-m-d'); ?>" required>
               </div>
             </div>
-            
-            <input type="hidden" name="equipment_id" value="<?php echo $row['id']; ?>">
-            
+      <input type="hidden" name="equipment_id" value="<?php echo isset($row['id']) ? htmlspecialchars($row['id']) : ''; ?>">
+
             <div class="form-actions text-center">
               <button type="submit" class="btn btn-primary">Mark as Repaired</button>
             </div>

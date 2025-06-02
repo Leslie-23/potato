@@ -37,6 +37,46 @@ $services_res = mysqli_query($con, $services_query);
 if(!$services_res) {
     die("Database query failed: " . mysqli_error($con));
 }
+
+$workout_query = "SELECT 
+    plan_id,
+    workout_name,
+    SUM(count) as total_count
+FROM (
+    SELECT 
+        preferred_workout_plan_1 as plan_id,
+        COUNT(*) as count
+    FROM members_fitness
+    WHERE preferred_workout_plan_1 IS NOT NULL
+    GROUP BY preferred_workout_plan_1
+    
+    UNION ALL
+    
+    SELECT 
+        preferred_workout_plan_2 as plan_id,
+        COUNT(*) as count
+    FROM members_fitness
+    WHERE preferred_workout_plan_2 IS NOT NULL
+    GROUP BY preferred_workout_plan_2
+    
+    UNION ALL
+    
+    SELECT 
+        preferred_workout_plan_3 as plan_id,
+        COUNT(*) as count
+    FROM members_fitness
+    WHERE preferred_workout_plan_3 IS NOT NULL
+    GROUP BY preferred_workout_plan_3
+) as all_plans
+JOIN workout_plan ON all_plans.plan_id = workout_plan.table_id
+GROUP BY plan_id, workout_name
+ORDER BY total_count DESC";
+
+$workout_res = mysqli_query($con, $workout_query);
+if(!$workout_res) {
+    die("Database query failed: " . mysqli_error($con));
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -53,7 +93,40 @@ if(!$services_res) {
     <link rel="stylesheet" href="../css/jquery.gritter.css" />
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <!-- Workout Plan Chart Script -->
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['bar']});
+    google.charts.setOnLoadCallback(drawWorkoutChart);
     
+    function drawWorkoutChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Workout Plan', 'Total Preferences'],
+            <?php
+            while($plan = mysqli_fetch_assoc($workout_res)) {
+                echo "['".htmlspecialchars($plan['workout_name'])."', ".intval($plan['total_count'])."],";
+            }
+            ?>
+        ]);
+        
+        var options = {
+            width: 1050,
+            legend: { position: 'none' },
+            bars: 'horizontal',
+            axes: {
+                x: {
+                    0: { side: 'top', label: 'Total Preferences'}
+                }
+            },
+            bar: { groupWidth: "90%" },
+            backgroundColor: 'transparent',
+            colors: ['#4CAF50'],
+            chartArea: {width: '80%'}
+        };
+        
+        var chart = new google.charts.Bar(document.getElementById('workout_plan_div'));
+        chart.draw(data, options);
+    }
+</script>
     <!-- Gender Pie Chart Script -->
     <script type="text/javascript">
         google.charts.load('current', {'packages':['corechart']});
@@ -197,10 +270,22 @@ if(!$services_res) {
             <div class="span12">
                 <div id="top_x_div" style="width: 100%; height: 350px;"></div>
             </div>
+             <div id="content-header">
+             <h1  class="text-center">Workout Preferences <i class="fas fa-chart-bar"></i> <i class="fas fa-dumbbell"></i></h1>
+    <p class="text-center">Showing combined preferences across all choice fields</p>
+</div>
+</div>
+
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span12">
+            <div id="workout_plan_div" style="width: 100%; height: 400px;"></div>
+        </div>
+    </div>
         </div>
     </div>
 </div>
-
+ 
 <!-- Footer -->
 <div class="row-fluid">
     <div id="footer" class="span12"> 

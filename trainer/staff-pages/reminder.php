@@ -1,86 +1,4 @@
 <?php
-// session_start();
-// if(!isset($_SESSION['user_id'])) {
-//     header('location:../index.php');
-//     exit();
-// }
-
-// include "../dbcon.php";
-
-// $trainer_id = $_SESSION['user_id'];
-
-// // Get members with active training sessions
-// $members_query = "SELECT DISTINCT ts.user_id, m.fullname 
-//                  FROM training_sessions ts
-//                  JOIN members m ON ts.user_id = m.user_id
-//                  WHERE ts.trainer_id = ?";
-// $stmt = mysqli_prepare($con, $members_query);
-// mysqli_stmt_bind_param($stmt, "i", $trainer_id);
-// mysqli_stmt_execute($stmt);
-// $members_result = mysqli_stmt_get_result($stmt);
-
-// if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_reminder'])) {
-//     $member_id = sanitizeInput($_POST['member_id'], 'int');
-//     $message = sanitizeInput($_POST['message']);
-//     $priority = sanitizeInput($_POST['priority'], 'int');
-    
-//     // Verify active session exists
-//     $verify_query = "SELECT 1 FROM training_sessions 
-//                     WHERE user_id = ? AND trainer_id = ? ";
-//     $stmt_verify = mysqli_prepare($con, $verify_query);
-//     mysqli_stmt_bind_param($stmt_verify, "ii", $member_id, $trainer_id);
-//     mysqli_stmt_execute($stmt_verify);
-    
-//     if(mysqli_stmt_num_rows($stmt_verify) > 0) {
-//         $insert_query = "INSERT INTO reminders 
-//                         (trainer_id, member_id, message, priority, created_at)
-//                         VALUES (?, ?, ?, ?, NOW())";
-//         $stmt_insert = mysqli_prepare($con, $insert_query);
-//         mysqli_stmt_bind_param($stmt_insert, "iisi", 
-//             $trainer_id, 
-//             $member_id,
-//             $message,
-//             $priority
-//         );
-        
-//         if(mysqli_stmt_execute($stmt_insert)) {
-//             $_SESSION['success'] = "Reminder sent successfully!";
-//         } else {
-//             $_SESSION['error'] = "Failed to send reminder: " . mysqli_error($con);
-//         }
-//     } else {
-//         $_SESSION['error'] = "You have no active training sessions with this member";
-//     }
-    
-//     header("Location: reminder.php");
-//     exit();
-// }
-
-// // Get sent reminders history
-// $history_query = "SELECT r.*, m.fullname as member_name
-//                  FROM reminder r
-//                  JOIN members m ON r.user_id = m.user_id
-//                  WHERE r.id = ?
-//                  ORDER BY r.created_at DESC
-//                  LIMIT 10";
-// $stmt_history = mysqli_prepare($con, $history_query);
-// mysqli_stmt_bind_param($stmt_history, "i", $trainer_id);
-// mysqli_stmt_execute($stmt_history);
-// $history_result = mysqli_stmt_get_result($stmt_history);
-
-// function sanitizeInput($data, $type = 'string') {
-//     global $con;
-//     $data = trim($data);
-//     $data = mysqli_real_escape_string($con, $data);
-//     switch($type) {
-//         case 'int': return (int)$data;
-//         case 'float': return (float)$data;
-//         default: return htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
-//     }
-// }
-?>
-
-<?php
 session_start();
 if(!isset($_SESSION['user_id'])) {
     header('location:../index.php');
@@ -91,12 +9,14 @@ include "../dbcon.php";
 
 $trainer_id = $_SESSION['user_id'];
 
-// Get members with active/scheduled sessions
-$members_query = "SELECT DISTINCT ts.`user_id`, m.`fullname` 
-                 FROM `training_sessions` ts
-                 JOIN `members` m ON ts.`user_id` = m.`user_id`
-                 WHERE ts.`trainer_id` = ?
-                 AND ts.`status` IN ('scheduled', 'pending')";
+// Get members who have active sessions with this trainer (excluding cancelled sessions)
+$members_query = "SELECT DISTINCT m.user_id, m.fullname 
+                 FROM training_sessions ts
+                 JOIN members m ON ts.user_id = m.user_id
+                 WHERE ts.trainer_id = ?
+                 AND ts.status != 'cancelled'
+                 AND m.status = 'scheduled'||m.status = 'active'||m.status = 'pending'||m.status = 'completed'
+                 ORDER BY m.fullname";
 $stmt = mysqli_prepare($con, $members_query);
 mysqli_stmt_bind_param($stmt, "i", $trainer_id);
 mysqli_stmt_execute($stmt);
@@ -107,20 +27,20 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_reminder'])) {
     $message = sanitizeInput($_POST['message']);
     $priority = sanitizeInput($_POST['priority'], 'int');
     
-    // Verify active session exists
-    $verify_query = "SELECT 1 FROM `training_sessions`
-                    WHERE `user_id` = ? AND `trainer_id` = ?
-                    AND `status` IN ('scheduled', 'pending')";
+    // Verify this trainer has an active session with this member
+    $verify_query = "SELECT 1 FROM training_sessions
+                    WHERE user_id = ? AND trainer_id = ?
+                    AND status IN ('scheduled', 'pending')";
     $stmt_verify = mysqli_prepare($con, $verify_query);
     mysqli_stmt_bind_param($stmt_verify, "ii", $member_id, $trainer_id);
     mysqli_stmt_execute($stmt_verify);
     
     if(mysqli_stmt_num_rows($stmt_verify) > 0) {
-        $insert_query = "INSERT INTO `reminder` 
-                        (`name`, `message`, `priority`, `status`, `date`, `user_id`, `trainer_id`, `created_at`)
+        $insert_query = "INSERT INTO reminder 
+                        (name, message, priority, status, date, user_id, trainer_id, created_at)
                         VALUES (?, ?, ?, 'pending', NOW(), ?, ?, NOW())";
         $stmt_insert = mysqli_prepare($con, $insert_query);
-        $reminder_name = "Session Reminder"; // You can customize this
+        $reminder_name = "Session Reminder from Trainer";
         mysqli_stmt_bind_param($stmt_insert, "ssiii", 
             $reminder_name,
             $message,
@@ -131,6 +51,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_reminder'])) {
         
         if(mysqli_stmt_execute($stmt_insert)) {
             $_SESSION['success'] = "Reminder sent successfully!";
+            
+            // Update member's reminder flag
+            $update_query = "UPDATE members SET reminder = 1 WHERE user_id = ?";
+            $stmt_update = mysqli_prepare($con, $update_query);
+            mysqli_stmt_bind_param($stmt_update, "i", $member_id);
+            mysqli_stmt_execute($stmt_update);
         } else {
             $_SESSION['error'] = "Failed to send reminder: " . mysqli_error($con);
         }
@@ -142,12 +68,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_reminder'])) {
     exit();
 }
 
-// Get sent reminders history
-$history_query = "SELECT r.*, m.`fullname` as member_name
-                 FROM `reminder` r
-                 JOIN `members` m ON r.`user_id` = m.`user_id`
-                 WHERE r.`trainer_id` = ?
-                 ORDER BY r.`created_at` DESC
+// Get sent reminders history for this trainer
+$history_query = "SELECT r.*, m.fullname as member_name
+                 FROM reminder r
+                 JOIN members m ON r.user_id = m.user_id
+                 WHERE r.trainer_id = ?
+                 ORDER BY r.created_at DESC
                  LIMIT 10";
 $stmt_history = mysqli_prepare($con, $history_query);
 mysqli_stmt_bind_param($stmt_history, "i", $trainer_id);
@@ -166,9 +92,6 @@ function sanitizeInput($data, $type = 'string') {
 }
 ?>
 
-
-<!-- REST OF YOUR HTML REMAINS THE SAME -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -180,7 +103,7 @@ function sanitizeInput($data, $type = 'string') {
     <link rel="stylesheet" href="../css/matrix-style.css" />
     <link rel="stylesheet" href="../css/matrix-media.css" />
     <link href="../font-awesome/css/all.min.css" rel="stylesheet" />
-      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .reminder-card {
@@ -198,6 +121,13 @@ function sanitizeInput($data, $type = 'string') {
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .trainer-header {
+            background-color: #337ab7;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -222,6 +152,11 @@ function sanitizeInput($data, $type = 'string') {
   </div>
   
   <div class="container-fluid">
+    <div class="trainer-header">
+      <h4><i class="fas fa-user-tie"></i> Trainer Reminder System</h4>
+      <p>Send messages and reminders to your assigned trainees</p>
+    </div>
+    
     <?php if(isset($_SESSION['success'])): ?>
         <div class="alert alert-success">
             <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -245,10 +180,10 @@ function sanitizeInput($data, $type = 'string') {
           <div class="widget-content form-container">
             <form method="POST" action="reminder.php">
               <div class="control-group">
-                <label class="control-label">Select Member:</label>
+                <label class="control-label">Select Trainee:</label>
                 <div class="controls">
                   <select name="member_id" class="span12" required>
-                    <option value="">-- Select Member --</option>
+                    <option value="">-- Select Trainee --</option>
                     <?php while($member = mysqli_fetch_assoc($members_result)): ?>
                       <option value="<?= $member['user_id'] ?>"><?= htmlspecialchars($member['fullname']) ?></option>
                     <?php endwhile; ?>
@@ -278,6 +213,9 @@ function sanitizeInput($data, $type = 'string') {
               <div class="form-actions">
                 <button type="submit" name="send_reminder" class="btn btn-success">
                   <i class="fas fa-paper-plane"></i> Send Reminder
+                </button>
+                <button type="button" class="btn btn-info" onclick="loadMessageTemplates()">
+                  <i class="fas fa-clipboard-list"></i> Load Template
                 </button>
               </div>
             </form>
@@ -326,6 +264,27 @@ function sanitizeInput($data, $type = 'string') {
 <script src="../js/jquery.min.js"></script> 
 <script src="../js/bootstrap.min.js"></script> 
 <script src="../js/matrix.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Initialize select2 for better dropdowns
+    $('select').select2();
+});
+
+function loadMessageTemplates() {
+    // This would ideally load from a database or predefined templates
+    const templates = [
+        "Reminder: Your training session is scheduled for tomorrow at {time}. Please arrive 10 minutes early.",
+        "Important: Don't forget to bring your water bottle and towel for today's intense workout!",
+        "Friendly reminder: We have a progress assessment scheduled for {date}. Be prepared!"
+    ];
+    
+    // Simple implementation - just load the first template
+    $('textarea[name="message"]').val(templates[0]);
+    
+    // In a real implementation, you might show a modal to select from templates
+}
+</script>
 
 </body>
 </html>
